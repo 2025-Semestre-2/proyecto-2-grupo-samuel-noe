@@ -1,0 +1,145 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888888;
+}
+
+/* Para que la barra de navegacion principal se quede arriba */
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    right: 0;
+    background-color: #e4bd10;
+    padding: 5px;
+    z-index: 1001;
+    display: flex;
+
+    gap: 5px;
+    align-items: center;
+    box-sizing: border-box;
+
+    overflow-x: auto;
+    flex-wrap: nowrap;
+}
+
+/* Se modifica el nav para que no se encoja y permita el scroll horizontal */
+nav > * {
+  flex: 0 0 auto;
+}
+
+nav::-webkit-scrollbar {
+  height: 12px;
+}
+nav::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.3);
+  border-radius: 3px;
+}
+
+/* Para que la barra de navegacion secundaria se quede a la izquierda */
+.secondary {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 200px;
+    flex-direction: column;
+    background-color: #ddc869;
+    padding: 73px 10px 20px 10px;
+    z-index: 999;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+/* Espaciado cuando hay barra lateral (Layout2) */
+.with-sidebar {
+  margin-top: 73px; 
+  margin-left: 200px;
+  padding: 20px;
+}
+
+/* Estilos para todas las textbox */
+input {
+    background-color: white;
+    color: black;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+input::placeholder {
+    color: #999;
+}
+
+/* Para que los textbox queden alineados en los formularios */
+.form-group {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 15px;
+  align-items: center;
+  margin: 15px 0;
+}
+
+.form-group label {
+  text-align: right;
+  font-weight: bold;
+}
+
+.form-group input {
+  width: 100%;
+}
+
+/* Para que el boton deslizante sea mas alto */
+.table-responsive::-webkit-scrollbar {
+  height: 10px; 
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #d39104;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #6fb3eb;
+}
