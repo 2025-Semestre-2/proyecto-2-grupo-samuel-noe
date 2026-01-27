@@ -2,6 +2,6 @@
 # PROYECTO #2 (Bases de Datos I)
 ### Integrantes:
 - Noé López Durón - 2024234500
-
+- Samuel Garcés Castillo - 2022129139
 
 ### Estado del proyecto:
