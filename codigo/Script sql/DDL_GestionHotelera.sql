@@ -59,7 +59,6 @@ CREATE TABLE CodigoTelefono (
 /*
  * TABLA: HospedajeTelefono
  * DESCRIPCIÓN: Entidad débil para normalizar la relación 1:N de números telefónicos.
- * Permite registrar múltiples contactos por hotel.
  */
 CREATE TABLE HospedajeTelefono (
     IdHospedajeTelefono INT IDENTITY(1,1),

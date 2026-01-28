@@ -150,7 +150,7 @@ GO
 
 /*
  * SP: SP_RegistrarInventarioHabitacion
- * DESCRIPCIÓN: Registra una habitación física (Unidad) asociada a un Tipo.
+ * DESCRIPCIÓN: Registra una habitación física asociada a un Tipo.
  */
 CREATE OR ALTER PROCEDURE SP_RegistrarInventarioHabitacion
     @IdTipoHabitacion INT,
@@ -293,7 +293,7 @@ BEGIN
         IF @FechaIngreso >= @FechaSalida
             THROW 51004, 'La fecha de salida debe ser posterior a la fecha de ingreso.', 1;
 
-        -- Validar disponibilidad (No solapamiento de fechas)
+        -- Validar disponibilidad
         IF EXISTS (
             SELECT 1 FROM Reservacion r
             INNER JOIN Habitacion h ON r.IdHabitacion = h.IdHabitacion
@@ -436,7 +436,7 @@ GO
 
 /*
  * SP: SP_AsociarActividadEmpresa
- * DESCRIPCIÓN: Vincula una actividad (Tour, Kayak) a una empresa.
+ * DESCRIPCIÓN: Vincula una actividad a una empresa.
  */
 CREATE OR ALTER PROCEDURE SP_AsociarActividadEmpresa
     @IdEmpresa INT,
@@ -496,7 +496,7 @@ BEGIN
         IF NOT EXISTS (SELECT 1 FROM Factura WHERE IdReservacion = @IdReservacion)
             THROW 51007, 'No se ha encontrado una factura para esta reservación.', 1;
 
-        -- Validar que no esté pagada ya (MetodoPago no sea NULL)
+        -- Validar que no esté pagada ya
         IF EXISTS (SELECT 1 FROM Factura WHERE IdReservacion = @IdReservacion AND MetodoPago IS NOT NULL)
             THROW 51008, 'Esta factura ya se encuentra pagada.', 1;
 

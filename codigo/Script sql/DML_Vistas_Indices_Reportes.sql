@@ -102,7 +102,6 @@ GO
 
 /*
  * SP: SP_ReporteFacturacion
- * REQUERIMIENTO: "visualizar lo facturado por día, mes, año o rango personalizado"
  */
 CREATE OR ALTER PROCEDURE SP_ReporteFacturacion
     @FechaInicio DATE,
@@ -124,7 +123,6 @@ GO
 
 /*
  * SP: SP_ReporteOcupacionPorTipo
- * REQUERIMIENTO: "Reporte según tipo de habitación, cuáles reservas finalizadas han sido utilizadas"
  */
 CREATE OR ALTER PROCEDURE SP_ReporteOcupacionPorTipo
     @FechaInicio DATE,
@@ -151,7 +149,6 @@ GO
 
 /*
  * SP: SP_ReporteRangoEdades
- * REQUERIMIENTO: "Conocer el rango de edades de las personas que han realizado las reservas"
  */
 CREATE OR ALTER PROCEDURE SP_ReporteRangoEdades
 AS
