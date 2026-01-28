@@ -1,7 +1,6 @@
 /*
  * NOMBRE DEL SCRIPT: DDL_GestionHotelera.sql
- * DESCRIPCIÓN: Script DDL (Data Definition Language) para la creación del esquema
- * de base de datos del proyecto de Gestión Hotelera y Recreación.
+ * DESCRIPCIÓN: Script DDL para la creación del esquema de base de datos del proyecto de Gestión Hotelera y Recreación.
  * MOTOR DE BASE DE DATOS: Microsoft SQL Server 2022
  */
 
@@ -54,7 +53,7 @@ CREATE TABLE CodigoTelefono (
     Pais NVARCHAR(50) NOT NULL,
 
     CONSTRAINT PK_CodigoTelefono PRIMARY KEY (IdCodigoTelefono),
-    CONSTRAINT CK_CodigoTelefono_FormatoCodigo CHECK (IdCodigoTelefono > 0) AND (IdCodigoTelefono < 999)
+    CONSTRAINT CK_CodigoTelefono_FormatoCodigo CHECK ((IdCodigoTelefono > 0) AND (IdCodigoTelefono < 999))
 );
 
 /*
@@ -69,7 +68,7 @@ CREATE TABLE HospedajeTelefono (
     NumeroTelefono INT DEFAULT 506,
     
     CONSTRAINT PK_HospedajeTelefono PRIMARY KEY (IdHospedajeTelefono),
-    CONSTRAINT FK_HospedajeTelefono_Hospedaje FOREIGN KEY (IdHospedaje) REFERENCES Hospedaje(IdHospedaje),
+    CONSTRAINT FK_HospedajeTelefono_Hospedaje FOREIGN KEY (IdHospedaje) REFERENCES Hospedaje(CedulaJuridica),
     CONSTRAINT FK_HospedajeTelefono_CodigoTelefono FOREIGN KEY (CodigoPais) REFERENCES CodigoTelefono(IdCodigoTelefono)
 );
 
@@ -82,7 +81,7 @@ CREATE TABLE CatalogoRedSocial (
     NombrePlataforma NVARCHAR(50) NOT NULL,
     UrlPlataforma NVARCHAR(255) NOT NULL,
 
-    CONSTRAINT PK_CatalogoRedSocial PRIMARY KEY (IdCatalogoRedSocial)
+    CONSTRAINT PK_CatalogoRedSocial PRIMARY KEY (IdCatalogoSocial)
 );
 
 /*
@@ -95,8 +94,8 @@ CREATE TABLE HospedajeRedSocial (
     IdPlataforma INT NOT NULL,
     
     CONSTRAINT PK_HospedajeRedSocial PRIMARY KEY (IdRedSocial),
-    CONSTRAINT FK_HospedajeRedSocial_Hospedaje FOREIGN KEY (IdHospedaje) REFERENCES Hospedaje(IdHospedaje),
-    CONSTRAINT FK_HospedajeRedSocial_CatalogoRedSocial FOREIGN KEY (IdPlataforma) REFERENCES CatalogoRedSocial(IdCatalogoRedSocial)
+    CONSTRAINT FK_HospedajeRedSocial_Hospedaje FOREIGN KEY (IdHospedaje) REFERENCES Hospedaje(CedulaJuridica),
+    CONSTRAINT FK_HospedajeRedSocial_CatalogoRedSocial FOREIGN KEY (IdPlataforma) REFERENCES CatalogoRedSocial(IdCatalogoSocial)
 );
 
 /*
@@ -120,7 +119,7 @@ CREATE TABLE HospedajeServicio (
     IdServicio INT NOT NULL,
     
     CONSTRAINT PK_HospedajeServicio PRIMARY KEY (IdHospedajeServicio),
-    CONSTRAINT FK_HospedajeServicio_Hospedaje FOREIGN KEY (IdHospedaje) REFERENCES Hospedaje(IdHospedaje),
+    CONSTRAINT FK_HospedajeServicio_Hospedaje FOREIGN KEY (IdHospedaje) REFERENCES Hospedaje(CedulaJuridica),
     CONSTRAINT FK_HospedajeServicio_CatalogoServicio FOREIGN KEY (IdServicio) REFERENCES CatalogoServicio(IdCatalogoServicio)
 );
 
@@ -142,7 +141,7 @@ CREATE TABLE TipoHabitacion (
     PrecioPorNoche DECIMAL(10, 2) NOT NULL,
     
     CONSTRAINT PK_TipoHabitacion PRIMARY KEY (IdTipoHabitacion),
-    CONSTRAINT FK_TipoHabitacion_Hospedaje FOREIGN KEY (IdHospedaje) REFERENCES Hospedaje(IdHospedaje),
+    CONSTRAINT FK_TipoHabitacion_Hospedaje FOREIGN KEY (IdHospedaje) REFERENCES Hospedaje(CedulaJuridica),
     CONSTRAINT CK_TipoHabitacion_Cama CHECK (TipoCama IN ('Individual', 'Queen', 'King'))
 );
 
@@ -226,8 +225,8 @@ CREATE TABLE ClienteTelefono (
     CodigoPais INT DEFAULT 506, -- Aquí se reutiliza la tabla con códigos de países de Hospedajes
     
     CONSTRAINT PK_ClienteTelefono PRIMARY KEY (IdTelefonoCliente),
-    CONSTRAINT FK_ClienteTelefono_Cliente FOREIGN KEY (IdCliente) REFERENCES Cliente(IdCliente)
-    CONSTRAINT FK_ClienteTelefono_CodigoPais FOREIGN KEY (CodigoPais REFERENCES) CodigoTelefono(Codigo)
+    CONSTRAINT FK_ClienteTelefono_Cliente FOREIGN KEY (IdCliente) REFERENCES Cliente(IdCliente),
+    CONSTRAINT FK_ClienteTelefono_CodigoPais FOREIGN KEY (CodigoPais) REFERENCES CodigoTelefono(IdCodigoTelefono)
 );
 
 -- ==========================================================================================
@@ -246,21 +245,23 @@ CREATE TABLE Reservacion (
     FechaSalida DATE NOT NULL,
     CantidadPersonas INT NOT NULL DEFAULT 1,
     PoseeVehiculo BIT NOT NULL DEFAULT 0,
+    Estado NVARCHAR(20) NOT NULL DEFAULT 'Activo',
     
     CONSTRAINT PK_Reservacion PRIMARY KEY (IdReservacion),
     CONSTRAINT FK_Reservacion_Cliente FOREIGN KEY (IdCliente) REFERENCES Cliente(IdCliente),
-    CONSTRAINT FK_Reservacion_Habitacion FOREIGN KEY (IdHabitacion) REFERENCES Habitacion(IdHabitacion)
+    CONSTRAINT FK_Reservacion_Habitacion FOREIGN KEY (IdHabitacion) REFERENCES Habitacion(IdHabitacion),
+    CONSTRAINT CK_Reservacion_Estado CHECK (Estado IN ('Activo', 'Cerrado'))
 );
 
 /*
  * TABLA: Factura
- * DESCRIPCIÓN: Registro fiscal de la transacción generada a partir de una reserva.
+ * DESCRIPCIÓN: Registro de la transacción generada a partir de una reserva.
  */
 CREATE TABLE Factura (
     IdFactura INT IDENTITY(1,1),
     IdReservacion INT NOT NULL,
     FechaEmision DATETIME NOT NULL DEFAULT GETDATE(),
-    MetodoPago NVARCHAR(50) NOT NULL,
+    MetodoPago NVARCHAR(50),
     NumeroNoches INT NOT NULL,
     ImporteTotal DECIMAL(18, 2) NOT NULL,
     
@@ -314,11 +315,11 @@ CREATE TABLE TipoActividad (
 CREATE TABLE EmpresaRecreacionTipoActividad (
     IdEmpresaRecreacionTipoActividad INT IDENTITY(1,1),
     IdEmpresaRecreacion INT NOT NULL,
-    IdActividad INT NOT NULL,
+    IdTipoActividad INT NOT NULL,
     
-    CONSTRAINT PK_EmpresaRecreacionTipoActividad PRIMARY KEY (IdActividad),
-    CONSTRAINT FK_EmpresaRecreacionTipoActividad_Empresa FOREIGN KEY (IdEmpresaRecreacion) REFERENCES EmpresaRecreacion(IdEmpresaRecreacion)
-    CONSTRAINT FK_EmpresaRecreacionTipoActividad_TipoActividad FOREIGN KEY (IdActividad) REFERENCES TipoActividad(IdTipoActividad)
+    CONSTRAINT PK_EmpresaRecreacionTipoActividad PRIMARY KEY (IdEmpresaRecreacionTipoActividad),
+    CONSTRAINT FK_EmpresaRecreacionTipoActividad_Empresa FOREIGN KEY (IdEmpresaRecreacion) REFERENCES EmpresaRecreacion(IdEmpresaRecreacion),
+    CONSTRAINT FK_EmpresaRecreacionTipoActividad_TipoActividad FOREIGN KEY (IdTipoActividad) REFERENCES TipoActividad(IdTipoActividad)
 );
 
 /*
@@ -331,7 +332,7 @@ CREATE TABLE TipoServicio (
     Descripcion NVARCHAR(MAX),
     Costo INT NOT NULL,
 
-    CONSTRAINT PK_TipoServicio PRIMARY KEY (IdTipoActividad),
+    CONSTRAINT PK_TipoServicio PRIMARY KEY (IdTipoServicio),
 );
 
 /*
@@ -341,11 +342,11 @@ CREATE TABLE TipoServicio (
 CREATE TABLE EmpresaRecreacionTipoServicio (
     IdEmpresaRecreacionTipoServicio INT IDENTITY(1,1),
     IdEmpresaRecreacion INT NOT NULL,
-    IdServicio INT NOT NULL,
+    IdTipoServicio INT NOT NULL,
     
-    CONSTRAINT PK_EmpresaRecreacionTipoServicio PRIMARY KEY (IdActividad),
-    CONSTRAINT FK_EmpresaRecreacionTipoServicio_Empresa FOREIGN KEY (IdEmpresaRecreacion) REFERENCES EmpresaRecreacion(IdEmpresaRecreacion)
-    CONSTRAINT FK_EmpresaRecreacionTipoServicio_TipoActividad FOREIGN KEY (IdServicio) REFERENCES TipoServicio(IdTipoServicio)
+    CONSTRAINT PK_EmpresaRecreacionTipoServicio PRIMARY KEY (IdEmpresaRecreacionTipoServicio),
+    CONSTRAINT FK_EmpresaRecreacionTipoServicio_Empresa FOREIGN KEY (IdEmpresaRecreacion) REFERENCES EmpresaRecreacion(IdEmpresaRecreacion),
+    CONSTRAINT FK_EmpresaRecreacionTipoServicio_TipoServicio FOREIGN KEY (IdTipoServicio) REFERENCES TipoServicio(IdTipoServicio)
 );
 
 -- ==========================================================================================
@@ -360,7 +361,7 @@ CREATE TABLE CredencialesUsuarios (
     Usuario NVARCHAR(50) NOT NULL,
     Contraseña NVARCHAR(50) NOT NULL,
 
-    CONSTRAINT CredencialesUsuarios PRIMARY KEY (Usuario)
+    CONSTRAINT PK_CredencialesUsuarios PRIMARY KEY (Usuario)
 );
 
 /*
@@ -371,5 +372,5 @@ CREATE TABLE CredencialesUsuarios (
     Usuario NVARCHAR(50) NOT NULL,
     Contraseña NVARCHAR(50) NOT NULL,
 
-    CONSTRAINT CredencialesAdmin PRIMARY KEY (Usuario)
+    CONSTRAINT PK_CredencialesAdmin PRIMARY KEY (Usuario)
 );
