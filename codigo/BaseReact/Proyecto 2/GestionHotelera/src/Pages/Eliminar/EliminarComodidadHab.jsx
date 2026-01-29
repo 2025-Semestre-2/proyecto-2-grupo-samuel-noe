@@ -1,12 +1,48 @@
 
 import { useState } from 'react'
 import { Textbox, TextboxBlock } from "../../Components/Textbox"
-import { ButtonSection1 } from '../../Components/ButtonSection'
+import { validarNull, validarInt } from '../../Components/Validaciones'
+import axios from 'axios'
 
 export function EliminarComodidadHab(){
 
   const [idTipoHab, setIdTipoHab] = useState('')
   const [desc, setDesc] = useState('')
+  const [validado, setValidado] = useState(false)
+
+  //Limpia las casillas
+  const LimpiarComodidadHab = () => {
+    setIdTipoHab('')
+    setDesc('')
+    setValidado(false)
+  }
+
+  const validacionesComodidadHab = () => {
+  
+    const idTipoHabValido = validarNull(idTipoHab, 'Identificación Tipo Habitación');
+    if (!idTipoHabValido.esValido) {
+        alert(idTipoHabValido.mensaje);
+        return;
+    }
+    const descValido = validarNull(desc, 'Descripción');
+    if (!descValido.esValido) {
+        alert(descValido.mensaje);
+        return;
+    }
+
+    const idTipoHabValido2 = validarInt(idTipoHab, 'Identificación Tipo Habitación');
+    if (!idTipoHabValido2.esValido) {
+        alert(idTipoHabValido2.mensaje);
+        return;
+    }
+
+    setValidado(true);
+  }
+
+  const mandarRequest = async () => {
+    //codigo
+    LimpiarComodidadHab()
+  }
 
   return (
     <>
@@ -39,7 +75,13 @@ export function EliminarComodidadHab(){
         />
         </div>
         
-        <ButtonSection1/>
+        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
+          <button onClick={() => {
+            validacionesComodidadHab()
+            if(validado){mandarRequest()}
+          }}>Aceptar</button>
+          <button onClick={LimpiarComodidadHab}>Cancelar</button>
+        </div>
 
       </div>
     </>

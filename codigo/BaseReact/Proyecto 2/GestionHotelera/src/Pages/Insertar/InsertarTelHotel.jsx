@@ -1,9 +1,8 @@
 
 import { useState } from 'react'
-import axios from 'axios'
 import { Textbox } from "../../Components/Textbox"
-import { ButtonSection1 } from '../../Components/ButtonSection'
 import { validarNull, validarInt } from '../../Components/Validaciones'
+import axios from 'axios'
 
 export function InsertarTelHotel(){
 
@@ -27,7 +26,7 @@ export function InsertarTelHotel(){
             alert(idHospedajeValido.mensaje);
             return;
         }
-        const codigoValido = validarNull(NumeroTelefono, 'Número de Teléfono');
+        const codigoValido = validarNull(CodigoPais, 'Código País');
         if (!codigoValido.esValido) {
             alert(codigoValido.mensaje);
             return;
@@ -43,7 +42,7 @@ export function InsertarTelHotel(){
             alert(idHospedajeValido2.mensaje);
             return;
         }
-        const codigoValido2 = validarNull(NumeroTelefono, 'Número de Teléfono');
+        const codigoValido2 = validarNull(CodigoPais, 'Código País');
         if (!codigoValido2.esValido) {
             alert(codigoValido2.mensaje);
             return;

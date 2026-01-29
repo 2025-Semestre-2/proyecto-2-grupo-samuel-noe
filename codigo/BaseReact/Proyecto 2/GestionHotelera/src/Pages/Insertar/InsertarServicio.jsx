@@ -6,40 +6,43 @@ import axios from 'axios'
 
 export function InsertarServicio(){
 
-  const [idHospedaje, setIdHospedaje] = useState('')
-  const [idServicio, setIdServicio] = useState('')
+  const [nombre, setNombre] = useState('')
+  const [desc, setDesc] = useState('')
+  const [costo, setCosto] = useState('')
   const [validado, setValidado] = useState(false)
 
   //Limpia las casillas
   const LimpiarServicio = () => {
-      setIdHospedaje('')
-      setIdServicio('')
-      setValidado(false)
+    setNombre('')
+    setDesc('')
+    setCosto('')
+    setValidado(false)
   }
 
   const validacionesServicio = () => {
   
-    const hospedajeValido = validarNull(idHospedaje, 'Identificación Hospedaje');
-    if (!hospedajeValido.esValido) {
-        alert(hospedajeValido.mensaje);
-        return;
+    const nombreValido = validarNull(nombre, 'Nombre del Servicio');
+    if (!nombreValido.esValido) {
+      alert(nombreValido.mensaje);
+      return;
     }
-    const servicioValido = validarNull(idServicio, 'Identificación Servicio');
-    if (!servicioValido.esValido) {
-        alert(servicioValido.mensaje);
-        return;
+    const descValido = validarNull(desc, 'Descripción');
+    if (!descValido.esValido) {
+      alert(descValido.mensaje);
+      return;
+    }
+    const costoValido = validarNull(costo, 'Costo');
+    if (!costoValido.esValido) {
+      alert(costoValido.mensaje);
+      return;
     }
 
-    const hospedajeValido2 = validarInt(idHospedaje, 'Identificación Hospedaje');
-    if (!hospedajeValido2.esValido) {
-        alert(hospedajeValido2.mensaje);
-        return;
+    const costoValido2 = validarInt(costo, 'Costo');
+    if (!costoValido2.esValido) {
+      alert(costoValido2.mensaje);
+      return;
     }
-    const servicioValido2 = validarInt(idServicio, 'Identificación Servicio');
-    if (!servicioValido2.esValido) {
-        alert(servicioValido2.mensaje);
-        return;
-    }
+
     setValidado(true);
   }
 
@@ -60,29 +63,39 @@ export function InsertarServicio(){
       }}>
       
         <div className="form-group">
-        <label>Identificación Hospedaje: </label>
+        <label>Nombre del Servicio: </label>
         <Textbox
-            type="text"
-            placeholder=""
-            value={idHospedaje}
-            onChange={setIdHospedaje}
+          type="text"
+          placeholder=""
+          value={nombre}
+          onChange={setNombre}
         />
         </div>
 
         <div className="form-group">
-        <label>Identificación Servicio: </label>
+        <label>Descripción: </label>
         <Textbox
-            type="text"
-            placeholder=""
-            value={idServicio}
-            onChange={setIdServicio}
+          type="text"
+          placeholder=""
+          value={desc}
+          onChange={setDesc}
+        />
+        </div>
+
+        <div className="form-group">
+        <label>Costo: </label>
+        <Textbox
+          type="text"
+          placeholder=""
+          value={costo}
+          onChange={setCosto}
         />
         </div>
         
         <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
           <button onClick={() => {
-              validacionesServicio()
-              if(validado){mandarRequest()}
+            validacionesServicio()
+            if(validado){mandarRequest()}
           }}>Aceptar</button>
           <button onClick={LimpiarServicio}>Cancelar</button>
         </div>

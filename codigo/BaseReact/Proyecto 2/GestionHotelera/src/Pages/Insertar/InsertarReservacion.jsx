@@ -1,7 +1,8 @@
 
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { ButtonSection1 } from '../../Components/ButtonSection'
+import { validarNull, validarInt } from '../../Components/Validaciones'
+import axios from 'axios'
 
 export function InsertarReservacion(){
 
@@ -11,6 +12,84 @@ export function InsertarReservacion(){
   const [fechaSalida, setFechaSalida] = useState('')
   const [cantPersonas, setCantPersonas] = useState('')
   const [vehiculo, setVehiculo] = useState('')
+  const [estado, setEstado] = useState('')
+  const [validado, setValidado] = useState(false)
+
+  //Limpia las casillas
+  const LimpiarReservacion = () => {
+    setIdCliente('')
+    setIdHab('')
+    setFechaIngreso('')
+    setFechaSalida('')
+    setCantPersonas('')
+    setVehiculo('')
+    setEstado('')
+    setValidado(false)
+  }
+
+  const validacionesReservacion = () => {
+  
+    const idClienteValido = validarNull(idCliente, 'Identificación Cliente');
+    if (!idClienteValido.esValido) {
+        alert(idClienteValido.mensaje);
+        return;
+    }
+    const idHabValido = validarNull(idHab, 'ID de la Habitación');
+    if (!idHabValido.esValido) {
+        alert(idHabValido.mensaje);
+        return;
+    }
+    const fechaIngresoValido = validarNull(fechaIngreso, 'Fecha Ingreso');
+    if (!fechaIngresoValido.esValido) {
+        alert(fechaIngresoValido.mensaje);
+        return;
+    }
+    const fechaSalidaValido = validarNull(fechaSalida, 'Fecha Salida');
+    if (!fechaSalidaValido.esValido) {
+        alert(fechaSalidaValido.mensaje);
+        return;
+    }
+    const cantidadPersonasValido = validarNull(cantPersonas, 'Cantidad de Personas');
+    if (!cantidadPersonasValido.esValido) {
+        alert(cantidadPersonasValido.mensaje);
+        return;
+    }
+    const poseeVehiculoValido = validarNull(vehiculo, 'Posee Vehículo');
+    if (!poseeVehiculoValido.esValido) {
+        alert(poseeVehiculoValido.mensaje);
+        return;
+    }
+    const estadoValido = validarNull(estado, 'Estado');
+    if (!estadoValido.esValido) {
+        alert(estadoValido.mensaje);
+        return;
+    }
+
+    const idClienteValido2 = validarInt(idCliente, 'Identificación Cliente');
+    if (!idClienteValido2.esValido) {
+        alert(idClienteValido2.mensaje);
+        return;
+    }
+    const idHabitacionValido2 = validarInt(idHab, 'ID de la Habitación');
+    if (!idHabitacionValido2.esValido) {
+        alert(idHabitacionValido2.mensaje);
+        return;
+    }
+    const cantidadPersonasValido2 = validarInt(cantPersonas, 'Cantidad de Personas');
+    if (!cantidadPersonasValido2.esValido) {
+        alert(cantidadPersonasValido2.mensaje);
+        return;
+    }
+
+    //Validacion bit?
+
+    setValidado(true);
+  }
+
+  const mandarRequest = async () => {
+    //codigo
+    LimpiarReservacion()
+  }
 
   return (
     <>
@@ -83,7 +162,23 @@ export function InsertarReservacion(){
         />
         </div>
 
-        <ButtonSection1/>
+        <div className="form-group">
+        <label>Estado: </label>
+        <Textbox
+            type="text"
+            placeholder=""
+            value={estado}
+            onChange={setEstado}
+        />
+        </div>
+
+        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
+          <button onClick={() => {
+            validacionesReservacion()
+            if(validado){mandarRequest()}
+          }}>Aceptar</button>
+          <button onClick={LimpiarReservacion}>Cancelar</button>
+        </div>
 
       </div>
     </>

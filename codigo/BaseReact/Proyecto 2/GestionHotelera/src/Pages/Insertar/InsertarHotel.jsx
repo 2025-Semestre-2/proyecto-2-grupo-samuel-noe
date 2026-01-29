@@ -1,8 +1,9 @@
 
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import axios from 'axios'
 import { validarNull, validarInt } from '../../Components/Validaciones'
+import axios from 'axios'
+
 
 export function InsertarHotel(){
 

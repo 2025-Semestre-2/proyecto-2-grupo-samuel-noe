@@ -1,13 +1,66 @@
 
 import { useState } from 'react'
 import { Textbox, TextboxBlock } from "../../Components/Textbox"
-import { ButtonSection1 } from '../../Components/ButtonSection'
+import { validarNull, validarInt } from '../../Components/Validaciones'
+import axios from 'axios'
 
 export function EliminarTelHotel(){
 
   const [idHospedaje, setIdHospedaje] = useState('')
   const [telefono, setTelefono] = useState('')
   const [codPais, setCodPais] = useState('')
+  const [validado, setValidado] = useState(false)
+
+  //Limpia las casillas
+  const LimpiarTelHotel = () => {
+    setIdHospedaje('')
+    setCodPais('')
+    setTelefono('')
+    setValidado(false)
+  }
+
+  const validacionesTelHotel = () => {
+    
+    const idHospedajeValido = validarNull(idHospedaje, 'Identificación Hospedaje');
+    if (!idHospedajeValido.esValido) {
+      alert(idHospedajeValido.mensaje);
+      return;
+    }
+    const codigoValido = validarNull(codPais, 'Código País');
+    if (!codigoValido.esValido) {
+      alert(codigoValido.mensaje);
+      return;
+    }
+    const numeroValido = validarNull(telefono, 'Número de Teléfono');
+    if (!numeroValido.esValido) {
+      alert(numeroValido.mensaje);
+      return;
+    }
+
+    const idHospedajeValido2 = validarInt(IdHospedaje, 'Identificación Hospedaje');
+    if (!idHospedajeValido2.esValido) {
+      alert(idHospedajeValido2.mensaje);
+      return;
+    }
+    const codigoValido2 = validarNull(codPais, 'Código País');
+    if (!codigoValido2.esValido) {
+      alert(codigoValido2.mensaje);
+      return;
+    }
+    const numeroValido2 = validarNull(telefono, 'Número de Teléfono');
+    if (!numeroValido2.esValido) {
+      alert(numeroValido2.mensaje);
+      return;
+    }
+
+    setValidado(true);
+  }
+
+  const mandarRequest = async () => {
+    //Codigo 
+    
+    LimpiarTelHotel()
+  }
 
   return (
     <>
@@ -50,7 +103,13 @@ export function EliminarTelHotel(){
         />
         </div> 
         
-        <ButtonSection1/>
+        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
+          <button onClick={() => {
+            validacionesTelHotel()
+            if(validado){mandarRequest()}
+          }}>Aceptar</button>
+          <button>Cancelar</button>
+        </div>
 
       </div>
     </>

@@ -1,6 +1,7 @@
 
 import { useState } from 'react'
 import { Textbox, TextboxBlock } from "../../Components/Textbox"
+import { validarNull, validarInt } from '../../Components/Validaciones'
 import axios from 'axios'
 
 export function EliminarTelCliente(){
@@ -9,6 +10,7 @@ export function EliminarTelCliente(){
   const [idCliente, setIdCliente] = useState('')
   const [telefono, setTelefono] = useState('')
   const [codPais, setCodPais] = useState('')
+  const [validado, setValidado] = useState(false)
 
   //Limpia las casillas
   const LimpiarTelCliente = () => {
@@ -16,6 +18,44 @@ export function EliminarTelCliente(){
     setIdCliente('')
     setTelefono('')
     setCodPais('')
+    setValidado(false)
+  }
+
+  const validacionesTelCliente = () => {
+  
+    const idClienteValido = validarNull(idCliente, 'Identificación Cliente');
+    if (!idClienteValido.esValido) {
+      alert(idClienteValido.mensaje);
+      return;
+    }
+    const telefonoValido = validarNull(telefono, 'Teléfono del Cliente');
+    if (!telefonoValido.esValido) {
+      alert(telefonoValido.mensaje);
+      return;
+    }
+    const codPaisValido = validarNull(codPais, 'Código País');
+    if (!codPaisValido.esValido) {
+      alert(codPaisValido.mensaje);
+      return;
+    }
+
+    const idClienteValido2 = validarInt(idCliente, 'Identificación Cliente');
+    if (!idClienteValido2.esValido) {
+      alert(idClienteValido2.mensaje);
+      return;
+    }
+    const telefonoValido2 = validarInt(telefono, 'Teléfono del Cliente');
+    if (!telefonoValido2.esValido) {
+      alert(telefonoValido2.mensaje);
+      return;
+    }
+    const codPaisValido2 = validarInt(codPais, 'Código País');
+    if (!codPaisValido2.esValido) {
+      alert(codPaisValido2.mensaje);
+      return;
+    }
+
+    setValidado(true);
   }
 
   const mandarRequest = async () => {
@@ -118,7 +158,10 @@ export function EliminarTelCliente(){
         </div> 
         
         <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={mandarRequest}>Aceptar</button>
+          <button onClick={() => {
+            validacionesTelCliente()
+            if(validado){mandarRequest()}
+          }}>Aceptar</button>
           <button onClick={LimpiarTelCliente}>Cancelar</button>
         </div>
 

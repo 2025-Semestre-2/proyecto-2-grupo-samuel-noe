@@ -1,7 +1,8 @@
 
 import { useState } from 'react'
 import { Textbox, TextboxBlock } from "../../Components/Textbox"
-import { ButtonSection1 } from '../../Components/ButtonSection'
+import { validarNull, validarInt } from '../../Components/Validaciones'
+import axios from 'axios'
 
 export function EliminarTipoHabitacion(){
 
@@ -10,6 +11,51 @@ export function EliminarTipoHabitacion(){
   const [desc, setDesc] = useState('')
   const [tipoCama, setTipoCama] = useState('')
   const [precioNoche, setPrecioNoche] = useState('')
+  const [validado, setValidado] = useState(false)
+
+  //Limpia las casillas
+  const LimpiarTipoHabitacion = () => {
+    setIdHotel('')
+    setNombre('')
+    setDesc('')
+    setTipoCama('')
+    setPrecioNoche('')
+    setValidado(false)
+  }
+
+  const validacionesTipoHabitacion = () => {
+  
+    const hospedajeValido = validarNull(idHotel, 'Identificación Hotel');
+    if (!hospedajeValido.esValido) {
+      alert(hospedajeValido.mensaje);
+      return;
+    }
+    const nombreValido = validarNull(nombre, 'Nombre');
+    if (!nombreValido.esValido) {
+      alert(nombreValido.mensaje);
+      return;
+    }
+
+    const camaValida = validarInt(tipoCama, 'Tipo de Cama');
+    if (!camaValida.esValido) {
+      alert(camaValida.mensaje);
+      return;
+    }
+
+    const precioValido = validarInt(precioNoche, 'Precio por noche');
+    if (!precioValido.esValido) {
+      alert(precioValido.mensaje);
+      return;
+    }
+    //validacion para decimal?
+
+    setValidado(true);
+  }
+
+  const mandarRequest = async () => {
+    //codigo
+    LimpiarTipoHabitacion()
+  }
 
   return (
     <>
@@ -72,7 +118,13 @@ export function EliminarTipoHabitacion(){
         />
         </div>
         
-        <ButtonSection1/>
+        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
+          <button onClick={() => {
+            validacionesTipoHabitacion()
+            if(validado){mandarRequest()}
+          }}>Aceptar</button>
+          <button onClick={LimpiarTipoHabitacion}>Cancelar</button>
+        </div>
 
       </div>
     </>

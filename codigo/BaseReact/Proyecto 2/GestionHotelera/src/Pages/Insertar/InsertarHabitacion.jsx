@@ -1,27 +1,59 @@
 
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { validarNull, validarInt } from "../../Components/Validaciones"
+import { validarNull, validarInt } from '../../Components/Validaciones'
+import axios from 'axios'
 
 export function InsertarHabitacion(){
 
   const [idTipoHab, setIdTipoHab] = useState('')
   const [numHab, setNumHab] = useState('')
   const [estado, setEstado] = useState('')
+  const [validado, setValidado] = useState(false)
 
-  const handleAceptar = () => {
-    const auxNull1 = validarNull(idTipoHab, 'ID Tipo Habitación')
-    if (!auxNull1.boolVali) 
-      return alert(auxNull1.mensaje)
+  //Limpia las casillas
+  const LimpiarHabitacion = () => {
+    setIdTipoHab('')
+    setNumHab('')
+    setEstado('')
+    setValidado(false)
+  }
 
-    const auxInt = validarInt(numHab, 'Número de Habitación')
-    if (!auxInt.boolVali) 
-      return alert(auxInt.mensaje)
+  const validacionesHabitacion = () => {
+  
+    const idTipoHabValido = validarNull(idTipoHab, 'Identificación Tipo Habitación');
+    if (!idTipoHabValido.esValido) {
+        alert(idTipoHabValido.mensaje);
+        return;
+    }
+    const numHabValido = validarNull(numHab, 'Número de Habitación');
+    if (!numHabValido.esValido) {
+        alert(numHabValido.mensaje);
+        return;
+    }
+    const estadoValido = validarNull(estado, 'Estado');
+    if (!estadoValido.esValido) {
+        alert(estadoValido.mensaje);
+        return;
+    }
 
-    const auxNull2 = validarNull(estado, 'Estado')
-    if (!auxNull2.boolVali) 
-      return alert(auxNull2.mensaje)
+    const idTipoHabValido2 = validarInt(idTipoHab, 'Identificación Tipo Habitación');
+    if (!idTipoHabValido2.esValido) {
+        alert(idTipoHabValido2.mensaje);
+        return;
+    }
+    const numHabValido2 = validarInt(numHab, 'Número de Habitación');
+    if (!numHabValido2.esValido) {
+        alert(numHabValido2.mensaje);
+        return;
+    }
 
+    setValidado(true);
+  }
+
+  const mandarRequest = async () => {
+    //codigo
+    LimpiarHabitacion()
   }
 
   return (
@@ -66,8 +98,11 @@ export function InsertarHabitacion(){
         </div>
         
         <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={handleAceptar}>Aceptar</button>
-          <button>Cancelar</button>
+          <button onClick={() => {
+            validacionesHabitacion()
+            if(validado){mandarRequest()}
+          }}>Aceptar</button>
+          <button onClick={LimpiarHabitacion}>Cancelar</button>
         </div>
 
       </div>

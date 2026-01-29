@@ -1,7 +1,8 @@
 
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { ButtonSection1 } from '../../Components/ButtonSection'
+import { validarNull, validarInt } from '../../Components/Validaciones'
+import axios from 'axios'
 
 export function ModificarFactura(){
 
@@ -10,6 +11,66 @@ export function ModificarFactura(){
   const [metodoPago, setMetodoPago] = useState('')
   const [cantNoches, setCantNoches] = useState('')
   const [importeTotal, setImporteTotal] = useState('')
+  const [validado, setValidado] = useState(false)
+
+  //Limpia las casillas
+  const LimpiarFactura = () => {
+    setIdReserva('')
+    setFechaEmision('')
+    setMetodoPago('')
+    setCantNoches('')
+    setImporteTotal('')
+    setValidado(false)
+  }
+
+  const validacionesFactura = () => {
+  
+    const idReservaValido = validarNull(idReserva, 'ID Reserva');
+    if (!idReservaValido.esValido) {
+        alert(idReservaValido.mensaje);
+        return;
+    }
+    const fechaValido = validarNull(fechaEmision, 'Fecha Emisión');
+    if (!fechaValido.esValido) {
+        alert(fechaValido.mensaje);
+        return;
+    }
+    const metodoPagoValido = validarNull(metodoPago, 'Método de Pago');
+    if (!metodoPagoValido.esValido) {
+        alert(metodoPagoValido.mensaje);
+        return;
+    }
+    const numNochesValido = validarNull(cantNoches, 'Cantidad de Noches');
+    if (!numNochesValido.esValido) {
+        alert(numNochesValido.mensaje);
+        return;
+    }
+    const importeTotalValido = validarNull(importeTotal, 'Importe Total');
+    if (!importeTotalValido.esValido) {
+        alert(importeTotalValido.mensaje);
+        return;
+    }
+
+    const idReservaValido2 = validarInt(idReserva, 'ID Reserva');
+    if (!idReservaValido2.esValido) {
+        alert(idReservaValido2.mensaje);
+        return;
+    }
+    const numNochesValido2 = validarInt(cantNoches, 'Cantidad de Noches');
+    if (!numNochesValido2.esValido) {
+        alert(numNochesValido2.mensaje);
+        return;
+    }
+
+    //Validacion decimal?
+
+    setValidado(true);
+  }
+
+  const mandarRequest = async () => {
+    //codigo
+    LimpiarFactura()
+  }
 
   return (
     <>
@@ -72,7 +133,13 @@ export function ModificarFactura(){
         />
         </div>
         
-        <ButtonSection1/>
+        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
+          <button onClick={() => {
+            validacionesFactura()
+            if(validado){mandarRequest()}
+          }}>Aceptar</button>
+          <button onClick={LimpiarFactura}>Cancelar</button>
+        </div>
 
       </div>
     </>

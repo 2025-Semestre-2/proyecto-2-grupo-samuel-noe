@@ -1,7 +1,6 @@
 
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { ButtonSection1 } from '../../Components/ButtonSection'
 import { validarNull, validarInt } from '../../Components/Validaciones'
 import axios from 'axios'
 
@@ -16,36 +15,37 @@ export function InsertarTipoHabitacion(){
 
   //Limpia las casillas
   const LimpiarTipoHabitacion = () => {
-      setIdHotel('')
-      setNombre('')
-      setDesc('')
-      setTipoCama('')
-      setPrecioNoche('')
-      setValidado(false)
+    setIdHotel('')
+    setNombre('')
+    setDesc('')
+    setTipoCama('')
+    setPrecioNoche('')
+    setValidado(false)
   }
 
   const validacionesTipoHabitacion = () => {
   
     const hospedajeValido = validarNull(idHotel, 'Identificación Hotel');
     if (!hospedajeValido.esValido) {
-        alert(hospedajeValido.mensaje);
-        return;
+      alert(hospedajeValido.mensaje);
+      return;
     }
     const nombreValido = validarNull(nombre, 'Nombre');
     if (!nombreValido.esValido) {
-        alert(nombreValido.mensaje);
-        return;
+      alert(nombreValido.mensaje);
+      return;
     }
 
     const camaValida = validarInt(tipoCama, 'Tipo de Cama');
     if (!camaValida.esValido) {
-        alert(camaValida.mensaje);
-        return;
+      alert(camaValida.mensaje);
+      return;
     }
+
     const precioValido = validarInt(precioNoche, 'Precio por noche');
     if (!precioValido.esValido) {
-        alert(precioValido.mensaje);
-        return;
+      alert(precioValido.mensaje);
+      return;
     }
     //validacion para decimal?
 
@@ -120,8 +120,8 @@ export function InsertarTipoHabitacion(){
         
         <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
           <button onClick={() => {
-              validacionesTipoHabitacion()
-              if(validado){mandarRequest()}
+            validacionesTipoHabitacion()
+            if(validado){mandarRequest()}
           }}>Aceptar</button>
           <button onClick={LimpiarTipoHabitacion}>Cancelar</button>
         </div>

@@ -1,12 +1,55 @@
 
 import { useState } from 'react'
 import { Textbox, TextboxBlock } from "../../Components/Textbox"
-import { ButtonSection1 } from '../../Components/ButtonSection'
+import { validarNull, validarInt } from '../../Components/Validaciones'
+import axios from 'axios'
 
 export function EliminarServicio(){
 
-  const [idHospedaje, setIdHospedaje] = useState('')
   const [nombre, setNombre] = useState('')
+  const [desc, setDesc] = useState('')
+  const [costo, setCosto] = useState('')
+  const [validado, setValidado] = useState(false)
+
+  //Limpia las casillas
+  const LimpiarServicio = () => {
+    setNombre('')
+    setDesc('')
+    setCosto('')
+    setValidado(false)
+  }
+
+  const validacionesServicio = () => {
+  
+    const nombreValido = validarNull(nombre, 'Nombre del Servicio');
+    if (!nombreValido.esValido) {
+      alert(nombreValido.mensaje);
+      return;
+    }
+    const descValido = validarNull(desc, 'Descripción');
+    if (!descValido.esValido) {
+      alert(descValido.mensaje);
+      return;
+    }
+    const costoValido = validarNull(costo, 'Costo');
+    if (!costoValido.esValido) {
+      alert(costoValido.mensaje);
+      return;
+    }
+
+    const costoValido2 = validarInt(costo, 'Costo');
+    if (!costoValido2.esValido) {
+      alert(costoValido2.mensaje);
+      return;
+    }
+
+    setValidado(true);
+  }
+
+  const mandarRequest = async () => {
+    //codigo
+    LimpiarServicio()
+  }
 
   return (
     <>
@@ -20,26 +63,42 @@ export function EliminarServicio(){
       }}>
       
         <div className="form-group">
-        <label>Identificación Hospedaje: </label>
+        <label>Nombre del Servicio: </label>
         <TextboxBlock
-            type="text"
-            placeholder=""
-            value={idHospedaje}
-            onChange={setIdHospedaje}
+          type="text"
+          placeholder=""
+          value={nombre}
+          onChange={setNombre}
         />
         </div>
 
         <div className="form-group">
-        <label>Nombre del Servicio: </label>
+        <label>Descripción: </label>
         <TextboxBlock
-            type="text"
-            placeholder=""
-            value={nombre}
-            onChange={setNombre}
+          type="text"
+          placeholder=""
+          value={desc}
+          onChange={setDesc}
+        />
+        </div>
+
+        <div className="form-group">
+        <label>Costo: </label>
+        <TextboxBlock
+          type="text"
+          placeholder=""
+          value={costo}
+          onChange={setCosto}
         />
         </div>
         
-        <ButtonSection1/>
+        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
+          <button onClick={() => {
+            validacionesServicio()
+            if(validado){mandarRequest()}
+          }}>Aceptar</button>
+          <button onClick={LimpiarServicio}>Cancelar</button>
+        </div>
 
       </div>
     </>

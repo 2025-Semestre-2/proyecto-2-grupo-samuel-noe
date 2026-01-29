@@ -1,8 +1,8 @@
 
 import { useState } from 'react'
-import axios from 'axios'
 import { Textbox } from "../../Components/Textbox"
 import { validarNull } from '../../Components/Validaciones'
+import axios from 'axios'
 
 export function InsertarCliente(){
 

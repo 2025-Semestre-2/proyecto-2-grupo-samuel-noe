@@ -1,7 +1,8 @@
 
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { ButtonSection1 } from '../../Components/ButtonSection'
+import { validarNull, validarInt } from '../../Components/Validaciones'
+import axios from 'axios'
 
 export function ModificarHotel(){
 
@@ -14,7 +15,71 @@ export function ModificarHotel(){
   const [barrio, setBarrio] = useState('')
   const [refGps, setRefGps] = useState('')
   const [correo, setCorreo] = useState('')
-  const [Url, setUrl] = useState('')
+  const [url, setUrl] = useState('')
+  const [validado, setValidado] = useState(false)
+
+    //Limpia las casillas
+    const LimpiarHotel = () => {
+        setNombre('')
+        setCedulaJuridica('')
+        setTipoHospedaje('')
+        setProvincia('')
+        setCanton('')
+        setDistrito('')
+        setBarrio('')
+        setSeniasExactas('')
+        setRefGps('')
+        setCorreo('')
+        setUrl('')
+        setValidado(false)
+    }
+
+    const validacionesHotel = () => {
+     
+        const nombreValido = validarNull(nombre, 'Nombre Hotel');
+        if (!nombreValido.esValido) {
+            alert(nombreValido.mensaje);
+            return;
+        }
+        const cedulaJuridicaValida = validarInt(cedulaJuridica, 'Cédula Jurídica');
+        if (!cedulaJuridicaValida.esValido) {
+            alert(cedulaJuridicaValida.mensaje);
+            return;
+        }
+        const tipoValido = validarNull(tipoHospedaje, 'Tipo de Hospedaje');
+        if (!tipoValido.esValido) {
+            alert(tipoValido.mensaje);
+            return;
+        }
+        const provinciaValida = validarNull(provincia, 'Provincia');
+        if (!provinciaValida.esValido) {
+            alert(provinciaValida.mensaje);
+            return;
+        }
+
+        const cantonValido = validarNull(canton, 'Cantón');
+        if (!cantonValido.esValido) {
+            alert(cantonValido.mensaje);
+            return;
+        }
+        const distritoValido = validarNull(distrito, 'Distrito');
+        if (!distritoValido.esValido) {
+            alert(distritoValido.mensaje);
+            return;
+        }
+        const correoValido = validarNull(correo, 'Correo Electrónico');
+        if (!correoValido.esValido) {
+            alert(correoValido.mensaje);
+            return;
+        }
+        setValidado(true);
+    }
+
+    const mandarRequest = async () => {
+        //Codigo del request
+
+        LimpiarHotel()
+    }
 
   return (
     <>
@@ -122,12 +187,18 @@ export function ModificarHotel(){
         <Textbox
             type="text"
             placeholder=""
-            value={Url}
+            value={url}
             onChange={setUrl}
         />
         </div>
 
-        <ButtonSection1/>
+        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
+            <button onClick={() => {
+                validacionesHotel()
+                if(validado){mandarRequest()}
+            }}>Aceptar</button>
+            <button onClick={LimpiarHotel}>Cancelar</button>
+        </div>
 
       </div>
     </>
