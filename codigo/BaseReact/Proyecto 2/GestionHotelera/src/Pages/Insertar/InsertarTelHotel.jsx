@@ -3,34 +3,67 @@ import { useState } from 'react'
 import axios from 'axios'
 import { Textbox } from "../../Components/Textbox"
 import { ButtonSection1 } from '../../Components/ButtonSection'
-//import { validarNull, validarInt } from '../../Components/Validaciones'
+import { validarNull, validarInt } from '../../Components/Validaciones'
 
 export function InsertarTelHotel(){
 
-  const [IdHospedaje, setIdHospedaje] = useState('')
-  const [CodigoPais, setCodigoPais] = useState('')
-  const [NumeroTelefono, setNumeroTelefono] = useState('')
-  
-  const mandarRequest = async () => {
+    const [IdHospedaje, setIdHospedaje] = useState('')
+    const [CodigoPais, setCodigoPais] = useState('')
+    const [NumeroTelefono, setNumeroTelefono] = useState('')
+    const [validado, setValidado] = useState(false)
 
-      try {
-          await axios.post('http://localhost:3000/api/hospedaje-telefonos', {
-          IdHospedaje: parseInt(IdHospedaje),
-          CodigoPais: parseInt(CodigoPais),
-          NumeroTelefono: parseInt(NumeroTelefono),
-          });
-          alert(' Insertado correctamente');
-          setIdHospedaje('');
-          setCodigoPais('');
-          setNumeroTelefono('');
-      } 
-      catch (e) {
-          alert(' Error al insertar: ' + e.message);
-          console.error(e);
-      }
-  };
+    //Limpia las casillas
+    const LimpiarTelHotel = () => {
+        setIdHospedaje('')
+        setCodigoPais('')
+        setNumeroTelefono('')
+        setValidado(false)
+    }
+    
+    const validacionesTelHotel = () => {
+     
+        const idHospedajeValido = validarNull(IdHospedaje, 'Identificación Hospedaje');
+        if (!idHospedajeValido.esValido) {
+            alert(idHospedajeValido.mensaje);
+            return;
+        }
+        const codigoValido = validarNull(NumeroTelefono, 'Número de Teléfono');
+        if (!codigoValido.esValido) {
+            alert(codigoValido.mensaje);
+            return;
+        }
+        const numeroValido = validarNull(NumeroTelefono, 'Número de Teléfono');
+        if (!numeroValido.esValido) {
+            alert(numeroValido.mensaje);
+            return;
+        }
 
-  return (
+        const idHospedajeValido2 = validarInt(IdHospedaje, 'Identificación Hospedaje');
+        if (!idHospedajeValido2.esValido) {
+            alert(idHospedajeValido2.mensaje);
+            return;
+        }
+        const codigoValido2 = validarNull(NumeroTelefono, 'Número de Teléfono');
+        if (!codigoValido2.esValido) {
+            alert(codigoValido2.mensaje);
+            return;
+        }
+        const numeroValido2 = validarNull(NumeroTelefono, 'Número de Teléfono');
+        if (!numeroValido2.esValido) {
+            alert(numeroValido2.mensaje);
+            return;
+        }
+
+        setValidado(true);
+    }
+
+    const mandarRequest = async () => {
+        //Codigo 
+        
+        LimpiarTelHotel()
+    }
+
+    return (
     <>
       <h1>Insertar Teléfono de Hotel</h1>
 
@@ -72,7 +105,10 @@ export function InsertarTelHotel(){
         </div> 
         
         <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-            <button onClick={mandarRequest}>Aceptar</button>
+            <button onClick={() => {
+                validacionesTelHotel()
+                if(validado){mandarRequest()}
+            }}>Aceptar</button>
             <button>Cancelar</button>
         </div>
 

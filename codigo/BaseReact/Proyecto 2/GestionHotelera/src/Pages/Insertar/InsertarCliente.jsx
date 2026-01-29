@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { Textbox } from "../../Components/Textbox"
+import { validarNull } from '../../Components/Validaciones'
 
 export function InsertarCliente(){
 
@@ -16,6 +17,7 @@ export function InsertarCliente(){
     const [canton, setCanton] = useState('')
     const [distrito, setDistrito] = useState('')
     const [correo, setCorreo] = useState('')
+    const [validado, setValidado] = useState(false)
 
     //Limpia las casillas
     const LimpiarCliente = () => {
@@ -30,10 +32,50 @@ export function InsertarCliente(){
         setCanton('')
         setDistrito('')
         setCorreo('')
+        setValidado(false)
+    }
+
+    const validacionesCliente = () => {
+     
+        const nombreValido = validarNull(nombre, 'Nombre Cliente');
+        if (!nombreValido.esValido) {
+            alert(nombreValido.mensaje);
+            return;
+        }
+        const apellido1Valido = validarNull(apellido1, 'Primer Apellido');
+        if (!apellido1Valido.esValido) {
+            alert(apellido1Valido.mensaje);
+            return;
+        }
+        const fechaValida = validarNull(fechaNacimiento, 'Fecha de Nacimiento');
+        if (!fechaValida.esValido) {
+            alert(fechaValida.mensaje);
+            return;
+        }
+        const tipoValido = validarNull(tipoIdentificacion, 'Tipo Identificación');
+        if (!tipoValido.esValido) {
+            alert(tipoValido.mensaje);
+            return;
+        }
+        const numeroValido = validarNull(identificacion, 'Número de Identificación');
+        if (!numeroValido.esValido) {
+            alert(numeroValido.mensaje);
+            return;
+        }
+        const paisValido = validarNull(paisResidencia, 'País de Residencia');
+        if (!paisValido.esValido) {
+            alert(paisValido.mensaje);
+            return;
+        }
+        const correoValido = validarNull(correo, 'Correo Electrónico');
+        if (!correoValido.esValido) {
+            alert(correoValido.mensaje);
+            return;
+        }
+        setValidado(true);
     }
 
     const mandarRequest = async () => {
-
         try {
             //let sirve para crear una variable local dentro de la funcion
             //sino, no podria usar el if así
@@ -190,7 +232,10 @@ export function InsertarCliente(){
         </div>
         
         <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-            <button onClick={mandarRequest}>Aceptar</button>
+            <button onClick={() => {
+                validacionesCliente()
+                if(validado){mandarRequest()}
+            }}>Aceptar</button>
             <button onClick={LimpiarCliente}>Cancelar</button>
         </div>
 

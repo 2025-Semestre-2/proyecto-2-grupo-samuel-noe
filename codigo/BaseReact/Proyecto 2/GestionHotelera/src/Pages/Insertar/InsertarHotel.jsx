@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
 import axios from 'axios'
+import { validarNull, validarInt } from '../../Components/Validaciones'
 
 export function InsertarHotel(){
 
@@ -16,6 +17,7 @@ export function InsertarHotel(){
   const [refGps, setRefGps] = useState('')
   const [correo, setCorreo] = useState('')
   const [url, setUrl] = useState('')
+  const [validado, setValidado] = useState(false)
 
     //Limpia las casillas
     const LimpiarHotel = () => {
@@ -30,32 +32,56 @@ export function InsertarHotel(){
         setRefGps('')
         setCorreo('')
         setUrl('')
+        setValidado(false)
     }
-    /*
-    const mandarRequest = async () => {
-        try {
-            await axios.post('http://localhost:3000/api/hospedaje', {
-            NombreComercial: nombre,
-            CedulaJuridica: cedulaJuridica,
-            TipoHospedaje: tipoHospedaje,
-            Provincia: provincia,
-            Canton: canton,
-            Distrito: distrito,
-            Barrio: barrio,
-            SenasExactas: seniasExactas,
-            ReferenciaGPS: refGps,
-            CorreoElectronico: correo,
-            URL: url
-            })
-            alert(' Insertado correctamente')
-            LimpiarCliente()
-        } 
-        catch (e) {
-            alert(' Error al insertar: ' + e.message)
-            console.error(e)
+
+    const validacionesHotel = () => {
+     
+        const nombreValido = validarNull(nombre, 'Nombre Hotel');
+        if (!nombreValido.esValido) {
+            alert(nombreValido.mensaje);
+            return;
         }
+        const cedulaJuridicaValida = validarInt(cedulaJuridica, 'Cédula Jurídica');
+        if (!cedulaJuridicaValida.esValido) {
+            alert(cedulaJuridicaValida.mensaje);
+            return;
+        }
+        const tipoValido = validarNull(tipoHospedaje, 'Tipo de Hospedaje');
+        if (!tipoValido.esValido) {
+            alert(tipoValido.mensaje);
+            return;
+        }
+        const provinciaValida = validarNull(provincia, 'Provincia');
+        if (!provinciaValida.esValido) {
+            alert(provinciaValida.mensaje);
+            return;
+        }
+
+        const cantonValido = validarNull(canton, 'Cantón');
+        if (!cantonValido.esValido) {
+            alert(cantonValido.mensaje);
+            return;
+        }
+        const distritoValido = validarNull(distrito, 'Distrito');
+        if (!distritoValido.esValido) {
+            alert(distritoValido.mensaje);
+            return;
+        }
+        const correoValido = validarNull(correo, 'Correo Electrónico');
+        if (!correoValido.esValido) {
+            alert(correoValido.mensaje);
+            return;
+        }
+        setValidado(true);
     }
-    */
+
+    const mandarRequest = async () => {
+        //Codigo del request
+
+        LimpiarHotel()
+    }
+
     return (
     <>
       <h1>Insertar Hotel</h1>
@@ -178,7 +204,10 @@ export function InsertarHotel(){
         </div>
         
         <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-            <button>Aceptar</button>
+            <button onClick={() => {
+                validacionesHotel()
+                if(validado){mandarRequest()}
+            }}>Aceptar</button>
             <button onClick={LimpiarHotel}>Cancelar</button>
         </div>
 

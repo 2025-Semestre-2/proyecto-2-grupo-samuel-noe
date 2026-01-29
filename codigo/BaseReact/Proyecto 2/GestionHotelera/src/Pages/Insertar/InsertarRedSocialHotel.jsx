@@ -1,13 +1,51 @@
 
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { ButtonSection1 } from '../../Components/ButtonSection'
+import { validarInt, validarNull } from '../../Components/Validaciones'
+import axios from 'axios'
 
 export function InsertarRedSocialHotel(){
 
   const [idHospedaje, setIdHospedaje] = useState('')
-  const [nombre, setNombre] = useState('')
-  const [url, setUrl] = useState('')
+  const [idPlataforma, setIdPlataforma] = useState('')
+  const [validado, setValidado] = useState(false)
+
+  //Limpia las casillas
+  const LimpiarRedSocialHotel = () => {
+    setIdHospedaje('')
+    setIdPlataforma('')
+    setValidado(false)
+  }
+
+  const validacionesRedSocialHotel = () => {
+    const idHospedajeValido = validarNull(idHospedaje, 'Identificación Hospedaje');
+    if (!idHospedajeValido.esValido) {
+      alert(idHospedajeValido.mensaje);
+      return;
+    }
+    const idPlataformaValido = validarNull(idPlataforma, 'Identificación Red Social');
+    if (!idPlataformaValido.esValido) {
+      alert(idPlataformaValido.mensaje);
+      return;
+    }
+
+    const idHospedajeValido2 = validarInt(idHospedaje, 'Identificación Hospedaje');
+    if (!idHospedajeValido2.esValido) {
+      alert(idHospedajeValido2.mensaje);
+      return;
+    }
+    const idPlataformaValido2 = validarInt(idPlataforma, 'Identificación Red Social');
+    if (!idPlataformaValido2.esValido) {
+      alert(idPlataformaValido2.mensaje);
+      return;
+    }
+    setValidado(true);
+  }
+
+  const mandarRequest = async () => {
+    // Código para enviar la solicitud
+    LimpiarRedSocialHotel();
+  }
 
   return (
     <>
@@ -31,26 +69,22 @@ export function InsertarRedSocialHotel(){
         </div>
 
         <div className="form-group">
-        <label>Nombre de la Red Social: </label>
+        <label>Identificación Red Social: </label>
         <Textbox
             type="text"
             placeholder=""
-            value={nombre}
-            onChange={setNombre}
+            value={idPlataforma}
+            onChange={setIdPlataforma}
         />
         </div>
-
-        <div className="form-group">
-        <label>Enlace URL: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={url}
-            onChange={setUrl}
-        />
-        </div> 
         
-        <ButtonSection1/>
+        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
+            <button onClick={() => {
+                validacionesRedSocialHotel()
+                if(validado){mandarRequest()}
+            }}>Aceptar</button>
+            <button onClick={LimpiarRedSocialHotel}>Cancelar</button>
+        </div>
 
       </div>
     </>
