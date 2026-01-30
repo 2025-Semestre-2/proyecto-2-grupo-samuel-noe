@@ -6,19 +6,19 @@ import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-export function ReportarServicios(){
+export function ReportarRedesSociales(){
 
   return (
     <>
-      <h1>Reportar Servicios Empresa</h1>
-      
+      <h1>Reportar Redes Sociales</h1>
       <div className="container mt-5">
         <table className="table table-bordered">
             <thead>
                 <tr>
                     <th>ID</th> 
-                    <th>ID del Hotel</th>   
-                    <th>Nombre</th>
+                    <th>ID Hotel</th>   
+                    <th>Nombre Red Social</th>
+                    <th>Enlace URL</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,10 +26,11 @@ export function ReportarServicios(){
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td></td>
                 </tr>
             </tbody>
         </table>
-      </div>
+    </div>
     </>
   )
 }

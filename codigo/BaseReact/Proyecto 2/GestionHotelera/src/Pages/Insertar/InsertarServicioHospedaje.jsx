@@ -1,46 +1,43 @@
-//Los Insertar,Modificar,Eliminar y ReportarServicio
-//Son de Empresa Recreacion
+
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
 import { validarNull, validarInt } from '../../Components/Validaciones'
 import axios from 'axios'
 
-export function InsertarServicio(){
+export function InsertarServicioHospedaje(){
 
-  const [nombre, setNombre] = useState('')
-  const [desc, setDesc] = useState('')
-  const [costo, setCosto] = useState('')
+  const [idHotel, setIdHotel] = useState('')
+  const [idServicio, setIdServicio] = useState('')
   const [validado, setValidado] = useState(false)
 
   //Limpia las casillas
   const LimpiarServicio = () => {
-    setNombre('')
-    setDesc('')
-    setCosto('')
+    setIdHotel('')
+    setIdServicio('')
     setValidado(false)
   }
 
   const validacionesServicio = () => {
-  
-    const nombreValido = validarNull(nombre, 'Nombre del Servicio');
-    if (!nombreValido.esValido) {
-      alert(nombreValido.mensaje);
+
+    const idHotelValido = validarNull(idHotel, 'ID del Hotel');
+    if (!idHotelValido.esValido) {
+      alert(idHotelValido.mensaje);
       return;
     }
-    const descValido = validarNull(desc, 'Descripción');
-    if (!descValido.esValido) {
-      alert(descValido.mensaje);
-      return;
-    }
-    const costoValido = validarNull(costo, 'Costo');
-    if (!costoValido.esValido) {
-      alert(costoValido.mensaje);
+    const idServicioValido = validarNull(idServicio, 'ID del Servicio');
+    if (!idServicioValido.esValido) {
+      alert(idServicioValido.mensaje);
       return;
     }
 
-    const costoValido2 = validarInt(costo, 'Costo');
-    if (!costoValido2.esValido) {
-      alert(costoValido2.mensaje);
+    const idHotelValido2 = validarInt(idHotel, 'ID del Hotel');
+    if (!idHotelValido2.esValido) {
+      alert(idHotelValido2.mensaje);
+      return;
+    }
+    const idServicioValido2 = validarInt(idServicio, 'ID del Servicio');
+    if (!idServicioValido2.esValido) {
+      alert(idServicioValido2.mensaje);
       return;
     }
 
@@ -54,7 +51,7 @@ export function InsertarServicio(){
 
   return (
     <>
-      <h1>Insertar Servicio Empresa</h1>
+      <h1>Insertar Servicio Hospedaje</h1>
 
       <div style={{
         border: '2px solid #333',
@@ -64,35 +61,25 @@ export function InsertarServicio(){
       }}>
       
         <div className="form-group">
-        <label>Nombre del Servicio: </label>
+        <label>ID del Hotel: </label>
         <Textbox
           type="text"
           placeholder=""
-          value={nombre}
-          onChange={setNombre}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Descripción: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={desc}
-          onChange={setDesc}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Costo: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={costo}
-          onChange={setCosto}
+          value={idHotel}
+          onChange={setIdHotel}
         />
         </div>
         
+        <div className="form-group">
+        <label>ID del Servicio: </label>
+        <Textbox
+          type="text"
+          placeholder=""
+          value={idServicio}
+          onChange={setIdServicio}
+        />
+        </div>
+
         <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
           <button onClick={() => {
             validacionesServicio()

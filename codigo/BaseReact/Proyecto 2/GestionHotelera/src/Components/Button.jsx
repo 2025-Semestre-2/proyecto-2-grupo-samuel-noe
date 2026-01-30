@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react"
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-export function Button1() {
-    return(
-        <>
-        </>
-    )
-}
-
 //Funcion que acomoda los botones de los buttondrop
 //children es todo lo que esta entre las etiquetas donde se llama
 export function EstiloBotonDrop({ href, children }) {
@@ -72,7 +65,7 @@ export function ButtonDrop2() {
   );
 }
 
-//Funcion para un boton desplegable de mantenimiento servicios hotel
+//Funcion para un boton desplegable de mantenimiento tipo servicios 
 export function ButtonDrop3() {
   const [isOpen, setIsOpen] = useState(false);
   
@@ -82,7 +75,7 @@ export function ButtonDrop3() {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
       >
-        Mantenimiento Servicios Hotel
+        Tipo Servicios
       </button>
         {isOpen && (
         <ul className="dropdown-menu show" style={{position: 'static', width: '100%', minWidth: 'unset', padding: 0}}>
@@ -163,6 +156,126 @@ export function ButtonDrop6() {
             <EstiloBotonDrop href="/ModificarTelCliente">Modificar</EstiloBotonDrop>
             <EstiloBotonDrop href="/EliminarTelCliente">Eliminar</EstiloBotonDrop>
             <EstiloBotonDrop href="/ReportarTelClientes">Reportar</EstiloBotonDrop>
+        </ul>
+        )}
+    </div>
+  );
+}
+
+//Funcion para un boton desplegable de mantenimiento redes sociales
+export function ButtonDrop7() {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="dropdown" style={{width: '100%'}}>
+      <button 
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        Catálogo Redes Sociales   
+      </button>
+        {isOpen && (
+        <ul className="dropdown-menu show" style={{position: 'static', width: '100%', minWidth: 'unset', padding: 0}}>
+          <EstiloBotonDrop href="/InsertarRedSocial">Insertar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/ModificarRedSocial">Modificar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/EliminarRedSocial">Eliminar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/ReportarRedesSociales">Reportar</EstiloBotonDrop>
+        </ul>
+        )}
+    </div>
+  );
+}
+
+//Funcion para un boton desplegable de mantenimiento servicios catalogo
+export function ButtonDrop8() {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="dropdown" style={{width: '100%'}}>
+      <button 
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        Catálogo Servicios   
+      </button>
+        {isOpen && (
+        <ul className="dropdown-menu show" style={{position: 'static', width: '100%', minWidth: 'unset', padding: 0}}>
+          <EstiloBotonDrop href="/InsertarServicioCatalogo">Insertar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/ModificarServicioCatalogo">Modificar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/EliminarServicioCatalogo">Eliminar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/ReportarServiciosCata">Reportar</EstiloBotonDrop>
+        </ul>
+        )}
+    </div>
+  );
+}
+
+//Funcion para un boton desplegable de mantenimiento servicios hospedaje
+export function ButtonDrop9() {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="dropdown" style={{width: '100%'}}>
+      <button 
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        Servicios Hospedaje   
+      </button>
+        {isOpen && (
+        <ul className="dropdown-menu show" style={{position: 'static', width: '100%', minWidth: 'unset', padding: 0}}>
+          <EstiloBotonDrop href="/InsertarServicioHospedaje">Insertar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/ModificarServicioHospedaje">Modificar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/EliminarServicioHospedaje">Eliminar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/ReportarServicioHospedajes">Reportar</EstiloBotonDrop>
+        </ul>
+        )}
+    </div>
+  );
+}
+
+//Funcion para un boton desplegable de mantenimiento empresa-actividad
+export function ButtonDrop10() {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="dropdown" style={{width: '100%'}}>
+      <button 
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        Empresa Recreacion Tipo Actividad   
+      </button>
+        {isOpen && (
+        <ul className="dropdown-menu show" style={{position: 'static', width: '100%', minWidth: 'unset', padding: 0}}>
+          <EstiloBotonDrop href="/InsertarEmpRecTipoAct">Insertar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/ModificarEmpRecTipoAct">Modificar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/EliminarEmpRecTipoAct">Eliminar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/ReportarEmpRecTipoAct">Reportar</EstiloBotonDrop>
+        </ul>
+        )}
+    </div>
+  );
+}
+
+//Funcion para un boton desplegable de mantenimiento empresa-servicio
+export function ButtonDrop11() {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="dropdown" style={{width: '100%'}}>
+      <button 
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        Empresa Recreacion Tipo Servicio   
+      </button>
+        {isOpen && (
+        <ul className="dropdown-menu show" style={{position: 'static', width: '100%', minWidth: 'unset', padding: 0}}>
+          <EstiloBotonDrop href="/InsertarEmpRecTipoServicio">Insertar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/ModificarEmpRecTipoServicio">Modificar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/EliminarEmpRecTipoServicio">Eliminar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/ReportarEmpRecTipoServicio">Reportar</EstiloBotonDrop>
         </ul>
         )}
     </div>

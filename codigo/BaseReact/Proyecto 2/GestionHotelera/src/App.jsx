@@ -38,10 +38,20 @@ import {ModificarRedSocialHotel} from './Pages/Modificar/ModificarRedSocialHotel
 import {EliminarRedSocialHotel} from './Pages/Eliminar/EliminarRedSocialHotel.jsx'
 import {ReportarRedSocialHoteles} from './Pages/Reportar/ReportarRedSocialHoteles.jsx'
 
-import {InsertarServicio} from './Pages/Insertar/InsertarServicio.jsx'
-import {ModificarServicio} from './Pages/Modificar/ModificarServicio.jsx'
-import {EliminarServicio} from './Pages/Eliminar/EliminarServicio.jsx'
-import {ReportarServicios} from './Pages/Reportar/ReportarServicios.jsx'
+import {InsertarServicioCatalogo} from './Pages/Insertar/InsertarServicioCatalogo.jsx'
+import {ModificarServicioCatalogo} from './Pages/Modificar/ModificarServicioCatalogo.jsx'
+import {EliminarServicioCatalogo} from './Pages/Eliminar/EliminarServicioCatalogo.jsx'
+import {ReportarServiciosCata} from './Pages/Reportar/ReportarServiciosCata.jsx'
+
+import {InsertarRedSocial} from './Pages/Insertar/InsertarRedSocial.jsx'
+import {ModificarRedSocial} from './Pages/Modificar/ModificarRedSocial.jsx'
+import {EliminarRedSocial} from './Pages/Eliminar/EliminarRedSocial.jsx'
+import {ReportarRedesSociales} from './Pages/Reportar/ReportarRedesSociales.jsx'
+
+import {InsertarServicioHospedaje} from './Pages/Insertar/InsertarServicioHospedaje.jsx'
+import {ModificarServicioHospedaje} from './Pages/Modificar/ModificarServicioHospedaje.jsx'
+import {EliminarServicioHospedaje} from './Pages/Eliminar/EliminarServicioHospedaje.jsx'
+import {ReportarServicioHospedajes} from './Pages/Reportar/ReportarServicioHospedajes.jsx'
 
 import {InsertarTipoHabitacion} from './Pages/Insertar/InsertarTipoHabitacion.jsx'
 import {ModificarTipoHabitacion} from './Pages/Modificar/ModificarTipoHabitacion.jsx'
@@ -99,6 +109,21 @@ import {ModificarEmpRec} from './Pages/Modificar/ModificarEmpRec.jsx'
 import {EliminarEmpRec} from './Pages/Eliminar/EliminarEmpRec.jsx'
 import {ReportarEmpRec} from './Pages/Reportar/ReportarEmpRec.jsx'
 
+import {InsertarEmpRecTipoAct} from './Pages/Insertar/InsertarEmpRecTipoAct.jsx'
+import {ModificarEmpRecTipoAct} from './Pages/Modificar/ModificarEmpRecTipoAct.jsx'
+import {EliminarEmpRecTipoAct} from './Pages/Eliminar/EliminarEmpRecTipoAct.jsx'
+import {ReportarEmpRecTipoAct} from './Pages/Reportar/ReportarEmpRecTipoAct.jsx'
+
+import {InsertarServicio} from './Pages/Insertar/InsertarServicio.jsx'
+import {ModificarServicio} from './Pages/Modificar/ModificarServicio.jsx'
+import {EliminarServicio} from './Pages/Eliminar/EliminarServicio.jsx'
+import {ReportarServicios} from './Pages/Reportar/ReportarServicios.jsx'
+
+import {InsertarEmpRecTipoServicio} from './Pages/Insertar/InsertarEmpRecTipoServicio.jsx'
+import {ModificarEmpRecTipoServicio} from './Pages/Modificar/ModificarEmpRecTipoServicio.jsx'
+import {EliminarEmpRecTipoServicio} from './Pages/Eliminar/EliminarEmpRecTipoServicio.jsx'
+import {ReportarEmpRecTipoServicio} from './Pages/Reportar/ReportarEmpRecTipoServicio.jsx'
+
 function App() {
 
   return (
@@ -127,11 +152,20 @@ function App() {
           <Route path='/EliminarRedSocialHotel' element = {<EliminarRedSocialHotel/>}/>
           <Route path='/ReportarRedSocialHoteles' element = {<ReportarRedSocialHoteles/>}/>
         
-          <Route path='/ManteServicios' element = {<ManteServicios/>}/>
-          <Route path='/InsertarServicio' element = {<InsertarServicio/>}/>
-          <Route path='/ModificarServicio' element = {<ModificarServicio/>}/>
-          <Route path='/EliminarServicio' element = {<EliminarServicio/>}/>
-          <Route path='/ReportarServicios' element = {<ReportarServicios/>}/>
+          <Route path='/InsertarRedSocial' element = {<InsertarRedSocial/>}/>
+          <Route path='/ModificarRedSocial' element = {<ModificarRedSocial/>}/>
+          <Route path='/EliminarRedSocial' element = {<EliminarRedSocial/>}/>
+          <Route path='/ReportarRedesSociales' element = {<ReportarRedesSociales/>}/>
+        
+          <Route path='/InsertarServicioCatalogo' element = {<InsertarServicioCatalogo/>}/>
+          <Route path='/ModificarServicioCatalogo' element = {<ModificarServicioCatalogo/>}/>
+          <Route path='/EliminarServicioCatalogo' element = {<EliminarServicioCatalogo/>}/>
+          <Route path='/ReportarServiciosCata' element = {<ReportarServiciosCata/>}/>
+        
+          <Route path='/InsertarServicioHospedaje' element = {<InsertarServicioHospedaje/>}/>
+          <Route path='/ModificarServicioHospedaje' element = {<ModificarServicioHospedaje/>}/>
+          <Route path='/EliminarServicioHospedaje' element = {<EliminarServicioHospedaje/>}/>
+          <Route path='/ReportarServicioHospedajes' element = {<ReportarServicioHospedajes/>}/>
         </Route>
         <Route element = {<Layout4/>}>
         <Route path='/ManteTipoHabitacion' element = {<ManteTipoHabitacion/>}/>
@@ -190,6 +224,22 @@ function App() {
         <Route path='/ModificarEmpRec' element = {<ModificarEmpRec/>}/>
         <Route path='/EliminarEmpRec' element = {<EliminarEmpRec/>}/>
         <Route path='/ReportarEmpRec' element = {<ReportarEmpRec/>}/>
+
+        <Route path='/InsertarEmpRecTipoAct' element = {<InsertarEmpRecTipoAct/>}/>
+        <Route path='/ModificarEmpRecTipoAct' element = {<ModificarEmpRecTipoAct/>}/>
+        <Route path='/EliminarEmpRecTipoAct' element = {<EliminarEmpRecTipoAct/>}/>
+        <Route path='/ReportarEmpRecTipoAct' element = {<ReportarEmpRecTipoAct/>}/>
+        
+        <Route path='/ManteServicios' element = {<ManteServicios/>}/>
+        <Route path='/InsertarServicio' element = {<InsertarServicio/>}/>
+        <Route path='/ModificarServicio' element = {<ModificarServicio/>}/>
+        <Route path='/EliminarServicio' element = {<EliminarServicio/>}/>
+        <Route path='/ReportarServicios' element = {<ReportarServicios/>}/>
+
+        <Route path='/InsertarEmpRecTipoServicio' element = {<InsertarEmpRecTipoServicio/>}/>
+        <Route path='/ModificarEmpRecTipoServicio' element = {<ModificarEmpRecTipoServicio/>}/>
+        <Route path='/EliminarEmpRecTipoServicio' element = {<EliminarEmpRecTipoServicio/>}/>
+        <Route path='/ReportarEmpRecTipoServicio' element = {<ReportarEmpRecTipoServicio/>}/>
         </Route>
         <Route element = {<Layout10/>}>
         <Route path='/ManteReservaciones' element = {<ManteReservaciones/>}/>

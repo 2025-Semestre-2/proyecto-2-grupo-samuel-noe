@@ -1,17 +1,14 @@
 
 import '../App.css'
 import { Link } from "react-router-dom"
-import {ButtonDrop1, ButtonDrop2, ButtonDrop3, ButtonDrop4, ButtonDrop5, ButtonDrop6} from './Button'
+import {ButtonDrop1, ButtonDrop2, ButtonDrop3, ButtonDrop4, ButtonDrop5,
+     ButtonDrop6, ButtonDrop7, ButtonDrop8, ButtonDrop9, ButtonDrop10, ButtonDrop11} from './Button'
 
 /*
-
 <Link to="/ManteServicios">
     <button>Mantenimiento Servicios</button>
 </Link>
-
-
 */
-
 
 //Barra de navegacion principal donde estan los mantenimientos
 export function Navbar(){
@@ -98,7 +95,9 @@ export function Navbar2(){
 
             <ButtonDrop1/>
             <ButtonDrop2/>
-            <ButtonDrop3/>
+            <ButtonDrop7/>
+            <ButtonDrop8/>
+            <ButtonDrop9/>
             
         </nav>
         </>
@@ -299,6 +298,10 @@ export function Navbar9(){
             <Link to="/ReportarEmpRec">
                 <button>Reportar Empresa Recreación</button>
             </Link>
+                
+            <ButtonDrop10/>
+            <ButtonDrop3/>
+            <ButtonDrop11/>
                 
         </nav>
         </>

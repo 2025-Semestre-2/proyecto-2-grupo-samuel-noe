@@ -1,47 +1,27 @@
 
 import { useState } from 'react'
-import { Textbox } from "../../Components/Textbox"
+import { Textbox, TextboxBlock } from "../../Components/Textbox"
 import { validarNull, validarInt } from '../../Components/Validaciones'
 import axios from 'axios'
 
-export function ModificarServicio(){
+export function EliminarServicioCatalogo(){
 
   const [idServicio, setIdServicio] = useState('')
   const [nombre, setNombre] = useState('')
-  const [desc, setDesc] = useState('')
-  const [costo, setCosto] = useState('')
   const [validado, setValidado] = useState(false)
 
   //Limpia las casillas
   const LimpiarServicio = () => {
     setIdServicio('')
     setNombre('')
-    setDesc('')
-    setCosto('')
     setValidado(false)
   }
 
   const validacionesServicio = () => {
-  
+
     const nombreValido = validarNull(nombre, 'Nombre del Servicio');
     if (!nombreValido.esValido) {
       alert(nombreValido.mensaje);
-      return;
-    }
-    const descValido = validarNull(desc, 'Descripción');
-    if (!descValido.esValido) {
-      alert(descValido.mensaje);
-      return;
-    }
-    const costoValido = validarNull(costo, 'Costo');
-    if (!costoValido.esValido) {
-      alert(costoValido.mensaje);
-      return;
-    }
-
-    const costoValido2 = validarInt(costo, 'Costo');
-    if (!costoValido2.esValido) {
-      alert(costoValido2.mensaje);
       return;
     }
 
@@ -69,8 +49,7 @@ export function ModificarServicio(){
 
   return (
     <>
-      <h1>Modificar Servicio Empresa</h1>
-
+      <h1>Eliminar Servicio Catálogo</h1>
       <div style={{
         border: '2px solid #333',
         borderRadius: '4px',
@@ -100,31 +79,11 @@ export function ModificarServicio(){
       
         <div className="form-group">
         <label>Nombre del Servicio: </label>
-        <Textbox
+        <TextboxBlock
           type="text"
           placeholder=""
           value={nombre}
           onChange={setNombre}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Descripción: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={desc}
-          onChange={setDesc}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Costo: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={costo}
-          onChange={setCosto}
         />
         </div>
         

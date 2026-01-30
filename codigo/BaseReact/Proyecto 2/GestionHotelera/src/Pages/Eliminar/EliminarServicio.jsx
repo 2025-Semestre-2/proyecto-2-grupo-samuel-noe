@@ -69,7 +69,7 @@ export function EliminarServicio(){
 
   return (
     <>
-      <h1>Eliminar Servicio</h1>
+      <h1>Eliminar Servicio Empresa</h1>
 
       <div style={{
         border: '2px solid #333',

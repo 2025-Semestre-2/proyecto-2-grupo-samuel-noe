@@ -4,44 +4,42 @@ import { Textbox } from "../../Components/Textbox"
 import { validarNull, validarInt } from '../../Components/Validaciones'
 import axios from 'axios'
 
-export function ModificarServicio(){
+export function ModificarServicioHospedaje(){
 
+  const [idServicioHotel, setIdServicioHotel] = useState('')
+  const [idHotel, setIdHotel] = useState('')
   const [idServicio, setIdServicio] = useState('')
-  const [nombre, setNombre] = useState('')
-  const [desc, setDesc] = useState('')
-  const [costo, setCosto] = useState('')
   const [validado, setValidado] = useState(false)
 
   //Limpia las casillas
   const LimpiarServicio = () => {
+    setIdServicioHotel('')
+    setIdHotel('')
     setIdServicio('')
-    setNombre('')
-    setDesc('')
-    setCosto('')
     setValidado(false)
   }
 
   const validacionesServicio = () => {
-  
-    const nombreValido = validarNull(nombre, 'Nombre del Servicio');
-    if (!nombreValido.esValido) {
-      alert(nombreValido.mensaje);
+
+    const idHotelValido = validarNull(idHotel, 'ID del Hotel');
+    if (!idHotelValido.esValido) {
+      alert(idHotelValido.mensaje);
       return;
     }
-    const descValido = validarNull(desc, 'Descripción');
-    if (!descValido.esValido) {
-      alert(descValido.mensaje);
-      return;
-    }
-    const costoValido = validarNull(costo, 'Costo');
-    if (!costoValido.esValido) {
-      alert(costoValido.mensaje);
+    const idServicioValido = validarNull(idServicio, 'ID del Servicio');
+    if (!idServicioValido.esValido) {
+      alert(idServicioValido.mensaje);
       return;
     }
 
-    const costoValido2 = validarInt(costo, 'Costo');
-    if (!costoValido2.esValido) {
-      alert(costoValido2.mensaje);
+    const idHotelValido2 = validarInt(idHotel, 'ID del Hotel');
+    if (!idHotelValido2.esValido) {
+      alert(idHotelValido2.mensaje);
+      return;
+    }
+    const idServicioValido2 = validarInt(idServicio, 'ID del Servicio');
+    if (!idServicioValido2.esValido) {
+      alert(idServicioValido2.mensaje);
       return;
     }
 
@@ -54,22 +52,22 @@ export function ModificarServicio(){
   }
 
   const verificarExistenciaServicio = async () => {
-    if (!idServicio) {
-      alert('Ingresa un ID de Servicio');
+    if (!idServicioHotel) {
+      alert('Ingresa un ID de Servicio Hospedaje');
       return;
     }
     try {
       //codigo
     } 
     catch (e) {
-      alert('Servicio no encontrado: ' + e.message);
+      alert('Servicio Hospedaje no encontrado: ' + e.message);
       console.error(e);
     }
   }
 
   return (
     <>
-      <h1>Modificar Servicio Empresa</h1>
+      <h1>Modificar Servicio Hospedaje</h1>
 
       <div style={{
         border: '2px solid #333',
@@ -79,12 +77,12 @@ export function ModificarServicio(){
       }}>   
 
         <div className="form-group">
-        <label>ID de Servicio: </label>
+        <label>ID de Servicio Hospedaje: </label>
         <Textbox
           type="text"
           placeholder=""
-          value={idServicio}
-          onChange={setIdServicio}
+          value={idServicioHotel}
+          onChange={setIdServicioHotel}
         />
         </div>
         <button onClick={verificarExistenciaServicio}>Buscar</button>
@@ -99,35 +97,25 @@ export function ModificarServicio(){
       }}>
       
         <div className="form-group">
-        <label>Nombre del Servicio: </label>
+        <label>ID del Hotel: </label>
         <Textbox
           type="text"
           placeholder=""
-          value={nombre}
-          onChange={setNombre}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Descripción: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={desc}
-          onChange={setDesc}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Costo: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={costo}
-          onChange={setCosto}
+          value={idHotel}
+          onChange={setIdHotel}
         />
         </div>
         
+        <div className="form-group">
+        <label>ID del Servicio: </label>
+        <Textbox
+          type="text"
+          placeholder=""
+          value={idServicio}
+          onChange={setIdServicio}
+        />
+        </div>
+
         <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
           <button onClick={() => {
             validacionesServicio()

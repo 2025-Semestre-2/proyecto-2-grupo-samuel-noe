@@ -1,45 +1,43 @@
-//Estos son de la tabla TipoActividad
+
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
 import { validarNull, validarInt} from '../../Components/Validaciones'
 import axios from 'axios'
 
-export function InsertarActividad(){
+export function InsertarEmpRecTipoServicio(){
 
-  const [nombreActividad, setNombreActividad] = useState('')
-  const [desc, setDesc] = useState('')
-  const [precio, setPrecio] = useState('')
+  const [idEmpRec, setIdEmpRec] = useState('')
+  const [idTipoServicio, setIdTipoServicio] = useState('')
   const [validado, setValidado] = useState(false)
 
     //Limpia las casillas
     const LimpiarActividad = () => {
-        setNombreActividad('')
-        setDesc('')
-        setPrecio('')
+        setIdEmpRec('')
+        setIdTipoServicio('')
         setValidado(false)
     }
 
     const validacionesActividad = () => {
     
-        const nombreValido = validarNull(nombreActividad, 'Nombre de la Actividad');
-        if (!nombreValido.esValido) {
-            alert(nombreValido.mensaje);
+        const idEmpRecValido = validarNull(idEmpRec, 'ID Empresa Recreacion');
+        if (!idEmpRecValido.esValido) {
+            alert(idEmpRecValido.mensaje);
             return;
         }
-        const descValido = validarNull(desc, 'Descripción');
-        if (!descValido.esValido) {
-            alert(descValido.mensaje);
-            return;
-        }
-        const costoValido = validarNull(precio, 'Costo');
-        if (!costoValido.esValido) {
-            alert(costoValido.mensaje);
+        const idTipoServicioValido = validarNull(idTipoServicio, 'ID Tipo Servicio');
+        if (!idTipoServicioValido.esValido) {
+            alert(idTipoServicioValido.mensaje);
             return;
         }
 
-        const costoValido2 = validarInt(precio, 'Costo');
-        if (!costoValido2.esValido) {
-            alert(costoValido2.mensaje);
+        const idEmpRecValido2 = validarInt(idEmpRec, 'ID Empresa Recreacion');
+        if (!idEmpRecValido2.esValido) {
+            alert(idEmpRecValido2.mensaje);
+            return;
+        }
+        const idTipoServicioValido2 = validarInt(idTipoServicio, 'ID Tipo Servicio');
+        if (!idTipoServicioValido2.esValido) {
+            alert(idTipoServicioValido2.mensaje);
             return;
         }
 
@@ -53,7 +51,7 @@ export function InsertarActividad(){
 
     return (
     <>
-      <h1>Insertar Actividad</h1>
+      <h1>Insertar Empresa Recreacion Tipo Servicio</h1>
       
       <div style={{
         border: '2px solid #333',
@@ -63,32 +61,22 @@ export function InsertarActividad(){
       }}>
       
         <div className="form-group">
-        <label>Nombre de la Actividad: </label>
+        <label>ID Empresa Recreacion: </label>
         <Textbox
             type="text"
             placeholder=""
-            value={nombreActividad}
-            onChange={setNombreActividad}
+            value={idEmpRec}
+            onChange={setIdEmpRec}
         />
         </div>
 
         <div className="form-group">
-        <label>Descripción: </label>
+        <label>ID Tipo Servicio: </label>
         <Textbox
             type="text"
             placeholder=""  
-            value={desc}
-            onChange={setDesc}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Costo: </label>
-        <Textbox
-            type="text"
-            placeholder=""  
-            value={precio}
-            onChange={setPrecio}
+            value={idTipoServicio}
+            onChange={setIdTipoServicio}
         />
         </div>
 

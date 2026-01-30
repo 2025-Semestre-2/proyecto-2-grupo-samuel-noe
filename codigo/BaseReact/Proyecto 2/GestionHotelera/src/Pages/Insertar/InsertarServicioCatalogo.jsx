@@ -1,46 +1,25 @@
-//Los Insertar,Modificar,Eliminar y ReportarServicio
-//Son de Empresa Recreacion
+
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
 import { validarNull, validarInt } from '../../Components/Validaciones'
 import axios from 'axios'
 
-export function InsertarServicio(){
+export function InsertarServicioCatalogo(){
 
   const [nombre, setNombre] = useState('')
-  const [desc, setDesc] = useState('')
-  const [costo, setCosto] = useState('')
   const [validado, setValidado] = useState(false)
 
   //Limpia las casillas
   const LimpiarServicio = () => {
     setNombre('')
-    setDesc('')
-    setCosto('')
     setValidado(false)
   }
 
   const validacionesServicio = () => {
-  
+
     const nombreValido = validarNull(nombre, 'Nombre del Servicio');
     if (!nombreValido.esValido) {
       alert(nombreValido.mensaje);
-      return;
-    }
-    const descValido = validarNull(desc, 'Descripción');
-    if (!descValido.esValido) {
-      alert(descValido.mensaje);
-      return;
-    }
-    const costoValido = validarNull(costo, 'Costo');
-    if (!costoValido.esValido) {
-      alert(costoValido.mensaje);
-      return;
-    }
-
-    const costoValido2 = validarInt(costo, 'Costo');
-    if (!costoValido2.esValido) {
-      alert(costoValido2.mensaje);
       return;
     }
 
@@ -54,7 +33,7 @@ export function InsertarServicio(){
 
   return (
     <>
-      <h1>Insertar Servicio Empresa</h1>
+      <h1>Insertar Servicio Catálogo</h1>
 
       <div style={{
         border: '2px solid #333',
@@ -70,26 +49,6 @@ export function InsertarServicio(){
           placeholder=""
           value={nombre}
           onChange={setNombre}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Descripción: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={desc}
-          onChange={setDesc}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Costo: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={costo}
-          onChange={setCosto}
         />
         </div>
         
