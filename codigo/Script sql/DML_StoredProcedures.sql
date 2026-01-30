@@ -24,33 +24,30 @@ CREATE OR ALTER PROCEDURE SP_AutenticarUsuario
 AS
 BEGIN
     SET NOCOUNT ON;
+    
+    -- Inicialización por defecto.
     SET @EsAutenticado = 0;
     SET @Rol = '';
 
-    -- Verificar si es Administrador
-    IF EXISTS (SELECT 1 FROM CredencialesAdmin WHERE Usuario = @Usuario AND Contraseña = @Password)
-    BEGIN
-        SET @EsAutenticado = 1;
-        SET @Rol = 'ADMIN';
-        RETURN;
-    END
+    -- Validar credenciales y obtener el rol directamente.
+    SELECT @Rol = TipoUsuario
+    FROM Usuario
+    WHERE Usuario = @Usuario AND Contraseña = @Password;
 
-    -- Verificar si es Usuario normal
-    IF EXISTS (SELECT 1 FROM CredencialesUsuarios WHERE Usuario = @Usuario AND Contraseña = @Password)
+    -- Si @Rol tiene valor, significa que encontró el usuario.
+    IF @Rol IS NOT NULL AND @Rol <> ''
     BEGIN
         SET @EsAutenticado = 1;
-        SET @Rol = 'USUARIO';
-        RETURN;
     END
 END
 GO
 
 -- ==========================================================================================
--- 2. MÓDULO DE GESTIÓN DE HOSPEDAJES (ADMINISTRACIÓN)
+-- 2. MÓDULO DE GESTIÓN DE HOSPEDAJES
 -- ==========================================================================================
 
 /*
- * SP: SP_RegistrarHospedaje
+ * SP: SP_RegistrarHospedaje.
  * DESCRIPCIÓN: Inserta un nuevo establecimiento de hospedaje.
  */
 CREATE OR ALTER PROCEDURE SP_RegistrarHospedaje
@@ -95,7 +92,7 @@ END
 GO
 
 /*
- * SP: SP_AgregarTelefonoHospedaje
+ * SP: SP_AgregarTelefonoHospedaje.
  * DESCRIPCIÓN: Agrega un teléfono a un hospedaje existente.
  */
 CREATE OR ALTER PROCEDURE SP_AgregarTelefonoHospedaje
@@ -123,7 +120,7 @@ GO
 -- ==========================================================================================
 
 /*
- * SP: SP_CrearTipoHabitacion
+ * SP: SP_CrearTipoHabitacion.
  * DESCRIPCIÓN: Crea una nueva categoría/tipo de habitación para un hotel.
  */
 CREATE OR ALTER PROCEDURE SP_CrearTipoHabitacion
@@ -149,12 +146,12 @@ END
 GO
 
 /*
- * SP: SP_RegistrarInventarioHabitacion
+ * SP: SP_RegistrarInventarioHabitacion.
  * DESCRIPCIÓN: Registra una habitación física asociada a un Tipo.
  */
 CREATE OR ALTER PROCEDURE SP_RegistrarInventarioHabitacion
     @IdTipoHabitacion INT,
-    @NumeroHabitacion NVARCHAR(20)
+    @NumeroHabitacion INT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -172,7 +169,7 @@ END
 GO
 
 /*
- * SP: SP_ModificarEstadoHabitacion
+ * SP: SP_ModificarEstadoHabitacion.
  * DESCRIPCIÓN: Cambia el estado (Activo/Inactivo) de una habitación. 
  */
 CREATE OR ALTER PROCEDURE SP_ModificarEstadoHabitacion
@@ -200,7 +197,7 @@ GO
 -- ==========================================================================================
 
 /*
- * SP: SP_UpsertCliente
+ * SP: SP_UpsertCliente.
  * DESCRIPCIÓN: Registra un cliente o actualiza sus datos si ya existe (basado en identificación).
  * Retorna el IdCliente interno.
  */
@@ -272,7 +269,7 @@ GO
 -- ==========================================================================================
 
 /*
- * SP: SP_CrearReservacion
+ * SP: SP_CrearReservacion.
  * DESCRIPCIÓN: Crea una reserva validando disponibilidad de fechas.
  */
 CREATE OR ALTER PROCEDURE SP_CrearReservacion
@@ -289,11 +286,11 @@ BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
 
-        -- Validar fechas lógicas
+        -- Validar fechas lógicas.
         IF @FechaIngreso >= @FechaSalida
             THROW 51004, 'La fecha de salida debe ser posterior a la fecha de ingreso.', 1;
 
-        -- Validar disponibilidad
+        -- Validar disponibilidad.
         IF EXISTS (
             SELECT 1 FROM Reservacion r
             INNER JOIN Habitacion h ON r.IdHabitacion = h.IdHabitacion
@@ -304,7 +301,7 @@ BEGIN
             THROW 51005, 'La habitación no está disponible en las fechas seleccionadas.', 1;
         END
 
-        -- Crear Reserva
+        -- Crear Reserva.
         INSERT INTO Reservacion (
             IdCliente, IdHabitacion, FechaHoraIngreso, FechaSalida, 
             CantidadPersonas, PoseeVehiculo
@@ -326,7 +323,7 @@ END
 GO
 
 /*
- * SP: SP_RealizarCheckOut
+ * SP: SP_RealizarCheckOut.
  * DESCRIPCIÓN: Finaliza la estadía. 
  */
 CREATE OR ALTER PROCEDURE SP_RealizarCheckOut
@@ -335,7 +332,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        -- Validar que la reserva exista
+        -- Validar que la reserva exista.
         IF NOT EXISTS (SELECT 1 FROM Reservacion WHERE IdReservacion = @IdReservacion)
             THROW 51006, 'Reserva no encontrada.', 1;
 
@@ -352,11 +349,11 @@ END
 GO
 
 -- ==========================================================================================
--- 6. TRIGGER REQUERIDO (PROYECTO 2 - FACTURACIÓN AUTOMÁTICA)
+-- 6. TRIGGER REQUERIDO
 -- ==========================================================================================
 
 /*
- * TRIGGER: TR_GenerarFacturaAlCerrarReserva
+ * TRIGGER: TR_GenerarFacturaAlCerrarReserva.
  * DESCRIPCIÓN: Al actualizar una reserva (CheckOut), genera la factura pendiente.
  */
 CREATE OR ALTER TRIGGER TR_GenerarFacturaAlCerrarReserva
@@ -378,11 +375,11 @@ BEGIN
 
     IF NOT EXISTS (SELECT 1 FROM Factura WHERE IdReservacion = @IdReservacion)
     BEGIN
-        -- Calcular Noches
+        -- Calcular Noches.
         SET @Noches = DATEDIFF(DAY, @FechaIngreso, @FechaSalida);
         IF @Noches < 1 SET @Noches = 1;
 
-        -- Obtener precio
+        -- Obtener precio.
         SELECT @PrecioNoche = th.PrecioPorNoche
         FROM Habitacion h
         JOIN TipoHabitacion th ON h.IdTipoHabitacion = th.IdTipoHabitacion
@@ -390,7 +387,7 @@ BEGIN
 
         SET @Total = @Noches * @PrecioNoche;
 
-        -- Insertar Factura
+        -- Insertar Factura.
         INSERT INTO Factura (IdReservacion, FechaEmision, MetodoPago, NumeroNoches, ImporteTotal)
         VALUES (@IdReservacion, GETDATE(), NULL, @Noches, @Total);
     END
@@ -402,7 +399,7 @@ GO
 -- ==========================================================================================
 
 /*
- * SP: SP_RegistrarEmpresaRecreacion
+ * SP: SP_RegistrarEmpresaRecreacion.
  * DESCRIPCIÓN: Crea una nueva empresa turística.
  */
 CREATE OR ALTER PROCEDURE SP_RegistrarEmpresaRecreacion
@@ -435,7 +432,7 @@ END
 GO
 
 /*
- * SP: SP_AsociarActividadEmpresa
+ * SP: SP_AsociarActividadEmpresa.
  * DESCRIPCIÓN: Vincula una actividad a una empresa.
  */
 CREATE OR ALTER PROCEDURE SP_AsociarActividadEmpresa
@@ -451,12 +448,12 @@ BEGIN
         
         DECLARE @IdTipoActividad INT;
 
-        -- Verificar si el tipo de actividad ya existe en el catálogo general
+        -- Verificar si el tipo de actividad ya existe en el catálogo general.
         SELECT @IdTipoActividad = IdTipoActividad 
         FROM TipoActividad 
         WHERE NombreTipoActividad = @NombreActividad;
 
-        -- Si no existe, crearlo
+        -- Si no existe, crearlo.
         IF @IdTipoActividad IS NULL
         BEGIN
             INSERT INTO TipoActividad (NombreTipoActividad, Descripcion, Costo)
@@ -478,11 +475,11 @@ END
 GO
 
 -- ==========================================================================================
--- 8. MÓDULO DE PAGOS Y FACTURACIÓN (NUEVO)
+-- 8. MÓDULO DE PAGOS Y FACTURACIÓN
 -- ==========================================================================================
 
 /*
- * SP: SP_PagarFactura
+ * SP: SP_PagarFactura.
  * DESCRIPCIÓN: Registra el pago de una factura generada previamente por el sistema.
  */
 CREATE OR ALTER PROCEDURE SP_PagarFactura
@@ -492,19 +489,19 @@ AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        -- Validar que la factura exista
+        -- Validar que la factura exista.
         IF NOT EXISTS (SELECT 1 FROM Factura WHERE IdReservacion = @IdReservacion)
             THROW 51007, 'No se ha encontrado una factura para esta reservación.', 1;
 
-        -- Validar que no esté pagada ya
+        -- Validar que no esté pagada ya.
         IF EXISTS (SELECT 1 FROM Factura WHERE IdReservacion = @IdReservacion AND MetodoPago IS NOT NULL)
             THROW 51008, 'Esta factura ya se encuentra pagada.', 1;
 
-        -- Validar el método de pago contra el CHECK de la base de datos
+        -- Validar el método de pago contra el CHECK de la base de datos.
         IF @MetodoPago NOT IN ('Efectivo', 'Tarjeta de Credito')
             THROW 51009, 'Método de pago inválido. Use Efectivo o Tarjeta de Credito.', 1;
 
-        -- Registrar el pago
+        -- Registrar el pago.
         UPDATE Factura
         SET MetodoPago = @MetodoPago
         WHERE IdReservacion = @IdReservacion;

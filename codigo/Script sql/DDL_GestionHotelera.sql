@@ -18,11 +18,11 @@ USE GestionHoteleraDB;
 GO
 
 -- ==========================================================================================
--- 2. MÓDULO DE GESTIÓN DE HOSPEDAJES (PROVEEDORES)
+-- 2. MÓDULO DE GESTIÓN DE HOSPEDAJES
 -- ==========================================================================================
 
 /*
- * TABLA: Hospedaje
+ * TABLA: Hospedaje.
  * DESCRIPCIÓN: Entidad fuerte que almacena la información corporativa y de ubicación
  * de los establecimientos de hospedaje.
  */
@@ -45,7 +45,7 @@ CREATE TABLE Hospedaje (
 );
 
 /*
- * TABLA: CodigoTelefono
+ * TABLA: CodigoTelefono.
  * DESCRIPCIÓN: Catálogo para almacenar el número el código y país.
  */
 CREATE TABLE CodigoTelefono (
@@ -57,7 +57,7 @@ CREATE TABLE CodigoTelefono (
 );
 
 /*
- * TABLA: HospedajeTelefono
+ * TABLA: HospedajeTelefono.
  * DESCRIPCIÓN: Entidad débil para normalizar la relación 1:N de números telefónicos.
  */
 CREATE TABLE HospedajeTelefono (
@@ -72,7 +72,7 @@ CREATE TABLE HospedajeTelefono (
 );
 
 /*
- * TABLA: CatalogoRedSocial
+ * TABLA: CatalogoRedSocial.
  * DESCRIPCIÓN: Catálogo de redes sociales.
  */
 CREATE TABLE CatalogoRedSocial (
@@ -84,7 +84,7 @@ CREATE TABLE CatalogoRedSocial (
 );
 
 /*
- * TABLA: HospedajeRedSocial
+ * TABLA: HospedajeRedSocial.
  * DESCRIPCIÓN: Almacena los enlaces a plataformas digitales del establecimiento.
  */
 CREATE TABLE HospedajeRedSocial (
@@ -98,7 +98,7 @@ CREATE TABLE HospedajeRedSocial (
 );
 
 /*
- * TABLA: CatalogoServicio
+ * TABLA: CatalogoServicio.
  * DESCRIPCIÓN: Catálogo de servicios.
  */
 CREATE TABLE CatalogoServicio (
@@ -109,7 +109,7 @@ CREATE TABLE CatalogoServicio (
 );
 
 /*
- * TABLA: HospedajeServicio
+ * TABLA: HospedajeServicio.
  * DESCRIPCIÓN: Catálogo de amenidades generales ofrecidas por el hotel.
  */
 CREATE TABLE HospedajeServicio (
@@ -127,7 +127,7 @@ CREATE TABLE HospedajeServicio (
 -- ==========================================================================================
 
 /*
- * TABLA: TipoHabitacion
+ * TABLA: TipoHabitacion.
  * DESCRIPCIÓN: Define las categorías o clases de habitaciones disponibles, actuando como
  * plantilla para las unidades físicas.
  */
@@ -145,7 +145,7 @@ CREATE TABLE TipoHabitacion (
 );
 
 /*
- * TABLA: HabitacionComodidad
+ * TABLA: HabitacionComodidad.
  * DESCRIPCIÓN: Lista detallada de equipamiento específico por tipo de habitación.
  */
 CREATE TABLE HabitacionComodidad (
@@ -158,7 +158,7 @@ CREATE TABLE HabitacionComodidad (
 );
 
 /*
- * TABLA: HabitacionFoto
+ * TABLA: HabitacionFoto.
  * DESCRIPCIÓN: Almacena las rutas o referencias a las imágenes de los tipos de habitación.
  */
 CREATE TABLE HabitacionFoto (
@@ -171,13 +171,13 @@ CREATE TABLE HabitacionFoto (
 );
 
 /*
- * TABLA: Habitacion
+ * TABLA: Habitacion.
  * DESCRIPCIÓN: Representa la unidad física (inventario) disponible para reservación.
  */
 CREATE TABLE Habitacion (
     IdHabitacion INT IDENTITY(1,1),
     IdTipoHabitacion INT NOT NULL,
-    NumeroHabitacion NVARCHAR(20) NOT NULL,
+    NumeroHabitacion INT NOT NULL,
     Estado NVARCHAR(20) DEFAULT 'Activo',
     
     CONSTRAINT PK_Habitacion PRIMARY KEY (IdHabitacion),
@@ -190,7 +190,7 @@ CREATE TABLE Habitacion (
 -- ==========================================================================================
 
 /*
- * TABLA: Cliente
+ * TABLA: Cliente.
  * DESCRIPCIÓN: Almacena los datos personales y demográficos de los huéspedes.
  */
 CREATE TABLE Cliente (
@@ -214,7 +214,7 @@ CREATE TABLE Cliente (
 );
 
 /*
- * TABLA: ClienteTelefono
+ * TABLA: ClienteTelefono.
  * DESCRIPCIÓN: Permite el registro de múltiples números de contacto por cliente.
  */
 CREATE TABLE ClienteTelefono (
@@ -229,11 +229,11 @@ CREATE TABLE ClienteTelefono (
 );
 
 -- ==========================================================================================
--- 5. MÓDULO DE OPERACIONES (RESERVAS Y FACTURACIÓN)
+-- 5. MÓDULO DE OPERACIONES
 -- ==========================================================================================
 
 /*
- * TABLA: Reservacion
+ * TABLA: Reservacion.
  * DESCRIPCIÓN: Entidad transaccional que vincula un cliente con una habitación en un periodo determinado.
  */
 CREATE TABLE Reservacion (
@@ -253,7 +253,7 @@ CREATE TABLE Reservacion (
 );
 
 /*
- * TABLA: Factura
+ * TABLA: Factura.
  * DESCRIPCIÓN: Registro de la transacción generada a partir de una reserva.
  */
 CREATE TABLE Factura (
@@ -271,11 +271,11 @@ CREATE TABLE Factura (
 );
 
 -- ==========================================================================================
--- 6. MÓDULO DE GESTIÓN DE RECREACIÓN (TURISMO)
+-- 6. MÓDULO DE GESTIÓN DE RECREACIÓN
 -- ==========================================================================================
 
 /*
- * TABLA: EmpresaRecreacion
+ * TABLA: EmpresaRecreacion.
  * DESCRIPCIÓN: Entidad independiente para proveedores de servicios turísticos.
  */
 CREATE TABLE EmpresaRecreacion (
@@ -308,7 +308,7 @@ CREATE TABLE TipoActividad (
 );
 
 /*
- * TABLA: EmpresaRecreacionTipoActividad
+ * TABLA: EmpresaRecreacionTipoActividad.
  * DESCRIPCIÓN: Tabla intermedia de actividades ofrecidas por las empresas de recreación.
  */
 CREATE TABLE EmpresaRecreacionTipoActividad (
@@ -335,7 +335,7 @@ CREATE TABLE TipoServicio (
 );
 
 /*
- * TABLA: EmpresaRecreacionTipoServicio
+ * TABLA: EmpresaRecreacionTipoServicio.
  * DESCRIPCIÓN: Tabla intermedia de servicios ofrecidos por las empresas de recreación.
  */
 CREATE TABLE EmpresaRecreacionTipoServicio (
@@ -349,27 +349,18 @@ CREATE TABLE EmpresaRecreacionTipoServicio (
 );
 
 -- ==========================================================================================
--- 7. MÓDULO EXTRA DE AUTENTICACIÓN (Login)
+-- 7. MÓDULO DE AUTENTICACIÓN
 -- ==========================================================================================
 
 /*
- * TABLA: CredencialesUsuarios.
+ * TABLA: Usuario.
  * DESCRIPCIÓN: Tabla que almacena credenciales de usuarios.
  */
-CREATE TABLE CredencialesUsuarios (
+CREATE TABLE Usuario (
     Usuario NVARCHAR(50) NOT NULL,
     Contraseña NVARCHAR(50) NOT NULL,
+    TipoUsuario VARCHAR(20),
 
-    CONSTRAINT PK_CredencialesUsuarios PRIMARY KEY (Usuario)
-);
-
-/*
- * TABLA: CredencialesAdmin.
- * DESCRIPCIÓN: Tabla que almacena credenciales de administradores.
- */
- CREATE TABLE CredencialesAdmin (
-    Usuario NVARCHAR(50) NOT NULL,
-    Contraseña NVARCHAR(50) NOT NULL,
-
-    CONSTRAINT PK_CredencialesAdmin PRIMARY KEY (Usuario)
+    CONSTRAINT PK_Usuario PRIMARY KEY (Usuario),
+    CONSTRAINT CK_Usuario_TipoUsuario CHECK (TipoUsuario IN ('ADMIN', 'USUARIO'))
 );
