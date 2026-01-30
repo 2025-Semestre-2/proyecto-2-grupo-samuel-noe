@@ -6,6 +6,7 @@ import axios from 'axios'
 
 export function ModificarEmpRec(){
 
+    const [idEmpRec, setIdEmpRec] = useState('')
     const [nombre, setNombre] = useState('')
     const [cedulaJuridica, setCedulaJuridica] = useState('')
     const [correo, setCorreo] = useState('')
@@ -19,6 +20,7 @@ export function ModificarEmpRec(){
 
     //Limpia las casillas
     const LimpiarEmpRec = () => {
+        setIdEmpRec('')
         setNombre('')
         setCedulaJuridica('')
         setCorreo('')
@@ -82,9 +84,43 @@ export function ModificarEmpRec(){
         LimpiarEmpRec()
     }
 
+    const verificarExistenciaEmpRec = async () => {
+        if (!idEmpRec) {
+            alert('Ingresa un ID de Empresa de Recreación');
+            return;
+        }
+        try {
+            //codigo
+        } 
+        catch (e) {
+            alert('Empresa de Recreación no encontrada: ' + e.message);
+            console.error(e);
+        }
+    }
+
     return (
     <>
       <h1>Modificar Empresa de Recreación</h1>
+
+      <div style={{
+        border: '2px solid #333',
+        borderRadius: '4px',
+        padding: '30px',
+        backgroundColor: '#f9f9f9',
+      }}>   
+
+        <div className="form-group">
+        <label>ID de la Empresa de Recreación: </label>
+        <Textbox
+            type="text"
+            placeholder=""
+            value={idEmpRec}
+            onChange={setIdEmpRec}
+        />
+        </div>
+        <button onClick={verificarExistenciaEmpRec}>Buscar</button>
+   
+      </div>
 
       <div style={{
         border: '2px solid #333',

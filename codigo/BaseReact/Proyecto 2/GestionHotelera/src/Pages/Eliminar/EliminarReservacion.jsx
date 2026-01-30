@@ -6,6 +6,7 @@ import axios from 'axios'
 
 export function EliminarReservacion(){
 
+  const [idReserva, setIdReserva] = useState('')
   const [idCliente, setIdCliente] = useState('')
   const [idHab, setIdHab] = useState('')
   const [fechaIngreso, setFechaIngreso] = useState('')
@@ -17,6 +18,7 @@ export function EliminarReservacion(){
 
   //Limpia las casillas
   const LimpiarReservacion = () => {
+    setIdReserva('')
     setIdCliente('')
     setIdHab('')
     setFechaIngreso('')
@@ -31,54 +33,54 @@ export function EliminarReservacion(){
   
     const idClienteValido = validarNull(idCliente, 'Identificación Cliente');
     if (!idClienteValido.esValido) {
-        alert(idClienteValido.mensaje);
-        return;
+      alert(idClienteValido.mensaje);
+      return;
     }
     const idHabValido = validarNull(idHab, 'ID de la Habitación');
     if (!idHabValido.esValido) {
-        alert(idHabValido.mensaje);
-        return;
+      alert(idHabValido.mensaje);
+      return;
     }
     const fechaIngresoValido = validarNull(fechaIngreso, 'Fecha Ingreso');
     if (!fechaIngresoValido.esValido) {
-        alert(fechaIngresoValido.mensaje);
-        return;
+      alert(fechaIngresoValido.mensaje);
+      return;
     }
     const fechaSalidaValido = validarNull(fechaSalida, 'Fecha Salida');
     if (!fechaSalidaValido.esValido) {
-        alert(fechaSalidaValido.mensaje);
-        return;
+      alert(fechaSalidaValido.mensaje);
+      return;
     }
     const cantidadPersonasValido = validarNull(cantPersonas, 'Cantidad de Personas');
     if (!cantidadPersonasValido.esValido) {
-        alert(cantidadPersonasValido.mensaje);
-        return;
+      alert(cantidadPersonasValido.mensaje);
+      return;
     }
     const poseeVehiculoValido = validarNull(vehiculo, 'Posee Vehículo');
     if (!poseeVehiculoValido.esValido) {
-        alert(poseeVehiculoValido.mensaje);
-        return;
+      alert(poseeVehiculoValido.mensaje);
+      return;
     }
     const estadoValido = validarNull(estado, 'Estado');
     if (!estadoValido.esValido) {
-        alert(estadoValido.mensaje);
-        return;
+      alert(estadoValido.mensaje);
+      return;
     }
 
     const idClienteValido2 = validarInt(idCliente, 'Identificación Cliente');
     if (!idClienteValido2.esValido) {
-        alert(idClienteValido2.mensaje);
-        return;
+      alert(idClienteValido2.mensaje);
+      return;
     }
     const idHabitacionValido2 = validarInt(idHab, 'ID de la Habitación');
     if (!idHabitacionValido2.esValido) {
-        alert(idHabitacionValido2.mensaje);
-        return;
+      alert(idHabitacionValido2.mensaje);
+      return;
     }
     const cantidadPersonasValido2 = validarInt(cantPersonas, 'Cantidad de Personas');
     if (!cantidadPersonasValido2.esValido) {
-        alert(cantidadPersonasValido2.mensaje);
-        return;
+      alert(cantidadPersonasValido2.mensaje);
+      return;
     }
 
     //Validacion bit?
@@ -91,9 +93,43 @@ export function EliminarReservacion(){
     LimpiarReservacion()
   }
 
+  const verificarExistenciaReserva = async () => {
+    if (!idReserva) {
+      alert('Ingresa un ID de Reservación');
+      return;
+    }
+    try {
+      //codigo
+    } 
+    catch (e) {
+      alert('Reservación no encontrada: ' + e.message);
+      console.error(e);
+    }
+  }
+
   return (
     <>
       <h1>Eliminar Reservación</h1>
+
+      <div style={{
+        border: '2px solid #333',
+        borderRadius: '4px',
+        padding: '30px',
+        backgroundColor: '#f9f9f9',
+      }}>   
+
+        <div className="form-group">
+        <label>ID de Reservación: </label>
+        <Textbox
+          type="text"
+          placeholder=""
+          value={idReserva}
+          onChange={setIdReserva}
+        />
+        </div>
+        <button onClick={verificarExistenciaReserva}>Buscar</button>
+   
+      </div>
 
       <div style={{
         border: '2px solid #333',

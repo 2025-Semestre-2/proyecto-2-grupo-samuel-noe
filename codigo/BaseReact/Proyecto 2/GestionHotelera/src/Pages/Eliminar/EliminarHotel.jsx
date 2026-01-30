@@ -6,20 +6,22 @@ import axios from 'axios'
 
 export function EliminarHotel(){
 
-  const [nombre, setNombre] = useState("Ejemplo Hotel")
-  const [cedulaJuridica, setCedulaJuridica] = useState('')
-  const [tipoHospedaje, setTipoHospedaje] = useState('')
-  const [provincia, setProvincia] = useState('')
-  const [canton, setCanton] = useState('')
-  const [distrito, setDistrito] = useState('')
-  const [barrio, setBarrio] = useState('')
-  const [refGps, setRefGps] = useState('')
-  const [correo, setCorreo] = useState('')
-  const [url, setUrl] = useState('')
-  const [validado, setValidado] = useState(false)
+    const [idHotel, setIdHotel] = useState('')
+    const [nombre, setNombre] = useState("Ejemplo Hotel")
+    const [cedulaJuridica, setCedulaJuridica] = useState('')
+    const [tipoHospedaje, setTipoHospedaje] = useState('')
+    const [provincia, setProvincia] = useState('')
+    const [canton, setCanton] = useState('')
+    const [distrito, setDistrito] = useState('')
+    const [barrio, setBarrio] = useState('')
+    const [refGps, setRefGps] = useState('')
+    const [correo, setCorreo] = useState('')
+    const [url, setUrl] = useState('')
+    const [validado, setValidado] = useState(false)
 
     //Limpia las casillas
     const LimpiarHotel = () => {
+        setIdHotel('')
         setNombre('')
         setCedulaJuridica('')
         setTipoHospedaje('')
@@ -81,10 +83,44 @@ export function EliminarHotel(){
         LimpiarHotel()
     }
 
+    const verificarExistenciaHotel = async () => {
+        if (!idHotel) {
+            alert('Ingresa un ID de Hotel');
+            return;
+        }
+        try {
+            //codigo
+        } 
+        catch (e) {
+            alert('Hotel no encontrado: ' + e.message);
+            console.error(e);
+        }
+    }
+
     return (
     <>
       <h1>Eliminar Hotel</h1>
 
+      <div style={{
+        border: '2px solid #333',
+        borderRadius: '4px',
+        padding: '30px',
+        backgroundColor: '#f9f9f9',
+      }}>   
+
+        <div className="form-group">
+        <label>ID de Hotel: </label>
+        <Textbox
+          type="text"
+          placeholder=""
+          value={idHotel}
+          onChange={setIdHotel}
+        />
+        </div>
+        <button onClick={verificarExistenciaHotel}>Buscar</button>
+   
+      </div>
+      
       <div style={{
         border: '2px solid #333',
         borderRadius: '4px',

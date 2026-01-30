@@ -45,6 +45,20 @@ export function ModificarUsuario(){
     LimpiarUsuario()
   }
 
+  const verificarExistenciaUsuario = async () => {
+    if (!usuario) {
+      alert('Ingresa un Nombre de Usuario');
+      return;
+    }
+    try {
+      //codigo
+    } 
+    catch (e) {
+      alert('Usuario no encontrado: ' + e.message);
+      console.error(e);
+    }
+  }
+
   return (
     <>
       <h1>Modificar Usuario</h1>
@@ -52,10 +66,10 @@ export function ModificarUsuario(){
       <div style={{
         border: '2px solid #333',
         borderRadius: '4px',
-        padding: '20px',
+        padding: '30px',
         backgroundColor: '#f9f9f9',
-      }}>
-      
+      }}>   
+
         <div className="form-group">
         <label>Nombre de Usuario: </label>
         <Textbox
@@ -65,6 +79,16 @@ export function ModificarUsuario(){
           onChange={setUsuario}
         />
         </div>
+        <button onClick={verificarExistenciaUsuario}>Buscar</button>
+   
+      </div>
+
+      <div style={{
+        border: '2px solid #333',
+        borderRadius: '4px',
+        padding: '20px',
+        backgroundColor: '#f9f9f9',
+      }}>
 
         <div className="form-group">
         <label>Contraseña: </label>

@@ -6,6 +6,7 @@ import axios from 'axios'
 
 export function ModificarActividad(){
 
+  const [idActividad, setIdActividad] = useState('')
   const [nombreActividad, setNombreActividad] = useState('')
   const [desc, setDesc] = useState('')
   const [precio, setPrecio] = useState('')
@@ -13,6 +14,7 @@ export function ModificarActividad(){
 
   //Limpia las casillas
   const LimpiarActividad = () => {
+    setIdActividad('')
     setNombreActividad('')
     setDesc('')
     setPrecio('')
@@ -46,14 +48,48 @@ export function ModificarActividad(){
     setValidado(true);
   }
 
-    const mandarRequest = async () => {
-      //codigo
-      LimpiarActividad()
+  const mandarRequest = async () => {
+    //codigo
+    LimpiarActividad()
+  }
+
+  const verificarExistenciaActividad = async () => {
+    if (!idActividad) {
+      alert('Ingresa un ID de actividad');
+      return;
     }
+    try {
+      //codigo
+    } 
+    catch (e) {
+      alert('Actividad no encontrada: ' + e.message);
+      console.error(e);
+    }
+  }
 
   return (
     <>
       <h1>Modificar Actividad</h1>
+
+      <div style={{
+        border: '2px solid #333',
+        borderRadius: '4px',
+        padding: '30px',
+        backgroundColor: '#f9f9f9',
+      }}>   
+
+      <div className="form-group">
+      <label>ID de la Actividad: </label>
+      <Textbox
+        type="text"
+        placeholder=""
+        value={idActividad}
+        onChange={setIdActividad}
+      />
+      </div>
+      <button onClick={verificarExistenciaActividad}>Buscar</button>
+   
+      </div>
       
       <div style={{
         border: '2px solid #333',

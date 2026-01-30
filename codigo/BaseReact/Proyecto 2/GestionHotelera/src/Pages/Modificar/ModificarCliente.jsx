@@ -90,20 +90,11 @@ export function ModificarCliente(){
     }
 
     const mandarRequest = async () => {
-        //let sirve para crear una variable local dentro de la funcion
-        //sino, no podria usar el if así
-        let fechaNacimientoISO
-        if (fechaNacimiento) {
-            // toISOString().split('T')[0] quita la hora y deja solo YYYY-MM-DD
-            fechaNacimientoISO = new Date(fechaNacimiento).toISOString().split('T')[0]
-        } 
-        else {
-            fechaNacimientoISO = null; //es un NOT NULL, cambiar luego
-        }
         try {
             let fechaNacimientoISO = fechaNacimiento
-                ? new Date(fechaNacimiento).toISOString().split('T')[0]
-                : null;
+            //Para enviar solo la fecha sin el tiempo
+            ? new Date(fechaNacimiento).toISOString().split('T')[0]
+            : null;
 
             await axios.put(`http://localhost:3000/api/cliente/${idCliente}`, {
                 Nombre: nombre,

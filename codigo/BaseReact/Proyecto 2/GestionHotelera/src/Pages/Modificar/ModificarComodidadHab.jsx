@@ -6,12 +6,14 @@ import axios from 'axios'
 
 export function ModificarComodidadHab(){
 
+  const [idComodidad, setIdComodidad] = useState('')
   const [idTipoHab, setIdTipoHab] = useState('')
   const [desc, setDesc] = useState('')
   const [validado, setValidado] = useState(false)
 
   //Limpia las casillas
   const LimpiarComodidadHab = () => {
+    setIdComodidad('')
     setIdTipoHab('')
     setDesc('')
     setValidado(false)
@@ -44,9 +46,43 @@ export function ModificarComodidadHab(){
     LimpiarComodidadHab()
   }
 
+  const verificarExistenciaComodidad = async () => {
+    if (!idComodidad) {
+      alert('Ingresa un ID de Comodidad');
+      return;
+    }
+    try {
+      //codigo
+    } 
+    catch (e) {
+      alert('Comodidad no encontrada: ' + e.message);
+      console.error(e);
+    }
+  }
+
   return (
     <>
       <h1>Modificar Comodidad de Habitación</h1>
+
+      <div style={{
+        border: '2px solid #333',
+        borderRadius: '4px',
+        padding: '30px',
+        backgroundColor: '#f9f9f9',
+      }}>   
+
+        <div className="form-group">
+        <label>ID de la Comodidad: </label>
+        <Textbox
+          type="text"
+          placeholder=""
+          value={idComodidad}
+          onChange={setIdComodidad}
+        />
+        </div>
+        <button onClick={verificarExistenciaComodidad}>Buscar</button>
+   
+      </div>
 
       <div style={{
         border: '2px solid #333',

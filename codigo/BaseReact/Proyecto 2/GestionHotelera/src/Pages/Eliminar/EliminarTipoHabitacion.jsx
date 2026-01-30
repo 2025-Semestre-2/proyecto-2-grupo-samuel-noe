@@ -6,6 +6,7 @@ import axios from 'axios'
 
 export function EliminarTipoHabitacion(){
 
+  const [idTipoHab, setIdTipoHab] = useState('')
   const [idHotel, setIdHotel] = useState('')
   const [nombre, setNombre] = useState('')
   const [desc, setDesc] = useState('')
@@ -15,6 +16,7 @@ export function EliminarTipoHabitacion(){
 
   //Limpia las casillas
   const LimpiarTipoHabitacion = () => {
+    setIdTipoHab('')
     setIdHotel('')
     setNombre('')
     setDesc('')
@@ -57,9 +59,43 @@ export function EliminarTipoHabitacion(){
     LimpiarTipoHabitacion()
   }
 
+  const verificarExistenciaTipoHab = async () => {
+    if (!idTipoHab) {
+      alert('Ingresa un ID de Tipo de Habitación');
+      return;
+    }
+    try {
+      //codigo
+    } 
+    catch (e) {
+      alert('Tipo de Habitación no encontrado: ' + e.message);
+      console.error(e);
+    }
+  }
+
   return (
     <>
       <h1>Eliminar Tipo Habitación</h1>
+      
+      <div style={{
+        border: '2px solid #333',
+        borderRadius: '4px',
+        padding: '30px',
+        backgroundColor: '#f9f9f9',
+      }}>   
+
+        <div className="form-group">
+        <label>ID de Tipo de Habitación: </label>
+        <Textbox
+          type="text"
+          placeholder=""
+          value={idTipoHab}
+          onChange={setIdTipoHab}
+        />
+        </div>
+        <button onClick={verificarExistenciaTipoHab}>Buscar</button>
+   
+      </div>
       
       <div style={{
         border: '2px solid #333',

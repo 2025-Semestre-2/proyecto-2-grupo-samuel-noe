@@ -6,12 +6,14 @@ import axios from 'axios'
 
 export function ModificarRedSocialHotel(){
 
+  const [idRedSocial, setIdRedSocial] = useState('')
   const [idHospedaje, setIdHospedaje] = useState('')
   const [idPlataforma, setIdPlataforma] = useState('')
   const [validado, setValidado] = useState(false)
 
   //Limpia las casillas
   const LimpiarRedSocialHotel = () => {
+    setIdRedSocial('')
     setIdHospedaje('')
     setIdPlataforma('')
     setValidado(false)
@@ -47,9 +49,43 @@ export function ModificarRedSocialHotel(){
     LimpiarRedSocialHotel();
   }
 
+  const verificarExistenciaRed = async () => {
+    if (!idRedSocial) {
+      alert('Ingresa un ID de Red Social');
+      return;
+    }
+    try {
+      //codigo
+    } 
+    catch (e) {
+      alert('Red Social no encontrada: ' + e.message);
+      console.error(e);
+    }
+  }
+
   return (
     <>
       <h1>Modificar Red Social de Hotel</h1>
+
+      <div style={{
+        border: '2px solid #333',
+        borderRadius: '4px',
+        padding: '30px',
+        backgroundColor: '#f9f9f9',
+      }}>   
+
+        <div className="form-group">
+        <label>ID de Red Social: </label>
+        <Textbox
+          type="text"
+          placeholder=""
+          value={idRedSocial}
+          onChange={setIdRedSocial}
+        />
+        </div>
+        <button onClick={verificarExistenciaRed}>Buscar</button>
+   
+      </div>
 
       <div style={{
         border: '2px solid #333',
@@ -61,29 +97,29 @@ export function ModificarRedSocialHotel(){
         <div className="form-group">
         <label>Identificación Hospedaje: </label>
         <Textbox
-            type="text"
-            placeholder=""
-            value={idHospedaje}
-            onChange={setIdHospedaje}
+          type="text"
+          placeholder=""
+          value={idHospedaje}
+          onChange={setIdHospedaje}
         />
         </div>
 
         <div className="form-group">
         <label>Identificación Red Social: </label>
         <Textbox
-            type="text"
-            placeholder=""
-            value={idPlataforma}
-            onChange={setIdPlataforma}
+          type="text"
+          placeholder=""
+          value={idPlataforma}
+          onChange={setIdPlataforma}
         />
         </div>
         
         <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-            <button onClick={() => {
-              validacionesRedSocialHotel()
-              if(validado){mandarRequest()}
-            }}>Aceptar</button>
-            <button onClick={LimpiarRedSocialHotel}>Cancelar</button>
+          <button onClick={() => {
+            validacionesRedSocialHotel()
+            if(validado){mandarRequest()}
+          }}>Aceptar</button>
+          <button onClick={LimpiarRedSocialHotel}>Cancelar</button>
         </div>
 
       </div>

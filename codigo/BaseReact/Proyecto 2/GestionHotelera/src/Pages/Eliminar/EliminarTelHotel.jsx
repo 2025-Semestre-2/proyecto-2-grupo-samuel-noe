@@ -6,6 +6,7 @@ import axios from 'axios'
 
 export function EliminarTelHotel(){
 
+  const [idTelefono, setIdTelefono] = useState('')
   const [idHospedaje, setIdHospedaje] = useState('')
   const [telefono, setTelefono] = useState('')
   const [codPais, setCodPais] = useState('')
@@ -13,6 +14,7 @@ export function EliminarTelHotel(){
 
   //Limpia las casillas
   const LimpiarTelHotel = () => {
+    setIdTelefono('')
     setIdHospedaje('')
     setCodPais('')
     setTelefono('')
@@ -62,9 +64,43 @@ export function EliminarTelHotel(){
     LimpiarTelHotel()
   }
 
+  const verificarExistenciaTelefono = async () => {
+    if (!idTelefono) {
+      alert('Ingresa un ID de Teléfono');
+      return;
+    }
+    try {
+      //codigo
+    } 
+    catch (e) {
+      alert('Teléfono no encontrado: ' + e.message);
+      console.error(e);
+    }
+  }
+
   return (
     <>
       <h1>Eliminar Teléfono de Hotel</h1>
+
+      <div style={{
+        border: '2px solid #333',
+        borderRadius: '4px',
+        padding: '30px',
+        backgroundColor: '#f9f9f9',
+      }}>   
+
+        <div className="form-group">
+        <label>ID de Teléfono: </label>
+        <Textbox
+          type="text"
+          placeholder=""
+          value={idTelefono}
+          onChange={setIdTelefono}
+        />
+        </div>
+        <button onClick={verificarExistenciaTelefono}>Buscar</button>
+   
+      </div>
 
       <div style={{
         border: '2px solid #333',
@@ -76,30 +112,30 @@ export function EliminarTelHotel(){
         <div className="form-group">
         <label>Identificación Hospedaje: </label>
         <TextboxBlock
-            type="text"
-            placeholder=""
-            value={idHospedaje}
-            onChange={setIdHospedaje}
+          type="text"
+          placeholder=""
+          value={idHospedaje}
+          onChange={setIdHospedaje}
         />
         </div>
 
         <div className="form-group">
         <label>Teléfono del Hotel: </label>
         <TextboxBlock
-            type="text"
-            placeholder=""
-            value={telefono}
-            onChange={setTelefono}
+          type="text"
+          placeholder=""
+          value={telefono}
+          onChange={setTelefono}
         />
         </div>
 
         <div className="form-group">
         <label>Código País: </label>
         <TextboxBlock
-            type="text"
-            placeholder=""
-            value={codPais}
-            onChange={setCodPais}
+          type="text"
+          placeholder=""
+          value={codPais}
+          onChange={setCodPais}
         />
         </div> 
         

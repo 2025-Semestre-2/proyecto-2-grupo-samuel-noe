@@ -6,6 +6,7 @@ import axios from 'axios'
 
 export function ModificarFactura(){
 
+  const [idFactura, setIdFactura] = useState('')
   const [idReserva, setIdReserva] = useState('')
   const [fechaEmision, setFechaEmision] = useState('')
   const [metodoPago, setMetodoPago] = useState('')
@@ -15,6 +16,7 @@ export function ModificarFactura(){
 
   //Limpia las casillas
   const LimpiarFactura = () => {
+    setIdFactura('')
     setIdReserva('')
     setFechaEmision('')
     setMetodoPago('')
@@ -72,9 +74,43 @@ export function ModificarFactura(){
     LimpiarFactura()
   }
 
+  const verificarExistenciaFactura = async () => {
+    if (!idFactura) {
+      alert('Ingresa un ID de Factura');
+      return;
+    }
+    try {
+    //codigo
+    } 
+    catch (e) {
+      alert('Factura no encontrada: ' + e.message);
+      console.error(e);
+    }
+  }
+
   return (
     <>
       <h1>Modificar Factura</h1>
+
+      <div style={{
+        border: '2px solid #333',
+        borderRadius: '4px',
+        padding: '30px',
+        backgroundColor: '#f9f9f9',
+      }}>   
+
+        <div className="form-group">
+        <label>ID de Factura: </label>
+        <Textbox
+          type="text"
+          placeholder=""
+          value={idFactura}
+          onChange={setIdFactura}
+        />
+        </div>
+        <button onClick={verificarExistenciaFactura}>Buscar</button>
+   
+      </div>
 
       <div style={{
         border: '2px solid #333',
@@ -86,50 +122,50 @@ export function ModificarFactura(){
         <div className="form-group">
         <label>ID Reserva: </label>
         <Textbox
-            type="text"
-            placeholder=""
-            value={idReserva}
-            onChange={setIdReserva}
+          type="text"
+          placeholder=""
+          value={idReserva}
+          onChange={setIdReserva}
         />
         </div>
 
         <div className="form-group">
         <label>Fecha Emisión: </label>
         <Textbox
-            type="text"
-            placeholder=""
-            value={fechaEmision}
-            onChange={setFechaEmision}
+          type="text"
+          placeholder=""
+          value={fechaEmision}
+          onChange={setFechaEmision}
         />
         </div>
 
         <div className="form-group">
         <label>Método de Pago: </label>
         <Textbox
-            type="text"
-            placeholder=""  
-            value={metodoPago}
-            onChange={setMetodoPago}
+          type="text"
+          placeholder=""  
+          value={metodoPago}
+          onChange={setMetodoPago}
         />
         </div>
 
         <div className="form-group">
         <label>Cantidad de Noches: </label>
         <Textbox
-            type="text"
-            placeholder=""
-            value={cantNoches}
-            onChange={setCantNoches}
+          type="text"
+          placeholder=""
+          value={cantNoches}
+          onChange={setCantNoches}
         />
         </div>
 
         <div className="form-group">
         <label>Importe Total: </label>
         <Textbox
-            type="text"
-            placeholder=""
-            value={importeTotal}
-            onChange={setImporteTotal}
+          type="text"
+          placeholder=""
+          value={importeTotal}
+          onChange={setImporteTotal}
         />
         </div>
         

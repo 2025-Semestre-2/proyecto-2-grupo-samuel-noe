@@ -6,6 +6,7 @@ import axios from 'axios'
 
 export function ModificarServicio(){
 
+  const [idServicio, setIdServicio] = useState('')
   const [nombre, setNombre] = useState('')
   const [desc, setDesc] = useState('')
   const [costo, setCosto] = useState('')
@@ -13,6 +14,7 @@ export function ModificarServicio(){
 
   //Limpia las casillas
   const LimpiarServicio = () => {
+    setIdServicio('')
     setNombre('')
     setDesc('')
     setCosto('')
@@ -51,9 +53,43 @@ export function ModificarServicio(){
     LimpiarServicio()
   }
 
+  const verificarExistenciaServicio = async () => {
+    if (!idServicio) {
+      alert('Ingresa un ID de Servicio');
+      return;
+    }
+    try {
+      //codigo
+    } 
+    catch (e) {
+      alert('Servicio no encontrado: ' + e.message);
+      console.error(e);
+    }
+  }
+
   return (
     <>
       <h1>Modificar Servicio</h1>
+
+      <div style={{
+        border: '2px solid #333',
+        borderRadius: '4px',
+        padding: '30px',
+        backgroundColor: '#f9f9f9',
+      }}>   
+
+        <div className="form-group">
+        <label>ID de Servicio: </label>
+        <Textbox
+          type="text"
+          placeholder=""
+          value={idServicio}
+          onChange={setIdServicio}
+        />
+        </div>
+        <button onClick={verificarExistenciaServicio}>Buscar</button>
+   
+      </div>
 
       <div style={{
         border: '2px solid #333',

@@ -6,12 +6,14 @@ import axios from 'axios'
 
 export function ModificarFotoHab(){
 
+  const [idFotoHab, setIdFotoHab] = useState('')
   const [idTipoHab, setIdTipoHab] = useState('')
   const [url, setUrl] = useState('')
   const [validado, setValidado] = useState(false)
 
   //Limpia las casillas
   const LimpiarFotoHab = () => {
+    setIdFotoHab('')
     setIdTipoHab('')
     setUrl('')
     setValidado(false)
@@ -44,10 +46,43 @@ export function ModificarFotoHab(){
     LimpiarFotoHab()
   }
 
+  const verificarExistenciaFotoHab = async () => {
+    if (!idFotoHab) {
+      alert('Ingresa un ID de Foto de Habitación');
+      return;
+    }
+    try {
+    //codigo
+    } 
+    catch (e) {
+      alert('Foto de Habitación no encontrada: ' + e.message);
+      console.error(e);
+    }
+  }
 
   return (
     <>
       <h1>Modificar Foto de Habitación</h1>
+
+      <div style={{
+        border: '2px solid #333',
+        borderRadius: '4px',
+        padding: '30px',
+        backgroundColor: '#f9f9f9',
+      }}>   
+
+        <div className="form-group">
+        <label>ID de Foto de Habitación: </label>
+        <Textbox
+          type="text"
+          placeholder=""
+          value={idFotoHab}
+          onChange={setIdFotoHab}
+        />
+        </div>
+        <button onClick={verificarExistenciaFotoHab}>Buscar</button>
+   
+      </div>
 
       <div style={{
         border: '2px solid #333',
