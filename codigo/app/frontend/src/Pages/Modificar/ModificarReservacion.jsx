@@ -16,7 +16,6 @@ export function ModificarReservacion(){
   const [estado, setEstado] = useState('')
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarReservacion = () => {
     setIdReserva('')
     setIdCliente('')
@@ -83,13 +82,10 @@ export function ModificarReservacion(){
       return;
     }
 
-    //Validacion bit?
-
     setValidado(true);
   }
 
   const mandarRequest = async () => {
-    //codigo
     LimpiarReservacion()
   }
 
@@ -99,7 +95,6 @@ export function ModificarReservacion(){
       return;
     }
     try {
-      //codigo
     } 
     catch (e) {
       alert('Reservación no encontrada: ' + e.message);

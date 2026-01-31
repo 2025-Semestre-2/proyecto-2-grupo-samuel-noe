@@ -19,7 +19,6 @@ export function InsertarCliente(){
     const [correo, setCorreo] = useState('')
     const [validado, setValidado] = useState(false)
 
-    //Limpia las casillas
     const LimpiarCliente = () => {
         setNombre('')
         setApellido1('')
@@ -77,15 +76,12 @@ export function InsertarCliente(){
 
     const mandarRequest = async () => {
         try {
-            //let sirve para crear una variable local dentro de la funcion
-            //sino, no podria usar el if así
             let fechaNacimientoISO
             if (fechaNacimiento) {
-                // toISOString().split('T')[0] quita la hora y deja solo YYYY-MM-DD
                 fechaNacimientoISO = new Date(fechaNacimiento).toISOString().split('T')[0]
             } 
             else {
-                fechaNacimientoISO = null; //es un NOT NULL, cambiar luego
+                fechaNacimientoISO = null;
             }
 
             await axios.post('http://localhost:3000/api/cliente', {

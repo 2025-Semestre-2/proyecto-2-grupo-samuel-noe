@@ -11,7 +11,6 @@ export function InsertarHabitacion(){
   const [estado, setEstado] = useState('')
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarHabitacion = () => {
     setIdTipoHab('')
     setNumHab('')
@@ -52,7 +51,6 @@ export function InsertarHabitacion(){
   }
 
   const mandarRequest = async () => {
-    //codigo
     LimpiarHabitacion()
   }
 

@@ -14,7 +14,6 @@ export function ModificarFactura(){
   const [importeTotal, setImporteTotal] = useState('')
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarFactura = () => {
     setIdFactura('')
     setIdReserva('')
@@ -64,13 +63,10 @@ export function ModificarFactura(){
         return;
     }
 
-    //Validacion decimal?
-
     setValidado(true);
   }
 
   const mandarRequest = async () => {
-    //codigo
     LimpiarFactura()
   }
 
@@ -80,7 +76,6 @@ export function ModificarFactura(){
       return;
     }
     try {
-    //codigo
     } 
     catch (e) {
       alert('Factura no encontrada: ' + e.message);

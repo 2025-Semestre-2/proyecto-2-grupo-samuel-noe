@@ -10,7 +10,6 @@ export function InsertarEmpRecTipoServicio(){
   const [idTipoServicio, setIdTipoServicio] = useState('')
   const [validado, setValidado] = useState(false)
 
-    //Limpia las casillas
     const LimpiarActividad = () => {
         setIdEmpRec('')
         setIdTipoServicio('')
@@ -45,7 +44,6 @@ export function InsertarEmpRecTipoServicio(){
     }
 
     const mandarRequest = async () => {
-        //codigo
         LimpiarActividad()
     }
 

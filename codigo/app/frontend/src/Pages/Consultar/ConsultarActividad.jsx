@@ -62,11 +62,3 @@ export function ConsultarActividad(){
     </>
   )
 }
-
-/*
-
-
-
-
-
-*/

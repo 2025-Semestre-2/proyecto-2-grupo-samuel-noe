@@ -1,133 +1,83 @@
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Textbox } from "../../Components/Textbox"
 import { validarNull, validarInt } from '../../Components/Validaciones'
-import axios from 'axios'
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function InsertarTelHotel(){
 
-    const [IdHospedaje, setIdHospedaje] = useState('')
-    const [CodigoPais, setCodigoPais] = useState('')
-    const [NumeroTelefono, setNumeroTelefono] = useState('')
-    const [validado, setValidado] = useState(false)
+    const [idHospedaje, setIdHospedaje] = useState('')
+    const [numeroTelefono, setNumeroTelefono] = useState('')
+    const [codPais, setCodPais] = useState('506')
+    const [codigosPais, setCodigosPais] = useState([])
 
-    //Limpia las casillas
-    const LimpiarTelHotel = () => {
-        setIdHospedaje('')
-        setCodigoPais('')
-        setNumeroTelefono('')
-        setValidado(false)
+    useEffect(() => {
+        const cargarCodigos = async () => {
+            try {
+                const res = await api.get('/util/codigos-pais');
+                setCodigosPais(res.data);
+            } catch (error) { console.error(error); }
+        };
+        cargarCodigos();
+    }, []);
+
+    const Limpiar = () => {
+        setIdHospedaje(''); setNumeroTelefono(''); setCodPais('506');
     }
     
-    const validacionesTelHotel = () => {
-     
-        const idHospedajeValido = validarNull(IdHospedaje, 'Identificación Hospedaje');
-        if (!idHospedajeValido.esValido) {
-            alert(idHospedajeValido.mensaje);
-            return;
-        }
-        const codigoValido = validarNull(CodigoPais, 'Código País');
-        if (!codigoValido.esValido) {
-            alert(codigoValido.mensaje);
-            return;
-        }
-        const numeroValido = validarNull(NumeroTelefono, 'Número de Teléfono');
-        if (!numeroValido.esValido) {
-            alert(numeroValido.mensaje);
-            return;
-        }
-
-        const idHospedajeValido2 = validarInt(IdHospedaje, 'Identificación Hospedaje');
-        if (!idHospedajeValido2.esValido) {
-            alert(idHospedajeValido2.mensaje);
-            return;
-        }
-        const codigoValido2 = validarNull(CodigoPais, 'Código País');
-        if (!codigoValido2.esValido) {
-            alert(codigoValido2.mensaje);
-            return;
-        }
-        const numeroValido2 = validarNull(NumeroTelefono, 'Número de Teléfono');
-        if (!numeroValido2.esValido) {
-            alert(numeroValido2.mensaje);
-            return;
-        }
-
-        setValidado(true);
-    }
-
     const mandarRequest = async () => {
-        //Codigo 
-        
-        LimpiarTelHotel()
+        if (!validarInt(idHospedaje, 'ID Hotel').esValido) return toast.warning("ID Hotel inválido");
+        if (!validarInt(numeroTelefono, 'Teléfono').esValido) return toast.warning("Número inválido");
+
+        const payload = {
+            idHospedaje: parseInt(idHospedaje),
+            codigoPais: parseInt(codPais),
+            numeroTelefono: parseInt(numeroTelefono)
+        };
+
+        try {
+            await api.post('/telefono-hotel', payload);
+            toast.success("Teléfono agregado correctamente.");
+            Limpiar();
+        } catch (error) {
+            toast.error("Error: " + (error.response?.data?.error || "Error desconocido"));
+        }
     }
 
     return (
     <>
+      <ToastContainer position="top-right" autoClose={3000}/>
       <h1>Insertar Teléfono de Hotel</h1>
 
       <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
+        border: '2px solid #333', borderRadius: '4px', padding: '30px', backgroundColor: '#f9f9f9',
       }}>
       
         <div className="form-group">
-        <label>Identificación Hospedaje: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={IdHospedaje}
-            onChange={setIdHospedaje}
-        />
+            <label>Cédula Jurídica del Hotel: </label>
+            <Textbox type="text" value={idHospedaje} onChange={setIdHospedaje} />
         </div>
 
         <div className="form-group">
-        <label>Teléfono del Hotel: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={NumeroTelefono}
-            onChange={setNumeroTelefono}
-        />
+            <label>Nuevo Teléfono: </label>
+            <div style={{display: 'flex', gap: '10px'}}>
+                <select 
+                    style={{padding: '8px', borderRadius: '4px', border: '1px solid #ccc', height:'42px'}}
+                    value={codPais} 
+                    onChange={(e) => setCodPais(e.target.value)}
+                >
+                    {codigosPais.map(c => <option key={c.IdCodigoTelefono} value={c.IdCodigoTelefono}>+{c.IdCodigoTelefono}</option>)}
+                </select>
+                <Textbox type="text" value={numeroTelefono} onChange={setNumeroTelefono} />
+            </div>
         </div>
-
-        <div className="form-group">
-        <label>Código País: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={CodigoPais}
-            onChange={setCodigoPais}
-        />
-        </div> 
         
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-            <button onClick={() => {
-                validacionesTelHotel()
-                if(validado){mandarRequest()}
-            }}>Aceptar</button>
-            <button>Cancelar</button>
+        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center', marginTop: '20px' }}>
+            <button onClick={mandarRequest}>Aceptar</button>
+            <button onClick={Limpiar}>Cancelar</button>
         </div>
-
       </div>
     </>
   )
 }
-
-
-        /*
-        if(validarNull(IdHospedaje).esValido === false || 
-        validarNull(CodigoPais).esValido === false || 
-        validarNull(NumeroTelefono).esValido === false)
-        {
-            alert('Error. Hay un campo vacío.')
-            return
-        }
-        if(validarInt(IdHospedaje).esValido === false)
-        {
-            alert('Error. Digite un número entero válido para Identificación Hospedaje.')
-            return
-        }
-        */

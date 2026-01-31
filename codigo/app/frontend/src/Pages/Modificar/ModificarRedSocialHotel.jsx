@@ -1,128 +1,91 @@
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { validarInt, validarNull } from '../../Components/Validaciones'
-import axios from 'axios'
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function ModificarRedSocialHotel(){
 
-  const [idRedSocial, setIdRedSocial] = useState('')
-  const [idHospedaje, setIdHospedaje] = useState('')
-  const [idPlataforma, setIdPlataforma] = useState('')
-  const [validado, setValidado] = useState(false)
+  const [idBusqueda, setIdBusqueda] = useState('');
+  const [encontrado, setEncontrado] = useState(null);
+  const [nuevoIdPlataforma, setNuevoIdPlataforma] = useState('');
+  const [catalogo, setCatalogo] = useState([]);
 
-  //Limpia las casillas
-  const LimpiarRedSocialHotel = () => {
-    setIdRedSocial('')
-    setIdHospedaje('')
-    setIdPlataforma('')
-    setValidado(false)
+  useEffect(() => {
+      const cargar = async () => {
+          const res = await api.get('/red-social-hotel/catalogo');
+          setCatalogo(res.data);
+      };
+      cargar();
+  }, []);
+
+  const buscar = async () => {
+      if(!idBusqueda) return toast.warning("Ingrese ID de registro");
+      try {
+          const res = await api.get('/red-social-hotel');
+          const item = res.data.find(x => x.IdRedSocial == idBusqueda);
+          if(item) {
+              setEncontrado(item);
+              const plat = catalogo.find(c => c.NombrePlataforma === item.RedSocial);
+              setNuevoIdPlataforma(plat ? plat.IdCatalogoSocial : catalogo[0]?.IdCatalogoSocial);
+              toast.success("Registro encontrado");
+          } else {
+              toast.error("No encontrado");
+              setEncontrado(null);
+          }
+      } catch (e) { toast.error("Error al buscar"); }
   }
 
-  const validacionesRedSocialHotel = () => {
-    const idHospedajeValido = validarNull(idHospedaje, 'Identificación Hospedaje');
-    if (!idHospedajeValido.esValido) {
-      alert(idHospedajeValido.mensaje);
-      return;
-    }
-    const idPlataformaValido = validarNull(idPlataforma, 'Identificación Red Social');
-    if (!idPlataformaValido.esValido) {
-      alert(idPlataformaValido.mensaje);
-      return;
-    }
-
-    const idHospedajeValido2 = validarInt(idHospedaje, 'Identificación Hospedaje');
-    if (!idHospedajeValido2.esValido) {
-      alert(idHospedajeValido2.mensaje);
-      return;
-    }
-    const idPlataformaValido2 = validarInt(idPlataforma, 'Identificación Red Social');
-    if (!idPlataformaValido2.esValido) {
-      alert(idPlataformaValido2.mensaje);
-      return;
-    }
-    setValidado(true);
-  }
-
-  const mandarRequest = async () => {
-    // Código para enviar la solicitud
-    LimpiarRedSocialHotel();
-  }
-
-  const verificarExistenciaRed = async () => {
-    if (!idRedSocial) {
-      alert('Ingresa un ID de Red Social');
-      return;
-    }
-    try {
-      //codigo
-    } 
-    catch (e) {
-      alert('Red Social no encontrada: ' + e.message);
-      console.error(e);
-    }
+  const guardar = async () => {
+      try {
+          await api.put(`/red-social-hotel/${encontrado.IdRedSocial}`, {
+              idPlataforma: nuevoIdPlataforma
+          });
+          toast.success("Actualizado correctamente");
+          setEncontrado(null);
+          setIdBusqueda('');
+      } catch (e) { toast.error("Error al guardar"); }
   }
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000}/>
       <h1>Modificar Red Social de Hotel</h1>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>   
-
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom:'20px'}}>   
         <div className="form-group">
-        <label>ID de Red Social: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idRedSocial}
-          onChange={setIdRedSocial}
-        />
+            <label style={{fontWeight:'bold'}}>ID de Registro (Tabla Intermedia): </label>
+            <div style={{display:'flex', gap:'10px'}}>
+                <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} />
+                <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
+            </div>
         </div>
-        <button onClick={verificarExistenciaRed}>Buscar</button>
-   
       </div>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '10px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>Identificación Hospedaje: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idHospedaje}
-          onChange={setIdHospedaje}
-        />
-        </div>
+      {encontrado && (
+          <div style={{border: '2px solid #333', borderRadius: '4px', padding: '30px', backgroundColor: '#f9f9f9'}}>
+            <div className="form-group">
+                <label>Hotel (Solo Lectura): </label>
+                <input disabled type="text" value={encontrado.Hotel} style={{width:'100%', padding:'8px', backgroundColor:'#ccc'}} />
+            </div>
 
-        <div className="form-group">
-        <label>Identificación Red Social: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idPlataforma}
-          onChange={setIdPlataforma}
-        />
-        </div>
-        
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-            validacionesRedSocialHotel()
-            if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarRedSocialHotel}>Cancelar</button>
-        </div>
-
-      </div>
+            <div className="form-group">
+                <label>Cambiar Red Social a: </label>
+                <select 
+                    style={{width: '100%', padding: '8px', height:'42px'}}
+                    value={nuevoIdPlataforma}
+                    onChange={(e) => setNuevoIdPlataforma(e.target.value)}
+                >
+                    {catalogo.map(c => <option key={c.IdCatalogoSocial} value={c.IdCatalogoSocial}>{c.NombrePlataforma}</option>)}
+                </select>
+            </div>
+            
+            <div style={{display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px'}}>
+              <button onClick={guardar}>Guardar Cambios</button>
+              <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+            </div>
+          </div>
+      )}
     </>
   )
 }

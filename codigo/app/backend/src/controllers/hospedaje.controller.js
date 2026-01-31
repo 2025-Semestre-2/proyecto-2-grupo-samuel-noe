@@ -11,13 +11,12 @@ const getHoteles = async (req, res) => {
     }
 };
 
-// Obtener UN hotel por ID
+// Obtener un hotel por ID
 const getHotelById = async (req, res) => {
     const { id } = req.params;
     try {
         const pool = await getConnection();
         
-        // 1. Datos del Hotel
         const hotelResult = await pool.request()
             .input('Id', sql.Int, id)
             .query('SELECT * FROM Hospedaje WHERE CedulaJuridica = @Id');
@@ -26,12 +25,10 @@ const getHotelById = async (req, res) => {
             return res.status(404).json({ message: 'Hotel no encontrado' });
         }
 
-        // 2. Datos de los Teléfonos
         const phonesResult = await pool.request()
             .input('Id', sql.Int, id)
             .query('SELECT * FROM HospedajeTelefono WHERE IdHospedaje = @Id');
 
-        // Combinar respuesta
         const hotel = hotelResult.recordset[0];
         const telefonos = phonesResult.recordset;
 
@@ -124,7 +121,7 @@ const deleteHotel = async (req, res) => {
     }
 };
 
-// Buscar Hoteles por Criterio
+// Buscar hoteles por criterio
 const searchHoteles = async (req, res) => {
     const { criterio } = req.query;
 
@@ -144,4 +141,36 @@ const searchHoteles = async (req, res) => {
     }
 };
 
-module.exports = { getHoteles, getHotelById, createHotel, updateHotel, deleteHotel, searchHoteles };
+// Reporte paginado
+const getReporteHoteles = async (req, res) => {
+    const { pagina, cantidad } = req.query;
+    
+    const page = parseInt(pagina) || 1;
+    const size = parseInt(cantidad) || 10;
+
+    try {
+        const pool = await getConnection();
+        const result = await pool.request()
+            .input('Pagina', sql.Int, page)
+            .input('CantidadPorPagina', sql.Int, size)
+            .execute('SP_ListarHotelesPaginado');
+
+        const data = result.recordset;
+        const totalRegistros = data.length > 0 ? data[0].TotalRegistros : 0;
+        const totalPaginas = Math.ceil(totalRegistros / size);
+
+        res.json({
+            datos: data,
+            meta: {
+                totalRegistros,
+                totalPaginas,
+                paginaActual: page,
+                registrosPorPagina: size
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { getHoteles, getHotelById, createHotel, updateHotel, deleteHotel, searchHoteles, getReporteHoteles };

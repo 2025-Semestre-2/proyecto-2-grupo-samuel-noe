@@ -41,7 +41,6 @@
   color: #888888;
 }
 
-/* Para que la barra de navegacion principal se quede arriba */
 nav {
     position: fixed;
     top: 0;
@@ -61,7 +60,6 @@ nav {
     flex-wrap: nowrap;
 }
 
-/* Se modifica el nav para que no se encoja y permita el scroll horizontal */
 nav > * {
   flex: 0 0 auto;
 }
@@ -74,7 +72,6 @@ nav::-webkit-scrollbar-thumb {
   border-radius: 3px;
 }
 
-/* Para que la barra de navegacion secundaria se quede a la izquierda */
 .secondary {
     position: fixed;
     top: 0;
@@ -92,14 +89,12 @@ nav::-webkit-scrollbar-thumb {
     box-sizing: border-box;
 }
 
-/* Espaciado cuando hay barra lateral (Layout2) */
 .with-sidebar {
   margin-top: 73px; 
   margin-left: 200px;
   padding: 20px;
 }
 
-/* Estilos para todas las textbox */
 input {
     background-color: white;
     color: black;
@@ -112,7 +107,6 @@ input::placeholder {
     color: #999;
 }
 
-/* Para que los textbox queden alineados en los formularios */
 .form-group {
   display: grid;
   grid-template-columns: 150px 1fr;
@@ -130,7 +124,6 @@ input::placeholder {
   width: 100%;
 }
 
-/* Para que el boton deslizante sea mas alto */
 .table-responsive::-webkit-scrollbar {
   height: 10px; 
 }

@@ -17,7 +17,6 @@ export function InsertarEmpRec(){
     const [seniasExactas, setSeniasExactas] = useState('')
     const [validado, setValidado] = useState(false)
 
-    //Limpia las casillas
     const LimpiarEmpRec = () => {
         setNombre('')
         setCedulaJuridica('')
@@ -78,7 +77,6 @@ export function InsertarEmpRec(){
     }
 
     const mandarRequest = async () => {
-        //codigo
         LimpiarEmpRec()
     }
 

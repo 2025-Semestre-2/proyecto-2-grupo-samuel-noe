@@ -11,7 +11,6 @@ export function EliminarEmpRecTipoAct(){
   const [idActividad, setIdActividad] = useState('')
   const [validado, setValidado] = useState(false)
 
-    //Limpia las casillas
     const LimpiarActividad = () => {
         setIdEmpRecTipoAct('')
         setIdEmpRec('')
@@ -47,7 +46,6 @@ export function EliminarEmpRecTipoAct(){
     }
 
     const mandarRequest = async () => {
-        //codigo
         LimpiarActividad()
     }
 
@@ -57,7 +55,6 @@ export function EliminarEmpRecTipoAct(){
       return;
     }
     try {
-      //codigo
     } 
     catch (e) {
       alert('Empresa-Actividad no encontrada: ' + e.message);

@@ -16,7 +16,6 @@ export function Login(){
     function verificarUsuario(user, password){
         if (user === "sammy") {
             if (password === "1234") {
-                //alert("Usuario Válido")
                 return true
             }
         } 

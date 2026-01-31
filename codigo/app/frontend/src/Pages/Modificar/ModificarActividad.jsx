@@ -12,7 +12,6 @@ export function ModificarActividad(){
   const [precio, setPrecio] = useState('')
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarActividad = () => {
     setIdActividad('')
     setNombreActividad('')
@@ -49,7 +48,6 @@ export function ModificarActividad(){
   }
 
   const mandarRequest = async () => {
-    //codigo
     LimpiarActividad()
   }
 
@@ -59,7 +57,6 @@ export function ModificarActividad(){
       return;
     }
     try {
-      //codigo
     } 
     catch (e) {
       alert('Actividad no encontrada: ' + e.message);

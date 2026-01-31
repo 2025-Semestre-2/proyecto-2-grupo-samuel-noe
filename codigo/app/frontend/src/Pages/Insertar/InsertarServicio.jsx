@@ -12,7 +12,6 @@ export function InsertarServicio(){
   const [costo, setCosto] = useState('')
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarServicio = () => {
     setNombre('')
     setDesc('')
@@ -48,7 +47,6 @@ export function InsertarServicio(){
   }
 
   const mandarRequest = async () => {
-    //codigo
     LimpiarServicio()
   }
 

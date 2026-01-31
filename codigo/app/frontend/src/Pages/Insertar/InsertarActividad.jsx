@@ -11,7 +11,6 @@ export function InsertarActividad(){
   const [precio, setPrecio] = useState('')
   const [validado, setValidado] = useState(false)
 
-    //Limpia las casillas
     const LimpiarActividad = () => {
         setNombreActividad('')
         setDesc('')
@@ -47,7 +46,6 @@ export function InsertarActividad(){
     }
 
     const mandarRequest = async () => {
-        //codigo
         LimpiarActividad()
     }
 

@@ -11,7 +11,6 @@ export function EliminarUsuario(){
   const [tipo, setTipo] = useState('')
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarUsuario = () => {
     setUsuario('')
     setContra('')
@@ -41,7 +40,6 @@ export function EliminarUsuario(){
   }
 
   const mandarRequest = async () => {
-    //codigo
     LimpiarUsuario()
   }
 
@@ -51,7 +49,6 @@ export function EliminarUsuario(){
       return;
     }
     try {
-      //codigo
     } 
     catch (e) {
       alert('Usuario no encontrado: ' + e.message);

@@ -15,7 +15,6 @@ export function InsertarReservacion(){
   const [estado, setEstado] = useState('')
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarReservacion = () => {
     setIdCliente('')
     setIdHab('')
@@ -81,13 +80,10 @@ export function InsertarReservacion(){
         return;
     }
 
-    //Validacion bit?
-
     setValidado(true);
   }
 
   const mandarRequest = async () => {
-    //codigo
     LimpiarReservacion()
   }
 

@@ -10,7 +10,6 @@ export function InsertarEmpRecTipoAct(){
   const [idActividad, setIdActividad] = useState('')
   const [validado, setValidado] = useState(false)
 
-    //Limpia las casillas
     const LimpiarActividad = () => {
         setIdEmpRec('')
         setIdActividad('')
@@ -45,7 +44,6 @@ export function InsertarEmpRecTipoAct(){
     }
 
     const mandarRequest = async () => {
-        //codigo
         LimpiarActividad()
     }
 

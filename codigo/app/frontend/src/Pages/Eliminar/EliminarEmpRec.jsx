@@ -18,7 +18,6 @@ export function EliminarEmpRec(){
     const [seniasExactas, setSeniasExactas] = useState('')
     const [validado, setValidado] = useState(false)
 
-    //Limpia las casillas
     const LimpiarEmpRec = () => {
         setIdEmpRec('')
         setNombre('')
@@ -80,7 +79,6 @@ export function EliminarEmpRec(){
     }
 
     const mandarRequest = async () => {
-        //codigo
         LimpiarEmpRec()
     }
 
@@ -90,7 +88,6 @@ export function EliminarEmpRec(){
             return;
         }
         try {
-            //codigo
         } 
         catch (e) {
             alert('Empresa de Recreación no encontrada: ' + e.message);

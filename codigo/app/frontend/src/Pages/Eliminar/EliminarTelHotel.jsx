@@ -1,153 +1,107 @@
-
 import { useState } from 'react'
-import { Textbox, TextboxBlock } from "../../Components/Textbox"
-import { validarNull, validarInt } from '../../Components/Validaciones'
-import axios from 'axios'
+import { Textbox } from "../../Components/Textbox"
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function EliminarTelHotel(){
 
-  const [idTelefono, setIdTelefono] = useState('')
-  const [idHospedaje, setIdHospedaje] = useState('')
-  const [telefono, setTelefono] = useState('')
-  const [codPais, setCodPais] = useState('')
-  const [validado, setValidado] = useState(false)
+  const [idBusqueda, setIdBusqueda] = useState('');
+  const [encontrado, setEncontrado] = useState(null);
 
-  //Limpia las casillas
-  const LimpiarTelHotel = () => {
-    setIdTelefono('')
-    setIdHospedaje('')
-    setCodPais('')
-    setTelefono('')
-    setValidado(false)
+  const buscar = async () => {
+      if(!idBusqueda) return toast.warning("Ingrese el ID del registro de teléfono");
+      
+      try {
+          const res = await api.get('/telefono-hotel');
+          const item = res.data.find(x => x.IdHospedajeTelefono == idBusqueda);
+          
+          if(item) {
+              setEncontrado(item);
+              toast.success("Teléfono encontrado");
+          } else {
+              toast.error("Registro no encontrado");
+              setEncontrado(null);
+          }
+      } catch (e) { 
+          console.error(e);
+          toast.error("Error al buscar"); 
+      }
   }
 
-  const validacionesTelHotel = () => {
-    
-    const idHospedajeValido = validarNull(idHospedaje, 'Identificación Hospedaje');
-    if (!idHospedajeValido.esValido) {
-      alert(idHospedajeValido.mensaje);
-      return;
-    }
-    const codigoValido = validarNull(codPais, 'Código País');
-    if (!codigoValido.esValido) {
-      alert(codigoValido.mensaje);
-      return;
-    }
-    const numeroValido = validarNull(telefono, 'Número de Teléfono');
-    if (!numeroValido.esValido) {
-      alert(numeroValido.mensaje);
-      return;
-    }
-
-    const idHospedajeValido2 = validarInt(IdHospedaje, 'Identificación Hospedaje');
-    if (!idHospedajeValido2.esValido) {
-      alert(idHospedajeValido2.mensaje);
-      return;
-    }
-    const codigoValido2 = validarNull(codPais, 'Código País');
-    if (!codigoValido2.esValido) {
-      alert(codigoValido2.mensaje);
-      return;
-    }
-    const numeroValido2 = validarNull(telefono, 'Número de Teléfono');
-    if (!numeroValido2.esValido) {
-      alert(numeroValido2.mensaje);
-      return;
-    }
-
-    setValidado(true);
-  }
-
-  const mandarRequest = async () => {
-    //Codigo 
-    
-    LimpiarTelHotel()
-  }
-
-  const verificarExistenciaTelefono = async () => {
-    if (!idTelefono) {
-      alert('Ingresa un ID de Teléfono');
-      return;
-    }
-    try {
-      //codigo
-    } 
-    catch (e) {
-      alert('Teléfono no encontrado: ' + e.message);
-      console.error(e);
-    }
+  const eliminar = async () => {
+      if(!window.confirm(`¿Seguro que desea eliminar el número ${encontrado.NumeroTelefono} de ${encontrado.Hotel}?`)) return;
+      
+      try {
+          await api.delete(`/telefono-hotel/${encontrado.IdHospedajeTelefono}`);
+          toast.success("Teléfono eliminado correctamente.");
+          setEncontrado(null);
+          setIdBusqueda('');
+      } catch (error) { 
+          const msg = error.response?.data?.error || "Error al eliminar";
+          toast.error("Error " + msg); 
+      }
   }
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={4000}/>
       <h1>Eliminar Teléfono de Hotel</h1>
 
+      {/* BÚSQUEDA */}
       <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
+        border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'
       }}>   
-
         <div className="form-group">
-        <label>ID de Teléfono: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idTelefono}
-          onChange={setIdTelefono}
-        />
+            <label style={{fontWeight:'bold'}}>ID de Registro (Tabla Teléfonos): </label>
+            <div style={{display:'flex', gap:'10px'}}>
+                <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} placeholder="Ingrese ID..." />
+                <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
+            </div>
+            <small style={{color: '#666'}}>Puede consultar los IDs en el módulo "Reportar Teléfonos".</small>
         </div>
-        <button onClick={verificarExistenciaTelefono}>Buscar</button>
-   
       </div>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>Identificación Hospedaje: </label>
-        <TextboxBlock
-          type="text"
-          placeholder=""
-          value={idHospedaje}
-          onChange={setIdHospedaje}
-        />
-        </div>
+      {encontrado && (
+        <div style={{
+            border: '2px solid #d9534f',
+            borderRadius: '4px', padding: '30px', backgroundColor: '#fff5f5'
+        }}>
+            <h3 style={{color: '#d9534f', marginTop: 0, textAlign:'center'}}>⚠ ¿Eliminar este teléfono?</h3>
 
-        <div className="form-group">
-        <label>Teléfono del Hotel: </label>
-        <TextboxBlock
-          type="text"
-          placeholder=""
-          value={telefono}
-          onChange={setTelefono}
-        />
-        </div>
+            <div className="form-group">
+                <label>Hotel: </label>
+                <input disabled type="text" value={encontrado.Hotel} 
+                       style={{width:'100%', padding:'8px', backgroundColor:'#e9ecef', border:'1px solid #ccc', borderRadius:'4px'}} />
+            </div>
 
-        <div className="form-group">
-        <label>Código País: </label>
-        <TextboxBlock
-          type="text"
-          placeholder=""
-          value={codPais}
-          onChange={setCodPais}
-        />
-        </div> 
-        
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-            validacionesTelHotel()
-            if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button>Cancelar</button>
-        </div>
+            <div className="form-group">
+                <label>ID Hotel: </label>
+                <input disabled type="text" value={encontrado.IdHospedaje} 
+                       style={{width:'100%', padding:'8px', backgroundColor:'#e9ecef', border:'1px solid #ccc', borderRadius:'4px'}} />
+            </div>
 
-      </div>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px'}}>
+                <div className="form-group">
+                    <label>País: </label>
+                    <input disabled type="text" value={encontrado.Pais} 
+                           style={{width:'100%', padding:'8px', backgroundColor:'#e9ecef', border:'1px solid #ccc', borderRadius:'4px'}} />
+                </div>
+                <div className="form-group">
+                    <label>Número: </label>
+                    <input disabled type="text" value={encontrado.NumeroTelefono} 
+                           style={{width:'100%', padding:'8px', backgroundColor:'#e9ecef', border:'1px solid #ccc', borderRadius:'4px', fontWeight: 'bold'}} />
+                </div>
+            </div>
+
+            <div style={{display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px'}}>
+                <button onClick={eliminar} style={{backgroundColor:'#dc3545', color:'white', fontWeight:'bold'}}>
+                    Eliminar Definitivamente
+                </button>
+                <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+            </div>
+        </div>
+      )}
     </>
   )
 }

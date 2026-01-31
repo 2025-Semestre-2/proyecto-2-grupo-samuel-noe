@@ -12,7 +12,6 @@ export function EliminarHabitacion(){
   const [estado, setEstado] = useState('')  
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarHabitacion = () => {
     setIdHab('')
     setIdTipoHab('')
@@ -54,7 +53,6 @@ export function EliminarHabitacion(){
   }
 
   const mandarRequest = async () => {
-    //codigo
     LimpiarHabitacion()
   }
 
@@ -64,7 +62,6 @@ export function EliminarHabitacion(){
       return;
     }
     try {
-    //codigo
     } 
     catch (e) {
       alert('Habitación no encontrada: ' + e.message);

@@ -1,129 +1,75 @@
-
-import { useState } from 'react'
-import { Textbox, TextboxBlock } from "../../Components/Textbox"
-import { validarNull, validarInt } from '../../Components/Validaciones'
-import axios from 'axios'
+import { useState, useEffect } from 'react'
+import { Textbox } from "../../Components/Textbox"
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function EliminarServicioHospedaje(){
 
-  const [idServicioHotel, setIdServicioHotel] = useState('')
-  const [idHotel, setIdHotel] = useState('')
-  const [idServicio, setIdServicio] = useState('')
-  const [validado, setValidado] = useState(false)
+  const [lista, setLista] = useState([]);
+  const [filtro, setFiltro] = useState('');
 
-  //Limpia las casillas
-  const LimpiarServicio = () => {
-    setIdServicioHotel('')
-    setIdHotel('')
-    setIdServicio('')
-    setValidado(false)
+  const cargarLista = async () => {
+      try {
+          const res = await api.get('/servicio-hospedaje');
+          setLista(res.data);
+      } catch (error) { toast.error("Error cargando lista"); }
   }
 
-  const validacionesServicio = () => {
+  useEffect(() => { cargarLista(); }, []);
 
-    const idHotelValido = validarNull(idHotel, 'ID del Hotel');
-    if (!idHotelValido.esValido) {
-      alert(idHotelValido.mensaje);
-      return;
-    }
-    const idServicioValido = validarNull(idServicio, 'ID del Servicio');
-    if (!idServicioValido.esValido) {
-      alert(idServicioValido.mensaje);
-      return;
-    }
-
-    const idHotelValido2 = validarInt(idHotel, 'ID del Hotel');
-    if (!idHotelValido2.esValido) {
-      alert(idHotelValido2.mensaje);
-      return;
-    }
-    const idServicioValido2 = validarInt(idServicio, 'ID del Servicio');
-    if (!idServicioValido2.esValido) {
-      alert(idServicioValido2.mensaje);
-      return;
-    }
-
-    setValidado(true);
+  const eliminar = async (id) => {
+      if(!window.confirm("¿Desvincular este servicio?")) return;
+      try {
+          await api.delete(`/servicio-hospedaje/${id}`);
+          toast.success("Eliminado correctamente.");
+          cargarLista();
+      } catch (error) { toast.error("Error al eliminar"); }
   }
 
-  const mandarRequest = async () => {
-    //codigo
-    LimpiarServicio()
-  }
-
-  const verificarExistenciaServicio = async () => {
-    if (!idServicioHotel) {
-      alert('Ingresa un ID de Servicio Hospedaje');
-      return;
-    }
-    try {
-      //codigo
-    } 
-    catch (e) {
-      alert('Servicio Hospedaje no encontrado: ' + e.message);
-      console.error(e);
-    }
-  }
+  const filtrados = lista.filter(item => 
+      item.Hotel.toLowerCase().includes(filtro.toLowerCase()) || 
+      item.IdHospedaje.toString().includes(filtro)
+  );
 
   return (
     <>
-      <h1>Eliminar Servicio Hospedaje</h1>
+      <ToastContainer position="top-right" autoClose={3000}/>
+      <h1>Eliminar Servicio de Hospedaje</h1>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>   
-
-        <div className="form-group">
-        <label>ID de Servicio Hospedaje: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idServicioHotel}
-          onChange={setIdServicioHotel}
-        />
-        </div>
-        <button onClick={verificarExistenciaServicio}>Buscar</button>
-   
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
+        <label style={{fontWeight:'bold'}}>Buscar por Hotel: </label>
+        <Textbox type="text" value={filtro} onChange={setFiltro} placeholder="Nombre o ID..." />
       </div>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>ID del Hotel: </label>
-        <TextboxBlock
-          type="text"
-          placeholder=""
-          value={idHotel}
-          onChange={setIdHotel}
-        />
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#f9f9f9'}}>
+        <div className="table-responsive">
+            <table className="table table-bordered table-hover" style={{backgroundColor:'white'}}>
+                <thead className="thead-dark" style={{backgroundColor: '#343a40', color: 'white'}}>
+                    <tr>
+                        <th>Hotel</th>
+                        <th>ID Hotel</th>
+                        <th>Servicio</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {filtrados.map(item => (
+                        <tr key={item.IdHospedajeServicio}>
+                            <td style={{fontWeight:'bold'}}>{item.Hotel}</td>
+                            <td>{item.IdHospedaje}</td>
+                            <td>{item.Servicio}</td>
+                            <td style={{textAlign:'center'}}>
+                                <button onClick={() => eliminar(item.IdHospedajeServicio)} style={{backgroundColor:'#dc3545', padding:'5px 10px', fontSize:'0.9rem'}}>
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                    {filtrados.length === 0 && <tr><td colSpan="4" className="text-center">No hay datos</td></tr>}
+                </tbody>
+            </table>
         </div>
-        
-        <div className="form-group">
-        <label>ID del Servicio: </label>
-        <TextboxBlock   
-          type="text"
-          placeholder=""
-          value={idServicio}
-          onChange={setIdServicio}
-        />
-        </div>
-
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-            validacionesServicio()
-            if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarServicio}>Cancelar</button>
-        </div>
-
       </div>
     </>
   )

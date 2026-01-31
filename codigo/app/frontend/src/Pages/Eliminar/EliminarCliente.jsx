@@ -20,7 +20,6 @@ export function EliminarCliente(){
     const [correo, setCorreo] = useState('')
     const [validado, setValidado] = useState(false)
   
-    //Limpia las casillas
     const LimpiarCliente = () => {
         setIdCliente('')
         setNombre('')
@@ -78,7 +77,6 @@ export function EliminarCliente(){
     }
 
     const mandarRequest = async () => {
-        //Codigo
         LimpiarCliente()
     }
 

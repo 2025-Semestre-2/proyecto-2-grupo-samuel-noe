@@ -42,10 +42,36 @@ SELECT
     Provincia,
     Canton,
     Distrito,
+    Barrio, -- Faltaba
+    SenasExactas, -- Faltaba (lo mostramos como referencia)
     ReferenciaGPS,
+    CorreoElectronico, -- Faltaba
     SitioWebURL,
     (SELECT TOP 1 NumeroTelefono FROM HospedajeTelefono WHERE IdHospedaje = h.CedulaJuridica) AS TelefonoPrincipal
 FROM Hospedaje h;
+GO
+
+-- 2. SP DE PAGINACIÓN (Nuevo)
+CREATE OR ALTER PROCEDURE SP_ListarHotelesPaginado
+    @Pagina INT = 1,
+    @CantidadPorPagina INT = 10
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Offset INT = (@Pagina - 1) * @CantidadPorPagina;
+
+    DECLARE @TotalRegistros INT;
+    SELECT @TotalRegistros = COUNT(*) FROM V_ListadoHoteles;
+
+    SELECT 
+        *,
+        @TotalRegistros AS TotalRegistros
+    FROM V_ListadoHoteles
+    ORDER BY NombreComercial ASC
+    OFFSET @Offset ROWS
+    FETCH NEXT @CantidadPorPagina ROWS ONLY;
+END
 GO
 
 /*

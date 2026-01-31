@@ -1,8 +1,6 @@
 
 import reactLogo from '../assets/react.svg'
-//import viteLogo from '/vite.svg'
 
-//<img src={viteLogo} className="logo vite" alt="Vite logo" />
 export function Home(){
     return(
         <>

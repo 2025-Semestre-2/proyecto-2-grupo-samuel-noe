@@ -11,7 +11,6 @@ export function ModificarEmpRecTipoServicio(){
   const [idTipoServicio, setIdTipoServicio] = useState('')
   const [validado, setValidado] = useState(false)
 
-    //Limpia las casillas
     const LimpiarActividad = () => {
         setIdEmpRecTipoServicio('')
         setIdEmpRec('')
@@ -47,7 +46,6 @@ export function ModificarEmpRecTipoServicio(){
     }
 
     const mandarRequest = async () => {
-        //codigo
         LimpiarActividad()
     }
 
@@ -57,7 +55,6 @@ export function ModificarEmpRecTipoServicio(){
       return;
     }
     try {
-      //codigo
     } 
     catch (e) {
       alert('Empresa-Servicio no encontrada: ' + e.message);

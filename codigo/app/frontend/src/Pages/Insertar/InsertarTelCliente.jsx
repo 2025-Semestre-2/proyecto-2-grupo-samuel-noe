@@ -10,7 +10,6 @@ export function InsertarTelCliente(){
   const [codPais, setCodPais] = useState('')
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarTelCliente = () => {
     setTelefono('')
     setCodPais('')
@@ -55,7 +54,6 @@ export function InsertarTelCliente(){
   }
 
   const mandarRequest = async () => {
-    //codigo
     LimpiarTelCliente()
   }
 

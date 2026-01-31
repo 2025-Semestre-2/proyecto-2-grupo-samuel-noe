@@ -1,91 +1,92 @@
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { validarInt, validarNull } from '../../Components/Validaciones'
-import axios from 'axios'
+import { validarInt } from '../../Components/Validaciones'
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function InsertarRedSocialHotel(){
 
   const [idHospedaje, setIdHospedaje] = useState('')
   const [idPlataforma, setIdPlataforma] = useState('')
-  const [validado, setValidado] = useState(false)
+  const [catalogo, setCatalogo] = useState([])
 
-  //Limpia las casillas
-  const LimpiarRedSocialHotel = () => {
-    setIdHospedaje('')
-    setIdPlataforma('')
-    setValidado(false)
-  }
+  useEffect(() => {
+      const cargarCatalogo = async () => {
+          try {
+              const res = await api.get('/red-social-hotel/catalogo');
+              setCatalogo(res.data);
+              if (res.data.length === 0) {
+                  toast.warning("El catálogo de redes está vacío. Agregue redes primero.");
+              } else {
+                  setIdPlataforma(res.data[0].IdCatalogoSocial);
+              }
+          } catch (error) { toast.error("Error cargando catálogo"); }
+      };
+      cargarCatalogo();
+  }, []);
 
-  const validacionesRedSocialHotel = () => {
-    const idHospedajeValido = validarNull(idHospedaje, 'Identificación Hospedaje');
-    if (!idHospedajeValido.esValido) {
-      alert(idHospedajeValido.mensaje);
-      return;
-    }
-    const idPlataformaValido = validarNull(idPlataforma, 'Identificación Red Social');
-    if (!idPlataformaValido.esValido) {
-      alert(idPlataformaValido.mensaje);
-      return;
-    }
-
-    const idHospedajeValido2 = validarInt(idHospedaje, 'Identificación Hospedaje');
-    if (!idHospedajeValido2.esValido) {
-      alert(idHospedajeValido2.mensaje);
-      return;
-    }
-    const idPlataformaValido2 = validarInt(idPlataforma, 'Identificación Red Social');
-    if (!idPlataformaValido2.esValido) {
-      alert(idPlataformaValido2.mensaje);
-      return;
-    }
-    setValidado(true);
+  const Limpiar = () => {
+    setIdHospedaje('');
+    if(catalogo.length > 0) setIdPlataforma(catalogo[0].IdCatalogoSocial);
   }
 
   const mandarRequest = async () => {
-    // Código para enviar la solicitud
-    LimpiarRedSocialHotel();
+    if (!validarInt(idHospedaje, 'ID Hotel').esValido) return toast.warning("ID Hotel inválido");
+    
+    if (catalogo.length === 0) return toast.error("No hay redes sociales disponibles para asociar.");
+
+    try {
+        await api.post('/red-social-hotel', {
+            idHospedaje: parseInt(idHospedaje),
+            idPlataforma: parseInt(idPlataforma)
+        });
+        toast.success("Red social asociada correctamente.");
+        Limpiar();
+    } catch (error) {
+        toast.error("Error: " + (error.response?.data?.error || "Desconocido"));
+    }
   }
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000}/>
       <h1>Insertar Red Social de Hotel</h1>
 
       <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '10px',
-        backgroundColor: '#f9f9f9',
+        border: '2px solid #333', borderRadius: '4px', padding: '30px', backgroundColor: '#f9f9f9',
       }}>
       
         <div className="form-group">
-        <label>Identificación Hospedaje: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={idHospedaje}
-            onChange={setIdHospedaje}
-        />
+            <label>Cédula Jurídica del Hotel: </label>
+            <Textbox type="text" value={idHospedaje} onChange={setIdHospedaje} placeholder="Ingrese ID..." />
         </div>
 
         <div className="form-group">
-        <label>Identificación Red Social: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={idPlataforma}
-            onChange={setIdPlataforma}
-        />
+            <label>Red Social a Asociar: </label>
+            {catalogo.length > 0 ? (
+                <select 
+                    style={{width: '100%', padding: '8px', height:'42px', borderRadius: '4px', border: '1px solid #ccc'}}
+                    value={idPlataforma}
+                    onChange={(e) => setIdPlataforma(e.target.value)}
+                >
+                    {catalogo.map(item => (
+                        <option key={item.IdCatalogoSocial} value={item.IdCatalogoSocial}>
+                            {item.NombrePlataforma}
+                        </option>
+                    ))}
+                </select>
+            ) : (
+                <div style={{color: 'red', fontStyle: 'italic'}}>
+                    No se encontraron redes sociales. Agregue una al catálogo.
+                </div>
+            )}
         </div>
         
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-            <button onClick={() => {
-                validacionesRedSocialHotel()
-                if(validado){mandarRequest()}
-            }}>Aceptar</button>
-            <button onClick={LimpiarRedSocialHotel}>Cancelar</button>
+        <div style={{ display: 'flex', gap: '50px', justifyContent: 'center', marginTop: '20px' }}>
+            <button onClick={mandarRequest} disabled={catalogo.length === 0}>Aceptar</button>
+            <button onClick={Limpiar} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
         </div>
-
       </div>
     </>
   )

@@ -11,7 +11,6 @@ export function InsertarUsuario(){
   const [tipo, setTipo] = useState('')
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarUsuario = () => {
     setUsuario('')
     setContra('')
@@ -41,7 +40,6 @@ export function InsertarUsuario(){
   }
 
   const mandarRequest = async () => {
-    //codigo
     LimpiarUsuario()
   }
 

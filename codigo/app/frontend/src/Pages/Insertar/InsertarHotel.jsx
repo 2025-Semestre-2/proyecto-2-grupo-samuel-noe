@@ -14,7 +14,7 @@ export function InsertarHotel() {
     const [codPais1, setCodPais1] = useState('506')
     const [telefono1, setTelefono1] = useState('')
     const [codPais2, setCodPais2] = useState('506')
-    const [telefono2, setTelefono2] = useState('') // Opcional
+    const [telefono2, setTelefono2] = useState('')
 
     const [tipoHospedaje, setTipoHospedaje] = useState('')
     const [provincia, setProvincia] = useState('')
@@ -128,7 +128,6 @@ export function InsertarHotel() {
                     />
                 </div>
 
-                {/* Teléfono Principal (Con Selector) */}
                 <div className="form-group">
                     <label>Teléfono Principal: </label>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>

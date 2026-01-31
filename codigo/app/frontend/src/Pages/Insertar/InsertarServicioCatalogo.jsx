@@ -1,65 +1,46 @@
-
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { validarNull, validarInt } from '../../Components/Validaciones'
-import axios from 'axios'
+import { validarNull } from '../../Components/Validaciones'
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function InsertarServicioCatalogo(){
 
   const [nombre, setNombre] = useState('')
-  const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
-  const LimpiarServicio = () => {
+  const Limpiar = () => {
     setNombre('')
-    setValidado(false)
-  }
-
-  const validacionesServicio = () => {
-
-    const nombreValido = validarNull(nombre, 'Nombre del Servicio');
-    if (!nombreValido.esValido) {
-      alert(nombreValido.mensaje);
-      return;
-    }
-
-    setValidado(true);
   }
 
   const mandarRequest = async () => {
-    //codigo
-    LimpiarServicio()
+    if (!validarNull(nombre, 'Nombre del Servicio').esValido) return toast.warning("Nombre requerido");
+
+    try {
+        await api.post('/catalogo-servicios', { nombre });
+        toast.success("Servicio agregado al catálogo.");
+        Limpiar();
+    } catch (error) {
+        toast.error("Error: " + (error.response?.data?.error || "Desconocido"));
+    }
   }
 
   return (
     <>
-      <h1>Insertar Servicio Catálogo</h1>
+      <ToastContainer position="top-right" autoClose={3000}/>
+      <h1>Insertar Servicio (Catálogo)</h1>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-      }}>
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '30px', backgroundColor: '#f9f9f9'}}>
       
         <div className="form-group">
-        <label>Nombre del Servicio: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={nombre}
-          onChange={setNombre}
-        />
+            <label>Nombre del Servicio: </label>
+            <Textbox type="text" placeholder="Ej: Aire Acondicionado" value={nombre} onChange={setNombre} />
         </div>
         
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-            validacionesServicio()
-            if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarServicio}>Cancelar</button>
+        <div style={{ display: 'flex', gap: '50px', justifyContent: 'center', marginTop: '20px' }}>
+            <button onClick={mandarRequest}>Aceptar</button>
+            <button onClick={Limpiar} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
         </div>
-
       </div>
     </>
   )

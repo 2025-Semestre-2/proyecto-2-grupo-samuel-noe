@@ -13,7 +13,6 @@ export function InsertarFactura(){
   const [importeTotal, setImporteTotal] = useState('')
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarFactura = () => {
     setIdReserva('')
     setFechaEmision('')
@@ -62,13 +61,10 @@ export function InsertarFactura(){
         return;
     }
 
-    //Validacion decimal?
-
     setValidado(true);
   }
 
   const mandarRequest = async () => {
-    //codigo
     LimpiarFactura()
   }
 

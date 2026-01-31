@@ -1,168 +1,76 @@
-
 import { useState } from 'react'
-import { Textbox, TextboxBlock } from "../../Components/Textbox"
-import { validarNull, validarInt } from '../../Components/Validaciones'
-import axios from 'axios'
+import { Textbox } from "../../Components/Textbox"
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function EliminarTipoHabitacion(){
 
-  const [idTipoHab, setIdTipoHab] = useState('')
-  const [idHotel, setIdHotel] = useState('')
-  const [nombre, setNombre] = useState('')
-  const [desc, setDesc] = useState('')
-  const [tipoCama, setTipoCama] = useState('')
-  const [precioNoche, setPrecioNoche] = useState('')
-  const [validado, setValidado] = useState(false)
+  const [idBusqueda, setIdBusqueda] = useState('');
+  const [encontrado, setEncontrado] = useState(null);
 
-  //Limpia las casillas
-  const LimpiarTipoHabitacion = () => {
-    setIdTipoHab('')
-    setIdHotel('')
-    setNombre('')
-    setDesc('')
-    setTipoCama('')
-    setPrecioNoche('')
-    setValidado(false)
+  const buscar = async () => {
+      if(!idBusqueda) return toast.warning("Ingrese ID");
+      try {
+          const res = await api.get('/tipo-habitacion');
+          const item = res.data.find(x => x.IdTipoHabitacion == idBusqueda);
+          if(item) {
+              setEncontrado(item);
+              toast.success("Encontrado");
+          } else {
+              toast.error("No encontrado");
+              setEncontrado(null);
+          }
+      } catch (e) { toast.error("Error de conexión"); }
   }
 
-  const validacionesTipoHabitacion = () => {
-  
-    const hospedajeValido = validarNull(idHotel, 'Identificación Hotel');
-    if (!hospedajeValido.esValido) {
-      alert(hospedajeValido.mensaje);
-      return;
-    }
-    const nombreValido = validarNull(nombre, 'Nombre');
-    if (!nombreValido.esValido) {
-      alert(nombreValido.mensaje);
-      return;
-    }
-
-    const camaValida = validarInt(tipoCama, 'Tipo de Cama');
-    if (!camaValida.esValido) {
-      alert(camaValida.mensaje);
-      return;
-    }
-
-    const precioValido = validarInt(precioNoche, 'Precio por noche');
-    if (!precioValido.esValido) {
-      alert(precioValido.mensaje);
-      return;
-    }
-    //validacion para decimal?
-
-    setValidado(true);
-  }
-
-  const mandarRequest = async () => {
-    //codigo
-    LimpiarTipoHabitacion()
-  }
-
-  const verificarExistenciaTipoHab = async () => {
-    if (!idTipoHab) {
-      alert('Ingresa un ID de Tipo de Habitación');
-      return;
-    }
-    try {
-      //codigo
-    } 
-    catch (e) {
-      alert('Tipo de Habitación no encontrado: ' + e.message);
-      console.error(e);
-    }
+  const eliminar = async () => {
+      if(!window.confirm("¿Eliminar este Tipo de Habitación?")) return;
+      try {
+          await api.delete(`/tipo-habitacion/${encontrado.IdTipoHabitacion}`);
+          toast.success("Eliminado correctamente.");
+          setEncontrado(null);
+          setIdBusqueda('');
+      } catch (error) {
+          const msg = error.response?.data?.error || "Error al eliminar";
+          toast.error("Error " + msg);
+      }
   }
 
   return (
     <>
-      <h1>Eliminar Tipo Habitación</h1>
-      
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>   
+      <ToastContainer position="top-right" autoClose={4000}/>
+      <h1>Eliminar Tipo de Habitación</h1>
 
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
         <div className="form-group">
-        <label>ID de Tipo de Habitación: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idTipoHab}
-          onChange={setIdTipoHab}
-        />
+            <label style={{fontWeight:'bold'}}>ID Tipo Habitación: </label>
+            <div style={{display:'flex', gap:'10px'}}>
+                <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} placeholder="ID..." />
+                <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
+            </div>
         </div>
-        <button onClick={verificarExistenciaTipoHab}>Buscar</button>
-   
       </div>
-      
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>ID del Hotel: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""
-            value={idHotel}
-            onChange={setIdHotel}
-        />
-        </div>
 
-        <div className="form-group">
-        <label>Nombre: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""
-            value={nombre}
-            onChange={setNombre}
-        />
-        </div>
+      {encontrado && (
+        <div style={{border: '2px solid #d9534f', borderRadius: '4px', padding: '30px', backgroundColor: '#fff5f5'}}>
+            <h3 style={{color: '#d9534f', marginTop: 0, textAlign:'center'}}>¿Eliminar Registro?</h3>
+            
+            <div className="form-group">
+                <label>Hotel: </label>
+                <input disabled type="text" value={encontrado.Hotel} className="form-control" style={{width:'100%', padding:'8px'}} />
+            </div>
+            <div className="form-group">
+                <label>Nombre Tipo: </label>
+                <input disabled type="text" value={encontrado.Nombre} className="form-control" style={{width:'100%', padding:'8px', fontWeight:'bold'}} />
+            </div>
 
-        <div className="form-group">
-        <label>Descripción: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""
-            value={desc}
-            onChange={setDesc}
-        />
+            <div style={{display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px'}}>
+                <button onClick={eliminar} style={{backgroundColor:'#dc3545', color:'white'}}>Eliminar</button>
+                <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+            </div>
         </div>
-
-        <div className="form-group">
-        <label>Tipo de Cama: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""  
-            value={tipoCama}
-            onChange={setTipoCama}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Precio por noche: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""
-            value={precioNoche}
-            onChange={setPrecioNoche}
-        />
-        </div>
-        
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-            validacionesTipoHabitacion()
-            if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarTipoHabitacion}>Cancelar</button>
-        </div>
-
-      </div>
+      )}
     </>
   )
 }

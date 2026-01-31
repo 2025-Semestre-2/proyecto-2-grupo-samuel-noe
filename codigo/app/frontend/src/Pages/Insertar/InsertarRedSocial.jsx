@@ -1,81 +1,54 @@
-
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { validarInt, validarNull } from '../../Components/Validaciones'
-import axios from 'axios'
+import { validarNull } from '../../Components/Validaciones'
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function InsertarRedSocial(){
 
   const [nombre, setNombre] = useState('')
   const [url, setUrl] = useState('')
-  const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
-  const LimpiarRedSocial = () => {
+  const Limpiar = () => {
     setNombre('')
     setUrl('')
-    setValidado(false)
-  }
-
-  const validacionesRedSocial = () => {
-    const nombreValido = validarNull(nombre, 'Nombre Plataforma');
-    if (!nombreValido.esValido) {
-      alert(nombreValido.mensaje);
-      return;
-    }
-    const urlValido = validarNull(url, 'URL');
-    if (!urlValido.esValido) {
-      alert(urlValido.mensaje);
-      return;
-    }
-
-    setValidado(true);
   }
 
   const mandarRequest = async () => {
-    // Código para enviar la solicitud
-    LimpiarRedSocial();
+    if (!validarNull(nombre, 'Nombre').esValido) return toast.warning("Nombre requerido");
+    if (!validarNull(url, 'URL').esValido) return toast.warning("URL requerida");
+
+    try {
+        await api.post('/catalogo-redes', { nombre, url });
+        toast.success("Plataforma agregada al catálogo.");
+        Limpiar();
+    } catch (error) {
+        toast.error("Error: " + (error.response?.data?.error || "Desconocido"));
+    }
   }
 
   return (
     <>
-      <h1>Insertar Red Social</h1>
+      <ToastContainer position="top-right" autoClose={3000}/>
+      <h1>Insertar Red Social (Catálogo)</h1>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '10px',
-        backgroundColor: '#f9f9f9',
-      }}>
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '30px', backgroundColor: '#f9f9f9'}}>
       
         <div className="form-group">
-        <label>Nombre Plataforma: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={nombre}
-            onChange={setNombre}
-        />
+            <label>Nombre Plataforma: </label>
+            <Textbox type="text" placeholder="Ej: Instagram" value={nombre} onChange={setNombre} />
         </div>
 
         <div className="form-group">
-        <label>URL: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={url}
-            onChange={setUrl}
-        />
+            <label>URL Base: </label>
+            <Textbox type="text" placeholder="Ej: www.instagram.com" value={url} onChange={setUrl} />
         </div>
         
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-            <button onClick={() => {
-                validacionesRedSocial()
-                if(validado){mandarRequest()}
-            }}>Aceptar</button>
-            <button onClick={LimpiarRedSocial}>Cancelar</button>
+        <div style={{ display: 'flex', gap: '50px', justifyContent: 'center', marginTop: '20px' }}>
+            <button onClick={mandarRequest}>Aceptar</button>
+            <button onClick={Limpiar} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
         </div>
-
       </div>
     </>
   )

@@ -1,6 +1,5 @@
 
 import React, {useState, useEffect} from "react"; 
-//Imports para poder hacer las tablas de reportes con Toastify y Bootstrap
 import axios from "axios";
 import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';

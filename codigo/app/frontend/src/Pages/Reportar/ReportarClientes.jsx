@@ -1,6 +1,5 @@
 
 import {useState, useEffect} from "react"; 
-//Imports para poder hacer las tablas de reportes con Toastify y Bootstrap
 import axios from "axios";
 import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -11,7 +10,6 @@ export function ReportarClientes(){
     const [datos, setDatos] = useState([]);
     const [cargando, setCargando] = useState(true);
 
-    // Cargar datos al montar el componente
     useEffect(() => {
         cargarDatos();
     }, []);

@@ -1,125 +1,107 @@
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { validarNull, validarInt } from '../../Components/Validaciones'
-import axios from 'axios'
+import { validarNull } from '../../Components/Validaciones'
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function ModificarComodidadHab(){
 
-  const [idComodidad, setIdComodidad] = useState('')
-  const [idTipoHab, setIdTipoHab] = useState('')
-  const [desc, setDesc] = useState('')
-  const [validado, setValidado] = useState(false)
-
-  //Limpia las casillas
-  const LimpiarComodidadHab = () => {
-    setIdComodidad('')
-    setIdTipoHab('')
-    setDesc('')
-    setValidado(false)
-  }
-
-  const validacionesComodidadHab = () => {
+  const [idBusqueda, setIdBusqueda] = useState('');
+  const [encontrado, setEncontrado] = useState(null);
   
-    const idTipoHabValido = validarNull(idTipoHab, 'Identificación Tipo Habitación');
-    if (!idTipoHabValido.esValido) {
-      alert(idTipoHabValido.mensaje);
-      return;
-    }
-    const descValido = validarNull(desc, 'Descripción');
-    if (!descValido.esValido) {
-      alert(descValido.mensaje);
-      return;
-    }
+  const [idTipoHab, setIdTipoHab] = useState('');
+  const [desc, setDesc] = useState('');
+  
+  const [tipos, setTipos] = useState([]);
 
-    const idTipoHabValido2 = validarInt(idTipoHab, 'Identificación Tipo Habitación');
-    if (!idTipoHabValido2.esValido) {
-      alert(idTipoHabValido2.mensaje);
-      return;
-    }
+  useEffect(() => {
+      const cargar = async () => {
+          try {
+            const res = await api.get('/comodidad-habitacion/tipos');
+            setTipos(res.data);
+          } catch(e) { console.error(e); }
+      };
+      cargar();
+  }, []);
 
-    setValidado(true);
+  const buscar = async () => {
+      if(!idBusqueda) return toast.warning("Ingrese ID");
+      try {
+          const res = await api.get('/comodidad-habitacion');
+          const item = res.data.find(x => x.IdComodidad == idBusqueda);
+          if(item) {
+              setEncontrado(item);
+              setIdTipoHab(item.IdTipoHabitacion.toString());
+              setDesc(item.Descripcion);
+              toast.success("Cargado");
+          } else {
+              toast.error("No encontrado");
+              setEncontrado(null);
+          }
+      } catch (e) { toast.error("Error al buscar"); }
   }
 
-  const mandarRequest = async () => {
-    //codigo
-    LimpiarComodidadHab()
-  }
+  const guardar = async () => {
+      if (!validarNull(desc, 'Descripción').esValido) return toast.warning("Descripción requerida");
 
-  const verificarExistenciaComodidad = async () => {
-    if (!idComodidad) {
-      alert('Ingresa un ID de Comodidad');
-      return;
-    }
-    try {
-      //codigo
-    } 
-    catch (e) {
-      alert('Comodidad no encontrada: ' + e.message);
-      console.error(e);
-    }
+      try {
+          await api.put(`/comodidad-habitacion/${encontrado.IdComodidad}`, {
+              idTipoHabitacion: parseInt(idTipoHab),
+              descripcion: desc
+          });
+          toast.success("Actualizado correctamente.");
+          setEncontrado(null);
+          setIdBusqueda('');
+      } catch (e) { 
+          toast.error("Error: " + (e.response?.data?.error || "Error al guardar")); 
+      }
   }
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000}/>
       <h1>Modificar Comodidad de Habitación</h1>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>   
-
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
         <div className="form-group">
-        <label>ID de la Comodidad: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idComodidad}
-          onChange={setIdComodidad}
-        />
+            <label style={{fontWeight:'bold'}}>ID Comodidad: </label>
+            <div style={{display:'flex', gap:'10px'}}>
+                <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} />
+                <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
+            </div>
         </div>
-        <button onClick={verificarExistenciaComodidad}>Buscar</button>
-   
       </div>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '10px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>Identificación Tipo Habitación: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={idTipoHab}
-            onChange={setIdTipoHab}
-        />
-        </div>
+      {encontrado && (
+        <div style={{border: '2px solid #333', borderRadius: '4px', padding: '30px', backgroundColor: '#f9f9f9'}}>
+            
+            <div className="form-group">
+                <label>Tipo de Habitación: </label>
+                <select 
+                    style={{
+                        width: '100%', padding: '8px', height:'42px', 
+                        borderRadius:'4px', border:'1px solid #ccc', 
+                        backgroundColor:'white', color: '#333'
+                    }}
+                    value={idTipoHab} onChange={(e) => setIdTipoHab(e.target.value)}
+                >
+                    {tipos.map(t => (
+                        <option key={t.IdTipoHabitacion} value={t.IdTipoHabitacion}>
+                            {t.Hotel} - {t.Nombre}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
-        <div className="form-group">
-        <label>Descripción: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={desc}
-            onChange={setDesc}
-        />
+            <div className="form-group"><label>Descripción: </label><Textbox type="text" value={desc} onChange={setDesc} /></div>
+            
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
+                <button onClick={guardar}>Guardar Cambios</button>
+                <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+            </div>
         </div>
-        
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-            validacionesComodidadHab()
-            if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarComodidadHab}>Cancelar</button>
-        </div>
-
-      </div>
+      )}
     </>
   )
 }

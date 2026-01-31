@@ -12,7 +12,6 @@ export function EliminarTelCliente(){
   const [codPais, setCodPais] = useState('')
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarTelCliente = () => {
     setIdTelCliente('')
     setIdCliente('')
@@ -76,7 +75,6 @@ export function EliminarTelCliente(){
       return;
     }
     try {
-      //Buscamos el Teléfono Cliente por su ID
       const response = await axios.get('http://localhost:3000/api/cliente-telefono');
       const lista = response.data?.data ?? []
       const telcliente = lista.find(c => String(c.IdTelefonoCliente) === String(idTelCliente));

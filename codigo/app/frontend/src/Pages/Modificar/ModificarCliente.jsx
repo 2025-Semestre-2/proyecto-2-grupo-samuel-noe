@@ -20,7 +20,6 @@ export function ModificarCliente(){
     const [correo, setCorreo] = useState('')
     const [validado, setValidado] = useState(false)
 
-    //Limpia las casillas
     const LimpiarCliente = () => {
         setIdCliente('')
         setNombre('')
@@ -92,7 +91,6 @@ export function ModificarCliente(){
     const mandarRequest = async () => {
         try {
             let fechaNacimientoISO = fechaNacimiento
-            //Para enviar solo la fecha sin el tiempo
             ? new Date(fechaNacimiento).toISOString().split('T')[0]
             : null;
 
@@ -124,7 +122,6 @@ export function ModificarCliente(){
             return;
         }
         try {
-            //Buscamos el Teléfono Cliente por su ID
             const response = await axios.get('http://localhost:3000/api/cliente');
             const lista = response.data?.data ?? [];
             const cliente = lista.find(c => String(c.IdCliente) === String(idCliente));

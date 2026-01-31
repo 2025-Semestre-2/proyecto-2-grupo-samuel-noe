@@ -12,7 +12,6 @@ export function ModificarServicio(){
   const [costo, setCosto] = useState('')
   const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
   const LimpiarServicio = () => {
     setIdServicio('')
     setNombre('')
@@ -49,7 +48,6 @@ export function ModificarServicio(){
   }
 
   const mandarRequest = async () => {
-    //codigo
     LimpiarServicio()
   }
 
@@ -59,7 +57,6 @@ export function ModificarServicio(){
       return;
     }
     try {
-      //codigo
     } 
     catch (e) {
       alert('Servicio no encontrado: ' + e.message);

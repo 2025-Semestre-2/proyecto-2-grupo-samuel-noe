@@ -5,12 +5,10 @@ import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 export function ConsultarHotel() {
-    // Estados
     const [criterio, setCriterio] = useState("");
     const [resultados, setResultados] = useState([]);
     const [busquedaRealizada, setBusquedaRealizada] = useState(false);
 
-    // Función de búsqueda
     const realizarBusqueda = async () => {
         if (!criterio.trim()) {
             toast.warning("Por favor ingrese un nombre o cédula para buscar.");
@@ -18,7 +16,6 @@ export function ConsultarHotel() {
         }
 
         try {
-            // Llama al endpoint de búsqueda que creamos en el backend
             const response = await api.get(`/hospedaje/buscar?criterio=${criterio}`);
             setResultados(response.data);
             setBusquedaRealizada(true);
@@ -36,7 +33,6 @@ export function ConsultarHotel() {
         }
     };
 
-    // Limpiar formulario y resultados
     const limpiarBusqueda = () => {
         setCriterio("");
         setResultados([]);

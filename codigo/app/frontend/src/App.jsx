@@ -3,9 +3,7 @@ import './App.css'
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom' 
 import {Layout, Layout2, Layout4, Layout5, Layout6, 
   Layout7, Layout8, Layout9, Layout10, Layout11} from './Components/Layout.jsx'
-//Layout3
 
-//Para que funcione el boton desplegable
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Login} from './Pages/Login.jsx'
 import {Home} from './Pages/home.jsx'

@@ -1,102 +1,74 @@
-
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { validarNull, validarInt } from '../../Components/Validaciones'
-import axios from 'axios'
+import { validarNull } from '../../Components/Validaciones'
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function ModificarServicioCatalogo(){
 
-  const [idServicio, setIdServicio] = useState('')
+  const [idBusqueda, setIdBusqueda] = useState('');
+  const [encontrado, setEncontrado] = useState(null);
+  
   const [nombre, setNombre] = useState('')
-  const [validado, setValidado] = useState(false)
 
-  //Limpia las casillas
-  const LimpiarServicio = () => {
-    setIdServicio('')
-    setNombre('')
-    setValidado(false)
+  const buscar = async () => {
+      if(!idBusqueda) return toast.warning("Ingrese ID");
+      try {
+          const res = await api.get('/catalogo-servicios');
+          const item = res.data.find(x => x.IdCatalogoServicio == idBusqueda);
+          if(item) {
+              setEncontrado(item);
+              setNombre(item.NombreServicio);
+              toast.success("Cargado");
+          } else {
+              toast.error("No encontrado");
+              setEncontrado(null);
+          }
+      } catch (e) { toast.error("Error al buscar"); }
   }
 
-  const validacionesServicio = () => {
-
-    const nombreValido = validarNull(nombre, 'Nombre del Servicio');
-    if (!nombreValido.esValido) {
-      alert(nombreValido.mensaje);
-      return;
-    }
-
-    setValidado(true);
-  }
-
-  const mandarRequest = async () => {
-    //codigo
-    LimpiarServicio()
-  }
-
-  const verificarExistenciaServicio = async () => {
-    if (!idServicio) {
-      alert('Ingresa un ID de Servicio');
-      return;
-    }
-    try {
-      //codigo
-    } 
-    catch (e) {
-      alert('Servicio no encontrado: ' + e.message);
-      console.error(e);
-    }
+  const guardar = async () => {
+      if (!validarNull(nombre, 'Nombre').esValido) return toast.warning("Nombre requerido");
+      
+      try {
+          await api.put(`/catalogo-servicios/${encontrado.IdCatalogoServicio}`, { nombre });
+          toast.success("Actualizado correctamente.");
+          setEncontrado(null);
+          setIdBusqueda('');
+      } catch (e) { 
+          toast.error("Error: " + (e.response?.data?.error || "Error al guardar")); 
+      }
   }
 
   return (
     <>
-      <h1>Modificar Servicio Catálogo</h1>
-      
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>   
+      <ToastContainer position="top-right" autoClose={3000}/>
+      <h1>Modificar Servicio (Catálogo)</h1>
 
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
         <div className="form-group">
-        <label>ID de Servicio: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idServicio}
-          onChange={setIdServicio}
-        />
+            <label style={{fontWeight:'bold'}}>ID Catálogo: </label>
+            <div style={{display:'flex', gap:'10px'}}>
+                <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} />
+                <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
+            </div>
         </div>
-        <button onClick={verificarExistenciaServicio}>Buscar</button>
-   
       </div>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>Nombre del Servicio: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={nombre}
-          onChange={setNombre}
-        />
+      {encontrado && (
+        <div style={{border: '2px solid #333', borderRadius: '4px', padding: '30px', backgroundColor: '#f9f9f9'}}>
+            <div className="form-group">
+                <label>Nombre del Servicio: </label>
+                <Textbox type="text" value={nombre} onChange={setNombre} />
+            </div>
+            
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
+                <button onClick={guardar}>Guardar Cambios</button>
+                <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+            </div>
         </div>
-        
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-            validacionesServicio()
-            if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarServicio}>Cancelar</button>
-        </div>
-
-      </div>
+      )}
     </>
   )
 }
