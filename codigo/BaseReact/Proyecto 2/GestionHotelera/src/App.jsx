@@ -1,6 +1,5 @@
 
 import './App.css'
-// HashRouter si es para github, BrowserRouter si es para servidor propio
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom' 
 import {Layout, Layout2, Layout4, Layout5, Layout6, 
   Layout7, Layout8, Layout9, Layout10, Layout11} from './Components/Layout.jsx'

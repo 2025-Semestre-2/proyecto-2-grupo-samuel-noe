@@ -1,29 +1,35 @@
-
 import { useState } from 'react'
-import { Textbox } from "../../Components/Textbox"
+import { Textbox, TextboxBlock } from "../../Components/Textbox"
 import { validarNull, validarInt } from '../../Components/Validaciones'
-import axios from 'axios'
+import api from '../../services/axiosConfig'
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function ModificarHotel(){
 
+    // Campo de búsqueda
     const [idHotel, setIdHotel] = useState('')
+
+    // Campos del formulario
     const [nombre, setNombre] = useState('')
     const [cedulaJuridica, setCedulaJuridica] = useState('')
+    const [telefono1, setTelefono1] = useState('')
     const [tipoHospedaje, setTipoHospedaje] = useState('')
     const [provincia, setProvincia] = useState('')
     const [canton, setCanton] = useState('')
     const [distrito, setDistrito] = useState('')
     const [barrio, setBarrio] = useState('')
+    const [seniasExactas, setSeniasExactas] = useState('')
     const [refGps, setRefGps] = useState('')
     const [correo, setCorreo] = useState('')
     const [url, setUrl] = useState('')
-    const [validado, setValidado] = useState(false)
 
-    //Limpia las casillas
+    // Limpia las casillas
     const LimpiarHotel = () => {
         setIdHotel('')
         setNombre('')
         setCedulaJuridica('')
+        setTelefono1('')
         setTipoHospedaje('')
         setProvincia('')
         setCanton('')
@@ -33,94 +39,119 @@ export function ModificarHotel(){
         setRefGps('')
         setCorreo('')
         setUrl('')
-        setValidado(false)
     }
 
+    // Retorna TRUE si es válido, FALSE si no
     const validacionesHotel = () => {
-     
         const nombreValido = validarNull(nombre, 'Nombre Hotel');
         if (!nombreValido.esValido) {
-            alert(nombreValido.mensaje);
-            return;
+            toast.warning(nombreValido.mensaje);
+            return false;
         }
-        const cedulaJuridicaValida = validarInt(cedulaJuridica, 'Cédula Jurídica');
-        if (!cedulaJuridicaValida.esValido) {
-            alert(cedulaJuridicaValida.mensaje);
-            return;
+        
+        const telefonoValido = validarInt(telefono1, 'Teléfono');
+        if (!telefonoValido.esValido) {
+            toast.warning(telefonoValido.mensaje);
+            return false;
         }
-        const tipoValido = validarNull(tipoHospedaje, 'Tipo de Hospedaje');
-        if (!tipoValido.esValido) {
-            alert(tipoValido.mensaje);
-            return;
+
+        const correoValido = validarNull(correo, 'Correo Electrónico');
+        if (!correoValido.esValido) {
+            toast.warning(correoValido.mensaje);
+            return false;
         }
-        const provinciaValida = validarNull(provincia, 'Provincia');
-        if (!provinciaValida.esValido) {
-            alert(provinciaValida.mensaje);
+
+        return true;
+    }
+
+    // Función para buscar el hotel por Cédula (ID) y llenar los campos
+    const verificarExistenciaHotel = async () => {
+        if (!idHotel) {
+            toast.warning('Ingresa una Cédula Jurídica para buscar');
             return;
         }
 
-        const cantonValido = validarNull(canton, 'Cantón');
-        if (!cantonValido.esValido) {
-            alert(cantonValido.mensaje);
-            return;
+        try {
+            const response = await api.get('/hospedaje');
+            const listaHoteles = response.data;
+            
+            const hotelEncontrado = listaHoteles.find(h => h.CedulaJuridica.toString() === idHotel);
+
+            if (hotelEncontrado) {
+                setNombre(hotelEncontrado.NombreComercial);
+                setCedulaJuridica(hotelEncontrado.CedulaJuridica.toString());
+                setTelefono1(hotelEncontrado.Telefono1.toString());
+                setTipoHospedaje(hotelEncontrado.TipoHospedaje);
+                setProvincia(hotelEncontrado.Provincia);
+                setCanton(hotelEncontrado.Canton);
+                setDistrito(hotelEncontrado.Distrito);
+                setBarrio(hotelEncontrado.Barrio || '');
+                setSeniasExactas(hotelEncontrado.SenasExactas);
+                setRefGps(hotelEncontrado.ReferenciaGPS || '');
+                setCorreo(hotelEncontrado.CorreoElectronico);
+                setUrl(hotelEncontrado.SitioWebURL || '');
+                
+                toast.success("Hotel encontrado. Puede modificar los datos.");
+            } else {
+                toast.error("No se encontró un hotel con esa Cédula Jurídica.");
+            }
+
+        } catch (e) {
+            console.error(e);
+            toast.error('Error al conectar con el servidor.');
         }
-        const distritoValido = validarNull(distrito, 'Distrito');
-        if (!distritoValido.esValido) {
-            alert(distritoValido.mensaje);
-            return;
-        }
-        const correoValido = validarNull(correo, 'Correo Electrónico');
-        if (!correoValido.esValido) {
-            alert(correoValido.mensaje);
-            return;
-        }
-        setValidado(true);
     }
 
     const mandarRequest = async () => {
-        //Codigo del request
+        // 1. Validar
+        if (!validacionesHotel()) return;
 
-        LimpiarHotel()
-    }
+        // 2. Preparar objeto
+        const hotelModificado = {
+            nombreComercial: nombre,
+            telefono1: parseInt(telefono1),
+            correoElectronico: correo,
+            sitioWebURL: url
+        };
 
-    const verificarExistenciaHotel = async () => {
-        if (!idHotel) {
-            alert('Ingresa un ID de Hotel');
-            return;
-        }
+        // 3. Enviar PUT
         try {
-            //codigo
-        } 
-        catch (e) {
-            alert('Hotel no encontrado: ' + e.message);
-            console.error(e);
+            const response = await api.put(`/hospedaje/${idHotel}`, hotelModificado);
+            toast.success(response.data.message || "Hotel actualizado correctamente");
+            LimpiarHotel();
+        } catch (error) {
+            console.error(error);
+            const msg = error.response?.data?.error || "Error al actualizar";
+            toast.error(msg);
         }
     }
 
     return (
     <>
+      <ToastContainer />
       <h1>Modificar Hotel</h1>
 
+      {/* SECCIÓN DE BÚSQUEDA */}
       <div style={{
         border: '2px solid #333',
         borderRadius: '4px',
         padding: '30px',
-        backgroundColor: '#f9f9f9',
+        backgroundColor: '#e9ecef',
+        marginBottom: '20px'
       }}>   
-
         <div className="form-group">
-        <label>ID de Hotel: </label>
+        <label style={{fontWeight: 'bold'}}>Buscar por Cédula Jurídica: </label>
         <Textbox
           type="text"
-          placeholder=""
+          placeholder="Ingrese ID para buscar"
           value={idHotel}
           onChange={setIdHotel}
         />
         </div>
-        <button onClick={verificarExistenciaHotel}>Buscar</button>
-   
+        <button onClick={verificarExistenciaHotel} style={{marginTop: '10px'}}>Buscar Hotel</button>
       </div>
 
+      {/* SECCIÓN DE EDICIÓN */}
       <div style={{
         border: '2px solid #333',
         borderRadius: '4px',
@@ -139,73 +170,58 @@ export function ModificarHotel(){
         </div>
 
         <div className="form-group">
-        <label>Cédula Jurídica: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={cedulaJuridica}
-            onChange={setCedulaJuridica}
+        <label>Cédula Jurídica (No editable): </label>
+        <input 
+            disabled 
+            type="text" 
+            value={cedulaJuridica} 
+            style={{backgroundColor: '#ccc', width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #999'}}
         />
         </div>
 
         <div className="form-group">
-        <label>Tipo de Hospedaje: </label>
+        <label>Teléfono Principal: </label>
         <Textbox
             type="text"
-            placeholder=""  
-            value={tipoHospedaje}
-            onChange={setTipoHospedaje}
+            placeholder=""
+            value={telefono1}
+            onChange={setTelefono1}
         />
+        </div>
+        
+        <div className="form-group">
+        <label>Tipo de Hospedaje: </label>
+        <Textbox type="text" value={tipoHospedaje} onChange={setTipoHospedaje} />
         </div>
 
         <div className="form-group">
         <label>Provincia: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={provincia}
-            onChange={setProvincia}
-        />
+        <Textbox type="text" value={provincia} onChange={setProvincia} />
         </div>
 
         <div className="form-group">
         <label>Cantón: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={canton}
-            onChange={setCanton}
-        />
+        <Textbox type="text" value={canton} onChange={setCanton} />
         </div>
 
         <div className="form-group">
         <label>Distrito: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={distrito}
-            onChange={setDistrito}
-        />
+        <Textbox type="text" value={distrito} onChange={setDistrito} />
         </div>
 
         <div className="form-group">
         <label>Barrio: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={barrio}
-            onChange={setBarrio}
-        />
+        <Textbox type="text" value={barrio} onChange={setBarrio} />
+        </div>
+
+        <div className="form-group">
+        <label>Señas Exactas: </label>
+        <Textbox type="text" value={seniasExactas} onChange={setSeniasExactas} />
         </div>
 
         <div className="form-group">
         <label>Referencia GPS: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={refGps}
-            onChange={setRefGps}
-        />
+        <Textbox type="text" value={refGps} onChange={setRefGps} />
         </div>
 
         <div className="form-group">
@@ -228,12 +244,9 @@ export function ModificarHotel(){
         />
         </div>
 
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-            <button onClick={() => {
-                validacionesHotel()
-                if(validado){mandarRequest()}
-            }}>Aceptar</button>
-            <button onClick={LimpiarHotel}>Cancelar</button>
+        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center', marginTop: '20px' }}>
+            <button onClick={mandarRequest}>Guardar Cambios</button>
+            <button onClick={LimpiarHotel}>Cancelar / Limpiar</button>
         </div>
 
       </div>
