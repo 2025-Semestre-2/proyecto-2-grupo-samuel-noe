@@ -94,7 +94,6 @@ export function ReportarHoteles(){
                             </table>
                         </div>
 
-                        {/* Controles de Paginación */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
                             <button 
                                 className="btn btn-secondary" 

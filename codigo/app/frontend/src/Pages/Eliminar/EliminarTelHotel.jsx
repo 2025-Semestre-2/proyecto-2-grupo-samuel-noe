@@ -48,7 +48,6 @@ export function EliminarTelHotel(){
       <ToastContainer position="top-right" autoClose={4000}/>
       <h1>Eliminar Teléfono de Hotel</h1>
 
-      {/* BÚSQUEDA */}
       <div style={{
         border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'
       }}>   

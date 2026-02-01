@@ -69,9 +69,6 @@ BEGIN
 END
 GO
 
-USE GestionHoteleraDB;
-GO
-
 CREATE OR ALTER PROCEDURE SP_ModificarHospedaje
     @IdHospedaje INT,
     @NombreComercial NVARCHAR(150),
@@ -187,9 +184,6 @@ BEGIN
         OR CAST(CedulaJuridica AS NVARCHAR) LIKE '%' + @Criterio + '%'
     ORDER BY NombreComercial ASC;
 END
-GO
-
-USE GestionHoteleraDB;
 GO
 
 -- ==========================================================================================
@@ -574,7 +568,7 @@ END
 GO
 
 -- ==========================================================================================
--- MÓDULO SERVICIOS DE HOSPEDAJE (TABLA INTERMEDIA)
+-- MÓDULO SERVICIOS DE HOSPEDAJE
 -- ==========================================================================================
 
 CREATE OR ALTER PROCEDURE SP_RegistrarHospedajeServicio
@@ -859,7 +853,7 @@ GO
 -- MÓDULO HABITACIONES
 -- ==========================================================================================
 
-/* 1. Reportar (Join triple: Habitacion -> Tipo -> Hotel) */
+/* 1. Reportar */
 CREATE OR ALTER PROCEDURE SP_ReportarHabitaciones
 AS
 BEGIN
@@ -990,7 +984,6 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Validar Duplicidad de Cédula
     IF EXISTS (SELECT 1 FROM Cliente WHERE NumeroIdentificacion = @NumeroIdentificacion)
         THROW 51000, 'Ya existe un cliente registrado con ese número de identificación.', 1;
 
@@ -1044,7 +1037,7 @@ BEGIN
 END
 GO
 
-/* 4. Eliminar (CON BLOQUEO DE SEGURIDAD) */
+/* 4. Eliminar */
 CREATE OR ALTER PROCEDURE SP_EliminarCliente
     @IdCliente INT
 AS
@@ -1413,7 +1406,6 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Validar duplicados por nombre
     IF EXISTS (SELECT 1 FROM TipoActividad WHERE NombreTipoActividad = @Nombre)
         THROW 51000, 'Ya existe una actividad registrada con ese nombre.', 1;
 
@@ -1443,7 +1435,7 @@ BEGIN
 END
 GO
 
-/* 4. Eliminar (Con protección de dependencias) */
+/* 4. Eliminar */
 CREATE OR ALTER PROCEDURE SP_EliminarTipoActividad
     @Id INT
 AS
@@ -1466,7 +1458,7 @@ GO
 -- MÓDULO INTERMEDIO: EMPRESA - TIPO ACTIVIDAD
 -- ==========================================================================================
 
-/* 1. Reportar (Con Joins para ver nombres) */
+/* 1. Reportar */
 CREATE OR ALTER PROCEDURE SP_ReportarEmpresaActividad
 AS
 BEGIN
@@ -1506,7 +1498,7 @@ GO
 
 /* 3. Modificar */
 CREATE OR ALTER PROCEDURE SP_ModificarEmpresaActividad
-    @IdRelacion INT, -- PK de la tabla intermedia
+    @IdRelacion INT,
     @IdEmpresa INT,
     @IdActividad INT
 AS
@@ -1516,7 +1508,6 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM EmpresaRecreacionTipoActividad WHERE IdEmpresaRecreacionTipoActividad = @IdRelacion)
         THROW 51000, 'El registro no existe.', 1;
 
-    -- Validar Duplicado (Excluyendo el propio registro)
     IF EXISTS (SELECT 1 FROM EmpresaRecreacionTipoActividad 
                WHERE IdEmpresaRecreacion = @IdEmpresa 
                AND IdTipoActividad = @IdActividad 
@@ -1537,5 +1528,453 @@ AS
 BEGIN
     SET NOCOUNT ON;
     DELETE FROM EmpresaRecreacionTipoActividad WHERE IdEmpresaRecreacionTipoActividad = @IdRelacion;
+END
+GO
+
+-- ==========================================================================================
+-- MÓDULO CATÁLOGO TIPO SERVICIO
+-- ==========================================================================================
+
+/* 1. Reportar */
+CREATE OR ALTER PROCEDURE SP_ReportarTipoServicio
+AS
+BEGIN
+    SELECT IdTipoServicio, NombreTipoServicio, Descripcion, Costo
+    FROM TipoServicio
+    ORDER BY NombreTipoServicio;
+END
+GO
+
+/* 2. Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarTipoServicio
+    @Nombre NVARCHAR(100),
+    @Descripcion NVARCHAR(MAX),
+    @Costo INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM TipoServicio WHERE NombreTipoServicio = @Nombre)
+        THROW 51000, 'Ya existe un servicio con ese nombre.', 1;
+
+    INSERT INTO TipoServicio (NombreTipoServicio, Descripcion, Costo)
+    VALUES (@Nombre, @Descripcion, @Costo);
+END
+GO
+
+/* 3. Modificar */
+CREATE OR ALTER PROCEDURE SP_ModificarTipoServicio
+    @Id INT,
+    @Nombre NVARCHAR(100),
+    @Descripcion NVARCHAR(MAX),
+    @Costo INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM TipoServicio WHERE IdTipoServicio = @Id)
+        THROW 51000, 'El servicio no existe.', 1;
+
+    UPDATE TipoServicio
+    SET NombreTipoServicio = @Nombre,
+        Descripcion = @Descripcion,
+        Costo = @Costo
+    WHERE IdTipoServicio = @Id;
+END
+GO
+
+/* 4. Eliminar */
+CREATE OR ALTER PROCEDURE SP_EliminarTipoServicio
+    @Id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM EmpresaRecreacionTipoServicio WHERE IdTipoServicio = @Id)
+    BEGIN
+        DECLARE @Cant INT;
+        SELECT @Cant = COUNT(*) FROM EmpresaRecreacionTipoServicio WHERE IdTipoServicio = @Id;
+        DECLARE @Msg NVARCHAR(200) = CONCAT('No se puede eliminar. Este servicio es ofrecido por ', @Cant, ' empresas. Desvincúlelas primero.');
+        THROW 51000, @Msg, 1;
+    END
+
+    DELETE FROM TipoServicio WHERE IdTipoServicio = @Id;
+END
+GO
+
+-- ==========================================================================================
+-- MÓDULO INTERMEDIO: EMPRESA - TIPO SERVICIO
+-- ==========================================================================================
+
+/* 1. Reportar */
+CREATE OR ALTER PROCEDURE SP_ReportarEmpresaServicio
+AS
+BEGIN
+    SELECT 
+        ets.IdEmpresaRecreacionTipoServicio AS ID,
+        er.NombreEmpresa AS Empresa,
+        ts.NombreTipoServicio AS Servicio,
+        ets.IdEmpresaRecreacion,
+        ets.IdTipoServicio
+    FROM EmpresaRecreacionTipoServicio ets
+    INNER JOIN EmpresaRecreacion er ON ets.IdEmpresaRecreacion = er.IdEmpresaRecreacion
+    INNER JOIN TipoServicio ts ON ets.IdTipoServicio = ts.IdTipoServicio
+    ORDER BY er.NombreEmpresa, ts.NombreTipoServicio;
+END
+GO
+
+/* 2. Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarEmpresaServicio
+    @IdEmpresa INT,
+    @IdServicio INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM EmpresaRecreacion WHERE IdEmpresaRecreacion = @IdEmpresa)
+        THROW 51000, 'La empresa no existe.', 1;
+    IF NOT EXISTS (SELECT 1 FROM TipoServicio WHERE IdTipoServicio = @IdServicio)
+        THROW 51000, 'El tipo de servicio no existe.', 1;
+
+    IF EXISTS (SELECT 1 FROM EmpresaRecreacionTipoServicio WHERE IdEmpresaRecreacion = @IdEmpresa AND IdTipoServicio = @IdServicio)
+        THROW 51000, 'Esta empresa ya ofrece este servicio.', 1;
+
+    INSERT INTO EmpresaRecreacionTipoServicio (IdEmpresaRecreacion, IdTipoServicio)
+    VALUES (@IdEmpresa, @IdServicio);
+END
+GO
+
+/* 3. Modificar */
+CREATE OR ALTER PROCEDURE SP_ModificarEmpresaServicio
+    @IdRelacion INT,
+    @IdEmpresa INT,
+    @IdServicio INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM EmpresaRecreacionTipoServicio WHERE IdEmpresaRecreacionTipoServicio = @IdRelacion)
+        THROW 51000, 'El registro no existe.', 1;
+
+    IF EXISTS (SELECT 1 FROM EmpresaRecreacionTipoServicio 
+               WHERE IdEmpresaRecreacion = @IdEmpresa 
+               AND IdTipoServicio = @IdServicio 
+               AND IdEmpresaRecreacionTipoServicio <> @IdRelacion)
+        THROW 51000, 'Esa combinación de Empresa y Servicio ya existe.', 1;
+
+    UPDATE EmpresaRecreacionTipoServicio
+    SET IdEmpresaRecreacion = @IdEmpresa,
+        IdTipoServicio = @IdServicio
+    WHERE IdEmpresaRecreacionTipoServicio = @IdRelacion;
+END
+GO
+
+/* 4. Eliminar */
+CREATE OR ALTER PROCEDURE SP_EliminarEmpresaServicio
+    @IdRelacion INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DELETE FROM EmpresaRecreacionTipoServicio WHERE IdEmpresaRecreacionTipoServicio = @IdRelacion;
+END
+GO
+
+-- ==========================================================================================
+-- 1. TRIGGER: GENERACIÓN AUTOMÁTICA DE FACTURA
+-- ==========================================================================================
+CREATE OR ALTER TRIGGER TRG_GenerarFactura_AlCerrarReserva
+ON Reservacion
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF UPDATE(Estado)
+    BEGIN
+        INSERT INTO Factura (IdReservacion, FechaEmision, MetodoPago, NumeroNoches, ImporteTotal)
+        SELECT 
+            i.IdReservacion,
+            GETDATE(),
+            NULL,
+            DATEDIFF(DAY, i.FechaHoraIngreso, i.FechaSalida),
+            (DATEDIFF(DAY, i.FechaHoraIngreso, i.FechaSalida) * th.PrecioPorNoche)
+        FROM inserted i
+        INNER JOIN deleted d ON i.IdReservacion = d.IdReservacion
+        INNER JOIN Habitacion h ON i.IdHabitacion = h.IdHabitacion
+        INNER JOIN TipoHabitacion th ON h.IdTipoHabitacion = th.IdTipoHabitacion
+        WHERE i.Estado = 'Cerrado' AND d.Estado = 'Activo';
+    END
+END
+GO
+
+-- ==========================================================================================
+-- 2. PROCEDIMIENTOS ALMACENADOS: RESERVACIONES
+-- ==========================================================================================
+
+/* Reportar */
+CREATE OR ALTER PROCEDURE SP_ReportarReservaciones
+AS
+BEGIN
+    SELECT 
+        r.IdReservacion,
+        r.IdCliente,
+        c.Nombre + ' ' + c.PrimerApellido AS NombreCliente,
+        r.IdHabitacion,
+        h.NumeroHabitacion,
+        r.FechaHoraIngreso,
+        r.FechaSalida,
+        r.CantidadPersonas,
+        r.PoseeVehiculo,
+        r.Estado
+    FROM Reservacion r
+    INNER JOIN Cliente c ON r.IdCliente = c.IdCliente
+    INNER JOIN Habitacion h ON r.IdHabitacion = h.IdHabitacion
+    ORDER BY r.FechaHoraIngreso DESC;
+END
+GO
+
+/* Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarReservacion
+    @IdCliente INT,
+    @IdHabitacion INT,
+    @FechaIngreso DATETIME,
+    @FechaSalida DATE,
+    @CantPersonas INT,
+    @PoseeVehiculo BIT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @FechaIngreso >= @FechaSalida
+        THROW 51000, 'La fecha de salida debe ser posterior a la de ingreso.', 1;
+
+    IF EXISTS (SELECT 1 FROM Reservacion 
+               WHERE IdHabitacion = @IdHabitacion 
+               AND Estado = 'Activo'
+               AND (@FechaIngreso < FechaSalida AND @FechaSalida > FechaHoraIngreso))
+    BEGIN
+        THROW 51000, 'La habitación no está disponible en esas fechas.', 1;
+    END
+
+    INSERT INTO Reservacion (IdCliente, IdHabitacion, FechaHoraIngreso, FechaSalida, CantidadPersonas, PoseeVehiculo, Estado)
+    VALUES (@IdCliente, @IdHabitacion, @FechaIngreso, @FechaSalida, @CantPersonas, @PoseeVehiculo, 'Activo');
+END
+GO
+
+/* Modificar */
+CREATE OR ALTER PROCEDURE SP_ModificarReservacion
+    @IdReservacion INT,
+    @IdCliente INT,
+    @IdHabitacion INT,
+    @FechaIngreso DATETIME,
+    @FechaSalida DATE,
+    @CantPersonas INT,
+    @PoseeVehiculo BIT,
+    @Estado NVARCHAR(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- 1. Validar existencia y estado actual
+    DECLARE @EstadoActual NVARCHAR(20);
+    SELECT @EstadoActual = Estado FROM Reservacion WHERE IdReservacion = @IdReservacion;
+
+    IF @EstadoActual IS NULL
+        THROW 51000, 'La reservación no existe.', 1;
+
+    IF @EstadoActual = 'Cerrado'
+        THROW 51000, 'No se puede modificar una reserva finalizada (Cerrada).', 1;
+
+    -- 2. Actualizar
+    UPDATE Reservacion
+    SET IdCliente = @IdCliente,
+        IdHabitacion = @IdHabitacion,
+        FechaHoraIngreso = @FechaIngreso,
+        FechaSalida = @FechaSalida,
+        CantidadPersonas = @CantPersonas,
+        PoseeVehiculo = @PoseeVehiculo,
+        Estado = @Estado
+    WHERE IdReservacion = @IdReservacion;
+END
+GO
+
+/* Eliminar */
+CREATE OR ALTER PROCEDURE SP_EliminarReservacion
+    @IdReservacion INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @EstadoActual NVARCHAR(20);
+    SELECT @EstadoActual = Estado FROM Reservacion WHERE IdReservacion = @IdReservacion;
+
+    IF @EstadoActual = 'Cerrado'
+        THROW 51000, 'No se puede eliminar una reserva cerrada (debe quedar en historial).', 1;
+
+    DELETE FROM Reservacion WHERE IdReservacion = @IdReservacion;
+END
+GO
+
+/* 1. Reportar */
+CREATE OR ALTER PROCEDURE SP_ReportarFacturas
+AS
+BEGIN
+    SELECT 
+        f.IdFactura,
+        f.IdReservacion,
+        c.Nombre + ' ' + c.PrimerApellido AS NombreCliente,
+        f.FechaEmision,
+        f.MetodoPago,
+        f.NumeroNoches,
+        f.ImporteTotal
+    FROM Factura f
+    INNER JOIN Reservacion r ON f.IdReservacion = r.IdReservacion
+    INNER JOIN Cliente c ON r.IdCliente = c.IdCliente
+    ORDER BY f.IdFactura DESC;
+END
+GO
+
+/* 2. Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarFacturaManual
+    @IdReservacion INT,
+    @FechaEmision DATETIME,
+    @MetodoPago NVARCHAR(50) = NULL,
+    @NumeroNoches INT,
+    @ImporteTotal DECIMAL(18,2)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM Reservacion WHERE IdReservacion = @IdReservacion)
+        THROW 51000, 'La reservación indicada no existe.', 1;
+
+    IF EXISTS (SELECT 1 FROM Factura WHERE IdReservacion = @IdReservacion)
+        THROW 51000, 'Ya existe una factura para esta reservación.', 1;
+
+    IF @MetodoPago IS NOT NULL AND @MetodoPago NOT IN ('Efectivo', 'Tarjeta de Credito')
+        THROW 51000, 'Método de pago inválido. Use: Efectivo o Tarjeta de Credito.', 1;
+
+    INSERT INTO Factura (IdReservacion, FechaEmision, MetodoPago, NumeroNoches, ImporteTotal)
+    VALUES (@IdReservacion, @FechaEmision, @MetodoPago, @NumeroNoches, @ImporteTotal);
+END
+GO
+
+/* 3. Modificar */
+CREATE OR ALTER PROCEDURE SP_ModificarFactura
+    @IdFactura INT,
+    @FechaEmision DATETIME,
+    @MetodoPago NVARCHAR(50),
+    @NumeroNoches INT,
+    @ImporteTotal DECIMAL(18,2)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM Factura WHERE IdFactura = @IdFactura)
+        THROW 51000, 'La factura no existe.', 1;
+
+    IF @MetodoPago IS NOT NULL AND @MetodoPago NOT IN ('Efectivo', 'Tarjeta de Credito')
+        THROW 51000, 'Método de pago inválido. Use: Efectivo o Tarjeta de Credito.', 1;
+
+    UPDATE Factura
+    SET FechaEmision = @FechaEmision,
+        MetodoPago = @MetodoPago,
+        NumeroNoches = @NumeroNoches,
+        ImporteTotal = @ImporteTotal
+    WHERE IdFactura = @IdFactura;
+END
+GO
+
+/* 4. Eliminar */
+CREATE OR ALTER PROCEDURE SP_EliminarFactura
+    @IdFactura INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DELETE FROM Factura WHERE IdFactura = @IdFactura;
+END
+GO
+
+-- ==========================================================================================
+-- MÓDULO FACTURACIÓN
+-- ==========================================================================================
+
+/* 1. Reportar */
+CREATE OR ALTER PROCEDURE SP_ReportarFacturas
+AS
+BEGIN
+    SELECT 
+        f.IdFactura,
+        f.IdReservacion,
+        c.Nombre + ' ' + c.PrimerApellido AS NombreCliente,
+        f.FechaEmision,
+        f.MetodoPago,
+        f.NumeroNoches,
+        f.ImporteTotal
+    FROM Factura f
+    INNER JOIN Reservacion r ON f.IdReservacion = r.IdReservacion
+    INNER JOIN Cliente c ON r.IdCliente = c.IdCliente
+    ORDER BY f.IdFactura DESC;
+END
+GO
+
+/* 2. Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarFacturaManual
+    @IdReservacion INT,
+    @FechaEmision DATETIME,
+    @MetodoPago NVARCHAR(50) = NULL,
+    @NumeroNoches INT,
+    @ImporteTotal DECIMAL(18,2)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM Reservacion WHERE IdReservacion = @IdReservacion)
+        THROW 51000, 'La reservación indicada no existe.', 1;
+
+    IF EXISTS (SELECT 1 FROM Factura WHERE IdReservacion = @IdReservacion)
+        THROW 51000, 'Ya existe una factura para esta reservación.', 1;
+
+    IF @MetodoPago IS NOT NULL AND @MetodoPago NOT IN ('Efectivo', 'Tarjeta de Credito')
+        THROW 51000, 'Método de pago inválido. Use: Efectivo o Tarjeta de Credito.', 1;
+
+    INSERT INTO Factura (IdReservacion, FechaEmision, MetodoPago, NumeroNoches, ImporteTotal)
+    VALUES (@IdReservacion, @FechaEmision, @MetodoPago, @NumeroNoches, @ImporteTotal);
+END
+GO
+
+/* 3. Modificar (Principalmente para procesar el PAGO) */
+CREATE OR ALTER PROCEDURE SP_ModificarFactura
+    @IdFactura INT,
+    @FechaEmision DATETIME,
+    @MetodoPago NVARCHAR(50),
+    @NumeroNoches INT,
+    @ImporteTotal DECIMAL(18,2)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM Factura WHERE IdFactura = @IdFactura)
+        THROW 51000, 'La factura no existe.', 1;
+
+    IF @MetodoPago IS NOT NULL AND @MetodoPago NOT IN ('Efectivo', 'Tarjeta de Credito')
+        THROW 51000, 'Método de pago inválido. Use: Efectivo o Tarjeta de Credito.', 1;
+
+    UPDATE Factura
+    SET FechaEmision = @FechaEmision,
+        MetodoPago = @MetodoPago,
+        NumeroNoches = @NumeroNoches,
+        ImporteTotal = @ImporteTotal
+    WHERE IdFactura = @IdFactura;
+END
+GO
+
+/* 4. Eliminar */
+CREATE OR ALTER PROCEDURE SP_EliminarFactura
+    @IdFactura INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DELETE FROM Factura WHERE IdFactura = @IdFactura;
 END
 GO

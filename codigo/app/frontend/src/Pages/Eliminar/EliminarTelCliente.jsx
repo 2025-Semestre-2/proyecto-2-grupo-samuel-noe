@@ -32,7 +32,6 @@ export function EliminarTelCliente(){
           setEncontrado(null);
           setIdBusqueda('');
       } catch (error) {
-          // Muestra el error de "Debe tener al menos un teléfono"
           toast.error("Error " + (error.response?.data?.error || "Error al eliminar"));
       }
   }

@@ -17,7 +17,6 @@ export function ModificarUsuario(){
       if(!usuarioBusqueda) return toast.warning("Ingrese nombre de usuario");
       try {
           const res = await api.get('/usuario');
-          // Búsqueda Case-Insensitive
           const item = res.data.find(x => x.Usuario.toLowerCase() === usuarioBusqueda.toLowerCase());
           
           if(item) {

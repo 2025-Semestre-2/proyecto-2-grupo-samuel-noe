@@ -2,8 +2,10 @@ const { Router } = require('express');
 const router = Router();
 const ctrl = require('../controllers/reservacion.controller');
 
-router.post('/', ctrl.crearReserva);
-router.put('/checkout', ctrl.realizarCheckout);
-router.get('/facturas', ctrl.getFacturas);
+router.get('/listas', ctrl.getListas);
+router.get('/', ctrl.getReservaciones);
+router.post('/', ctrl.createReservacion);
+router.put('/:id', ctrl.updateReservacion);
+router.delete('/:id', ctrl.deleteReservacion);
 
 module.exports = router;

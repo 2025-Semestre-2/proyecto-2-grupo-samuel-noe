@@ -18,7 +18,6 @@ export function InsertarTipoActividad(){
   }
 
   const mandarRequest = async () => {
-    // Validaciones
     if (!validarNull(nombre, 'Nombre Actividad').esValido) return toast.warning("Nombre requerido");
     if (!validarInt(costo, 'Costo').esValido) return toast.warning("Costo inválido (solo números)");
 

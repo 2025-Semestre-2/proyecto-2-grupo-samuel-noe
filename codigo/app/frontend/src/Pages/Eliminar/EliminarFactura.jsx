@@ -1,179 +1,66 @@
-
 import { useState } from 'react'
-import { Textbox, TextboxBlock } from "../../Components/Textbox"
-import { validarNull, validarInt } from '../../Components/Validaciones'
-import axios from 'axios'
+import { Textbox } from "../../Components/Textbox"
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function EliminarFactura(){
 
-  const [idFactura, setIdFactura] = useState('')
-  const [idReserva, setIdReserva] = useState('')
-  const [fechaEmision, setFechaEmision] = useState('')
-  const [metodoPago, setMetodoPago] = useState('')
-  const [cantNoches, setCantNoches] = useState('')
-  const [importeTotal, setImporteTotal] = useState('')
-  const [validado, setValidado] = useState(false)
+  const [idBusqueda, setIdBusqueda] = useState('');
+  const [encontrado, setEncontrado] = useState(null);
 
-  const LimpiarFactura = () => {
-    setIdFactura('')
-    setIdReserva('')
-    setFechaEmision('')
-    setMetodoPago('')
-    setCantNoches('')
-    setImporteTotal('')
-    setValidado(false)
+  const buscar = async () => {
+      if(!idBusqueda) return toast.warning("Ingrese ID Factura");
+      try {
+          const res = await api.get('/factura');
+          const item = res.data.find(x => x.IdFactura == idBusqueda);
+          if(item) {
+              setEncontrado(item);
+              toast.success("Factura cargada");
+          } else {
+              toast.error("No encontrada");
+              setEncontrado(null);
+          }
+      } catch (e) { toast.error("Error al buscar"); }
   }
 
-  const validacionesFactura = () => {
-  
-    const idReservaValido = validarNull(idReserva, 'ID Reserva');
-    if (!idReservaValido.esValido) {
-        alert(idReservaValido.mensaje);
-        return;
-    }
-    const fechaValido = validarNull(fechaEmision, 'Fecha Emisión');
-    if (!fechaValido.esValido) {
-        alert(fechaValido.mensaje);
-        return;
-    }
-    const metodoPagoValido = validarNull(metodoPago, 'Método de Pago');
-    if (!metodoPagoValido.esValido) {
-        alert(metodoPagoValido.mensaje);
-        return;
-    }
-    const numNochesValido = validarNull(cantNoches, 'Cantidad de Noches');
-    if (!numNochesValido.esValido) {
-        alert(numNochesValido.mensaje);
-        return;
-    }
-    const importeTotalValido = validarNull(importeTotal, 'Importe Total');
-    if (!importeTotalValido.esValido) {
-        alert(importeTotalValido.mensaje);
-        return;
-    }
-
-    const idReservaValido2 = validarInt(idReserva, 'ID Reserva');
-    if (!idReservaValido2.esValido) {
-        alert(idReservaValido2.mensaje);
-        return;
-    }
-    const numNochesValido2 = validarInt(cantNoches, 'Cantidad de Noches');
-    if (!numNochesValido2.esValido) {
-        alert(numNochesValido2.mensaje);
-        return;
-    }
-
-
-    setValidado(true);
-  }
-
-  const mandarRequest = async () => {
-    LimpiarFactura()
-  }
-
-  const verificarExistenciaFactura = async () => {
-    if (!idFactura) {
-      alert('Ingresa un ID de Factura');
-      return;
-    }
-    try {
-    } 
-    catch (e) {
-      alert('Factura no encontrada: ' + e.message);
-      console.error(e);
-    }
+  const eliminar = async () => {
+      if(!window.confirm(`¿Eliminar factura #${encontrado.IdFactura}?`)) return;
+      try {
+          await api.delete(`/factura/${encontrado.IdFactura}`);
+          toast.success("Eliminada correctamente.");
+          setEncontrado(null);
+          setIdBusqueda('');
+      } catch (error) {
+          toast.error("Error: " + (error.response?.data?.error || "Error al eliminar"));
+      }
   }
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={4000}/>
       <h1>Eliminar Factura</h1>
-
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>   
-
-        <div className="form-group">
-        <label>ID de Factura: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idFactura}
-          onChange={setIdFactura}
-        />
-        </div>
-        <button onClick={verificarExistenciaFactura}>Buscar</button>
-   
-      </div>
       
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>ID Reserva: </label>
-        <TextboxBlock
-          type="text"
-          placeholder=""
-          value={idReserva}
-          onChange={setIdReserva}
-        />
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
+        <div style={{display:'flex', gap:'10px'}}>
+            <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} placeholder="ID Factura..." />
+            <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
         </div>
-
-        <div className="form-group">
-        <label>Fecha Emisión: </label>
-        <TextboxBlock
-          type="text"
-          placeholder=""
-          value={fechaEmision}
-          onChange={setFechaEmision}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Método de Pago: </label>
-        <TextboxBlock
-          type="text"
-          placeholder=""  
-          value={metodoPago}
-          onChange={setMetodoPago}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Cantidad de Noches: </label>
-        <TextboxBlock
-          type="text"
-          placeholder=""
-          value={cantNoches}
-          onChange={setCantNoches}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Importe Total: </label>
-        <TextboxBlock
-          type="text"
-          placeholder=""
-          value={importeTotal}
-          onChange={setImporteTotal}
-        />
-        </div>
-        
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-            validacionesFactura()
-            if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarFactura}>Cancelar</button>
-        </div>
-
       </div>
+
+      {encontrado && (
+        <div style={{border: '2px solid #d9534f', borderRadius: '4px', padding: '30px', backgroundColor: '#fff5f5'}}>
+            <h3>Detalle Factura</h3>
+            <p><strong>Cliente:</strong> {encontrado.NombreCliente}</p>
+            <p><strong>Monto:</strong> ₡ {encontrado.ImporteTotal}</p>
+            <p><strong>Estado:</strong> {encontrado.MetodoPago || 'PENDIENTE DE PAGO'}</p>
+
+            <div style={{display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px'}}>
+                <button onClick={eliminar} style={{backgroundColor:'#dc3545', color:'white'}}>Eliminar Definitivamente</button>
+                <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+            </div>
+        </div>
+      )}
     </>
   )
 }

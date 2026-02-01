@@ -1,53 +1,66 @@
 const { getConnection, sql } = require('../config/db');
 
-// POST: Crear Reserva
-const crearReserva = async (req, res) => {
-    const { idCliente, idHabitacion, fechaIngreso, fechaSalida, cantidadPersonas, poseeVehiculo } = req.body;
+const getListas = async (req, res) => {
     try {
         const pool = await getConnection();
-        const result = await pool.request()
-            .input('IdCliente', sql.Int, idCliente)
-            .input('IdHabitacion', sql.Int, idHabitacion)
-            .input('FechaIngreso', sql.DateTime, new Date(fechaIngreso))
-            .input('FechaSalida', sql.Date, new Date(fechaSalida))
-            .input('CantidadPersonas', sql.Int, cantidadPersonas)
-            .input('PoseeVehiculo', sql.Bit, poseeVehiculo ? 1 : 0)
-            .output('IdReservacion', sql.Int)
-            .execute('SP_CrearReservacion');
-
-        res.json({ 
-            message: 'Reserva creada con éxito', 
-            idReservacion: result.output.IdReservacion 
-        });
-    } catch (error) {
-        res.status(409).json({ error: error.message });
-    }
+        const clientes = await pool.request().query("SELECT IdCliente, Nombre + ' ' + PrimerApellido AS NombreCompleto FROM Cliente");
+        const habitaciones = await pool.request().query("SELECT IdHabitacion, Numero, Estado FROM Habitacion");
+        res.json({ clientes: clientes.recordset, habitaciones: habitaciones.recordset });
+    } catch (error) { res.status(500).json({ error: error.message }); }
 };
 
-// PUT: Checkout
-const realizarCheckout = async (req, res) => {
-    const { idReservacion } = req.body;
+const getReservaciones = async (req, res) => {
+    try {
+        const pool = await getConnection();
+        const result = await pool.request().execute('SP_ReportarReservaciones');
+        res.json(result.recordset);
+    } catch (error) { res.status(500).json({ error: error.message }); }
+};
+
+const createReservacion = async (req, res) => {
+    const { idCliente, idHabitacion, fechaIngreso, fechaSalida, cantPersonas, poseeVehiculo } = req.body;
     try {
         const pool = await getConnection();
         await pool.request()
-            .input('IdReservacion', sql.Int, idReservacion)
-            .execute('SP_RealizarCheckOut');
-        
-        res.json({ message: 'Checkout realizado. Factura generada automáticamente.' });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+            .input('IdCliente', sql.Int, idCliente)
+            .input('IdHabitacion', sql.Int, idHabitacion)
+            .input('FechaIngreso', sql.DateTime, fechaIngreso)
+            .input('FechaSalida', sql.Date, fechaSalida)
+            .input('CantPersonas', sql.Int, cantPersonas)
+            .input('PoseeVehiculo', sql.Bit, poseeVehiculo)
+            .execute('SP_RegistrarReservacion');
+        res.json({ message: 'Reservación creada.' });
+    } catch (error) { res.status(400).json({ error: error.message }); }
 };
 
-// GET: Obtener Facturas
-const getFacturas = async (req, res) => {
+const updateReservacion = async (req, res) => {
+    const { id } = req.params;
+    const { idCliente, idHabitacion, fechaIngreso, fechaSalida, cantPersonas, poseeVehiculo, estado } = req.body;
     try {
         const pool = await getConnection();
-        const result = await pool.request().query('SELECT * FROM Factura');
-        res.json(result.recordset);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+        await pool.request()
+            .input('IdReservacion', sql.Int, id)
+            .input('IdCliente', sql.Int, idCliente)
+            .input('IdHabitacion', sql.Int, idHabitacion)
+            .input('FechaIngreso', sql.DateTime, fechaIngreso)
+            .input('FechaSalida', sql.Date, fechaSalida)
+            .input('CantPersonas', sql.Int, cantPersonas)
+            .input('PoseeVehiculo', sql.Bit, poseeVehiculo)
+            .input('Estado', sql.NVarChar, estado) // Si es 'Cerrado', activa Trigger
+            .execute('SP_ModificarReservacion');
+        res.json({ message: 'Reservación actualizada.' });
+    } catch (error) { res.status(400).json({ error: error.message }); }
 };
 
-module.exports = { crearReserva, realizarCheckout, getFacturas };
+const deleteReservacion = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const pool = await getConnection();
+        await pool.request()
+            .input('IdReservacion', sql.Int, id)
+            .execute('SP_EliminarReservacion');
+        res.json({ message: 'Reservación eliminada.' });
+    } catch (error) { res.status(400).json({ error: error.message }); }
+};
+
+module.exports = { getListas, getReservaciones, createReservacion, updateReservacion, deleteReservacion };

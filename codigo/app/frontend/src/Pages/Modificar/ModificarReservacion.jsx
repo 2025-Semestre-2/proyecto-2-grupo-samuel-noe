@@ -1,217 +1,148 @@
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { validarNull, validarInt } from '../../Components/Validaciones'
-import axios from 'axios'
+import { validarInt } from '../../Components/Validaciones'
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function ModificarReservacion(){
 
-  const [idReserva, setIdReserva] = useState('')
+  const [idBusqueda, setIdBusqueda] = useState('');
+  const [encontrado, setEncontrado] = useState(null);
+  
+  // Estados editables
   const [idCliente, setIdCliente] = useState('')
   const [idHab, setIdHab] = useState('')
   const [fechaIngreso, setFechaIngreso] = useState('')
   const [fechaSalida, setFechaSalida] = useState('')
   const [cantPersonas, setCantPersonas] = useState('')
-  const [vehiculo, setVehiculo] = useState('')
-  const [estado, setEstado] = useState('')
-  const [validado, setValidado] = useState(false)
+  const [vehiculo, setVehiculo] = useState('0')
+  const [estado, setEstado] = useState('Activo')
 
-  const LimpiarReservacion = () => {
-    setIdReserva('')
-    setIdCliente('')
-    setIdHab('')
-    setFechaIngreso('')
-    setFechaSalida('')
-    setCantPersonas('')
-    setVehiculo('')
-    setEstado('')
-    setValidado(false)
+  const [clientes, setClientes] = useState([])
+  const [habitaciones, setHabitaciones] = useState([])
+
+  useEffect(() => {
+      const cargarListas = async () => {
+          try {
+              const res = await api.get('/reservacion/listas');
+              setClientes(res.data.clientes);
+              setHabitaciones(res.data.habitaciones);
+          } catch(e) {}
+      };
+      cargarListas();
+  }, []);
+
+  const buscar = async () => {
+      if(!idBusqueda) return toast.warning("Ingrese ID");
+      try {
+          const res = await api.get('/reservacion');
+          const item = res.data.find(x => x.IdReservacion == idBusqueda);
+          if(item) {
+              setEncontrado(item);
+              setIdCliente(item.IdCliente);
+              setIdHab(item.IdHabitacion);
+              setFechaIngreso(item.FechaHoraIngreso.replace('Z', '')); // Ajuste formato fecha
+              setFechaSalida(item.FechaSalida.split('T')[0]);
+              setCantPersonas(item.CantidadPersonas);
+              setVehiculo(item.PoseeVehiculo ? '1' : '0');
+              setEstado(item.Estado);
+              
+              if(item.Estado === 'Cerrado') toast.warning("Reserva CERRADA: Solo lectura.");
+              else toast.success("Cargado");
+          } else {
+              toast.error("No encontrada");
+              setEncontrado(null);
+          }
+      } catch (e) { toast.error("Error al buscar"); }
   }
 
-  const validacionesReservacion = () => {
-  
-    const idClienteValido = validarNull(idCliente, 'Identificación Cliente');
-    if (!idClienteValido.esValido) {
-      alert(idClienteValido.mensaje);
-      return;
-    }
-    const idHabValido = validarNull(idHab, 'ID de la Habitación');
-    if (!idHabValido.esValido) {
-      alert(idHabValido.mensaje);
-      return;
-    }
-    const fechaIngresoValido = validarNull(fechaIngreso, 'Fecha Ingreso');
-    if (!fechaIngresoValido.esValido) {
-      alert(fechaIngresoValido.mensaje);
-      return;
-    }
-    const fechaSalidaValido = validarNull(fechaSalida, 'Fecha Salida');
-    if (!fechaSalidaValido.esValido) {
-      alert(fechaSalidaValido.mensaje);
-      return;
-    }
-    const cantidadPersonasValido = validarNull(cantPersonas, 'Cantidad de Personas');
-    if (!cantidadPersonasValido.esValido) {
-      alert(cantidadPersonasValido.mensaje);
-      return;
-    }
-    const poseeVehiculoValido = validarNull(vehiculo, 'Posee Vehículo');
-    if (!poseeVehiculoValido.esValido) {
-      alert(poseeVehiculoValido.mensaje);
-      return;
-    }
-    const estadoValido = validarNull(estado, 'Estado');
-    if (!estadoValido.esValido) {
-      alert(estadoValido.mensaje);
-      return;
-    }
+  const guardar = async () => {
+      if (!validarInt(cantPersonas, 'Personas').esValido) return toast.warning("Cantidad inválida");
 
-    const idClienteValido2 = validarInt(idCliente, 'Identificación Cliente');
-    if (!idClienteValido2.esValido) {
-      alert(idClienteValido2.mensaje);
-      return;
-    }
-    const idHabitacionValido2 = validarInt(idHab, 'ID de la Habitación');
-    if (!idHabitacionValido2.esValido) {
-      alert(idHabitacionValido2.mensaje);
-      return;
-    }
-    const cantidadPersonasValido2 = validarInt(cantPersonas, 'Cantidad de Personas');
-    if (!cantidadPersonasValido2.esValido) {
-      alert(cantidadPersonasValido2.mensaje);
-      return;
-    }
+      if(estado === 'Cerrado' && encontrado.Estado === 'Activo'){
+          if(!window.confirm("⚠️ ¿Está seguro de hacer CHECK-OUT? \nEsto CERRARÁ la reserva y generará la FACTURA automáticamente. No podrá deshacer esto.")) return;
+      }
 
-    setValidado(true);
+      try {
+          await api.put(`/reservacion/${encontrado.IdReservacion}`, {
+              idCliente: parseInt(idCliente),
+              idHabitacion: parseInt(idHab),
+              fechaIngreso,
+              fechaSalida,
+              cantPersonas: parseInt(cantPersonas),
+              poseeVehiculo: vehiculo === '1',
+              estado
+          });
+          toast.success(estado === 'Cerrado' ? "Reserva finalizada y Factura generada." : "Actualizado correctamente.");
+          setEncontrado(null);
+          setIdBusqueda('');
+      } catch (e) { 
+          toast.error("Error: " + (e.response?.data?.error || "Error al guardar")); 
+      }
   }
 
-  const mandarRequest = async () => {
-    LimpiarReservacion()
-  }
-
-  const verificarExistenciaReserva = async () => {
-    if (!idReserva) {
-      alert('Ingresa un ID de Reservación');
-      return;
-    }
-    try {
-    } 
-    catch (e) {
-      alert('Reservación no encontrada: ' + e.message);
-      console.error(e);
-    }
-  }
+  const isClosed = encontrado?.Estado === 'Cerrado';
 
   return (
     <>
-      <h1>Modificar Reservación</h1>
+      <ToastContainer position="top-right" autoClose={4000}/>
+      <h1>Modificar / Finalizar Reservación</h1>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>   
-
-        <div className="form-group">
-        <label>ID de Reservación: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idReserva}
-          onChange={setIdReserva}
-        />
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
+        <div style={{display:'flex', gap:'10px'}}>
+            <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} placeholder="ID Reserva..." />
+            <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
         </div>
-        <button onClick={verificarExistenciaReserva}>Buscar</button>
-   
       </div>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>ID del Cliente: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idCliente}
-          onChange={setIdCliente}
-        />
-        </div>
+      {encontrado && (
+        <div style={{border: '2px solid #333', borderRadius: '4px', padding: '30px', backgroundColor: isClosed ? '#e2e3e5' : '#f9f9f9'}}>
+            
+            <div className="form-group" style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px'}}>
+                <div>
+                    <label>Cliente: </label>
+                    <select disabled={isClosed} style={{width:'100%', padding:'8px'}} value={idCliente} onChange={(e)=>setIdCliente(e.target.value)}>
+                        {clientes.map(c => <option key={c.IdCliente} value={c.IdCliente}>{c.NombreCompleto}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label>Habitación: </label>
+                    <select disabled={isClosed} style={{width:'100%', padding:'8px'}} value={idHab} onChange={(e)=>setIdHab(e.target.value)}>
+                        {habitaciones.map(h => <option key={h.IdHabitacion} value={h.IdHabitacion}>H-{h.Numero}</option>)}
+                    </select>
+                </div>
+            </div>
 
-        <div className="form-group">
-        <label>ID de la Habitación: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idHab}
-          onChange={setIdHab}
-        />
-        </div>
+            <div className="form-group" style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px'}}>
+                <div><label>Check-In:</label><input disabled={isClosed} type="datetime-local" style={{width:'100%', padding:'8px'}} value={fechaIngreso} onChange={(e)=>setFechaIngreso(e.target.value)} /></div>
+                <div><label>Check-Out:</label><input disabled={isClosed} type="date" style={{width:'100%', padding:'8px'}} value={fechaSalida} onChange={(e)=>setFechaSalida(e.target.value)} /></div>
+            </div>
 
-        <div className="form-group">
-        <label>Fecha Ingreso: </label>
-        <Textbox
-          type="text"
-          placeholder=""  
-          value={fechaIngreso}
-          onChange={setFechaIngreso}
-        />
+            <div className="form-group" style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'20px'}}>
+                <div><label>Personas:</label><Textbox disabled={isClosed} type="number" value={cantPersonas} onChange={setCantPersonas} /></div>
+                <div>
+                    <label>Vehículo:</label>
+                    <select disabled={isClosed} style={{width:'100%', padding:'8px'}} value={vehiculo} onChange={(e)=>setVehiculo(e.target.value)}>
+                        <option value="0">No</option>
+                        <option value="1">Sí</option>
+                    </select>
+                </div>
+                <div>
+                    <label style={{fontWeight:'bold', color: estado==='Cerrado'?'red':'green'}}>ESTADO:</label>
+                    <select disabled={isClosed} style={{width:'100%', padding:'8px'}} value={estado} onChange={(e)=>setEstado(e.target.value)}>
+                        <option value="Activo">Activo</option>
+                        <option value="Cerrado">Cerrado (Check-Out)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
+                {!isClosed && <button onClick={guardar}>Guardar Cambios</button>}
+                <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+            </div>
         </div>
-
-        <div className="form-group">
-        <label>Fecha Salida: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={fechaSalida}
-          onChange={setFechaSalida}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Cantidad de Personas: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={cantPersonas}
-          onChange={setCantPersonas}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Posee Vehículo: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={vehiculo}
-          onChange={setVehiculo}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Estado: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={estado}
-          onChange={setEstado}
-        />
-        </div>
-        
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-            validacionesReservacion()
-            if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarReservacion}>Cancelar</button>
-        </div>
-
-      </div>
+      )}
     </>
   )
 }

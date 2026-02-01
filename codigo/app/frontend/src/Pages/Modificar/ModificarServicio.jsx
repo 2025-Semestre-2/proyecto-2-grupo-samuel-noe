@@ -1,139 +1,83 @@
-
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
 import { validarNull, validarInt } from '../../Components/Validaciones'
-import axios from 'axios'
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function ModificarServicio(){
 
-  const [idServicio, setIdServicio] = useState('')
+  const [idBusqueda, setIdBusqueda] = useState('');
+  const [encontrado, setEncontrado] = useState(null);
+  
+  // Campos editables
   const [nombre, setNombre] = useState('')
   const [desc, setDesc] = useState('')
   const [costo, setCosto] = useState('')
-  const [validado, setValidado] = useState(false)
 
-  const LimpiarServicio = () => {
-    setIdServicio('')
-    setNombre('')
-    setDesc('')
-    setCosto('')
-    setValidado(false)
+  const buscar = async () => {
+      if(!idBusqueda) return toast.warning("Ingrese ID");
+      try {
+          const res = await api.get('/tipo-servicio');
+          const item = res.data.find(x => x.IdTipoServicio == idBusqueda);
+          if(item) {
+              setEncontrado(item);
+              setNombre(item.NombreTipoServicio);
+              setDesc(item.Descripcion);
+              setCosto(item.Costo.toString());
+              toast.success("Cargado");
+          } else {
+              toast.error("No encontrado");
+              setEncontrado(null);
+          }
+      } catch (e) { toast.error("Error al buscar"); }
   }
 
-  const validacionesServicio = () => {
-  
-    const nombreValido = validarNull(nombre, 'Nombre del Servicio');
-    if (!nombreValido.esValido) {
-      alert(nombreValido.mensaje);
-      return;
-    }
-    const descValido = validarNull(desc, 'Descripción');
-    if (!descValido.esValido) {
-      alert(descValido.mensaje);
-      return;
-    }
-    const costoValido = validarNull(costo, 'Costo');
-    if (!costoValido.esValido) {
-      alert(costoValido.mensaje);
-      return;
-    }
+  const guardar = async () => {
+      if (!validarNull(nombre, 'Nombre').esValido) return toast.warning("Nombre requerido");
+      if (!validarInt(costo, 'Costo').esValido) return toast.warning("Costo inválido");
 
-    const costoValido2 = validarInt(costo, 'Costo');
-    if (!costoValido2.esValido) {
-      alert(costoValido2.mensaje);
-      return;
-    }
-
-    setValidado(true);
-  }
-
-  const mandarRequest = async () => {
-    LimpiarServicio()
-  }
-
-  const verificarExistenciaServicio = async () => {
-    if (!idServicio) {
-      alert('Ingresa un ID de Servicio');
-      return;
-    }
-    try {
-    } 
-    catch (e) {
-      alert('Servicio no encontrado: ' + e.message);
-      console.error(e);
-    }
+      try {
+          await api.put(`/tipo-servicio/${encontrado.IdTipoServicio}`, {
+              nombreTipoServicio: nombre,
+              descripcion: desc,
+              costo: parseInt(costo)
+          });
+          toast.success("Actualizado correctamente.");
+          setEncontrado(null);
+          setIdBusqueda('');
+      } catch (e) { 
+          toast.error("Error: " + (e.response?.data?.error || "Error al guardar")); 
+      }
   }
 
   return (
     <>
-      <h1>Modificar Servicio Empresa</h1>
+      <ToastContainer position="top-right" autoClose={3000}/>
+      <h1>Modificar Servicio</h1>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>   
-
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
         <div className="form-group">
-        <label>ID de Servicio: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idServicio}
-          onChange={setIdServicio}
-        />
+            <label style={{fontWeight:'bold'}}>ID de Servicio: </label>
+            <div style={{display:'flex', gap:'10px'}}>
+                <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} />
+                <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
+            </div>
         </div>
-        <button onClick={verificarExistenciaServicio}>Buscar</button>
-   
       </div>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>Nombre del Servicio: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={nombre}
-          onChange={setNombre}
-        />
+      {encontrado && (
+        <div style={{border: '2px solid #333', borderRadius: '4px', padding: '30px', backgroundColor: '#f9f9f9'}}>
+            <div className="form-group"><label>Nombre del Servicio: </label><Textbox type="text" value={nombre} onChange={setNombre} /></div>
+            <div className="form-group"><label>Descripción: </label><Textbox type="text" value={desc} onChange={setDesc} /></div>
+            <div className="form-group"><label>Costo: </label><Textbox type="text" value={costo} onChange={setCosto} /></div>
+            
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
+                <button onClick={guardar}>Guardar Cambios</button>
+                <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+            </div>
         </div>
-
-        <div className="form-group">
-        <label>Descripción: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={desc}
-          onChange={setDesc}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Costo: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={costo}
-          onChange={setCosto}
-        />
-        </div>
-        
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-            validacionesServicio()
-            if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarServicio}>Cancelar</button>
-        </div>
-
-      </div>
+      )}
     </>
   )
 }

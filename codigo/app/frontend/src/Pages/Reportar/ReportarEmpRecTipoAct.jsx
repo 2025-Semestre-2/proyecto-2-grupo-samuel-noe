@@ -20,7 +20,6 @@ export function ReportarEmpRecTipoAct(){
         } else {
             toast.info("No se encontraron registros.");
         }
-        // ----------------------------------------------------------
 
     } catch (e) { 
         console.error(e);

@@ -20,7 +20,6 @@ export function InsertarEmpRecTipoAct(){
               const resAct = await api.get('/empresa-actividad/actividades');
               setListaActividades(resAct.data);
               
-              // Forzado visual inicial
               if(resEmp.data.length > 0) setIdEmpresa(resEmp.data[0].IdEmpresaRecreacion.toString());
               if(resAct.data.length > 0) setIdActividad(resAct.data[0].IdTipoActividad.toString());
 

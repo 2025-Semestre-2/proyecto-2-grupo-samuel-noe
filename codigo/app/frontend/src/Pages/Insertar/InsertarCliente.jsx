@@ -34,7 +34,6 @@ export function InsertarCliente(){
         if (!validarNull(nombre, 'Nombre').esValido) return toast.warning("Nombre requerido");
         if (!validarNull(apellido1, '1er Apellido').esValido) return toast.warning("Apellido requerido");
         
-        // CAMBIO 2: Validación explícita del Combo
         if (!tipoId) return toast.warning("Seleccione el Tipo de Identificación");
         
         if (!validarNull(numId, 'Identificación').esValido) return toast.warning("Cédula requerida");

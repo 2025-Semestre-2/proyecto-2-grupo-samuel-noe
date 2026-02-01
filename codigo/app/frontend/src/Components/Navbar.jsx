@@ -55,10 +55,6 @@ export function Navbar(){
                 <button>Mantenimiento Facturas</button>
             </Link>
 
-            <Link to="/ManteEmpRec">
-                <button>Mantenimiento Empresa Recreación</button>
-            </Link>
-
             <Link to="/">
                 <button>Cerrar Sesión</button>
             </Link>

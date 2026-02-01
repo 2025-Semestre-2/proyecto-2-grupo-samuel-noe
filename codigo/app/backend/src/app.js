@@ -22,6 +22,10 @@ const clienteTelefonoRoutes = require('./routes/clienteTelefono.routes');
 const actividadRoutes = require('./routes/actividad.routes')
 const tipoActividadRoutes = require('./routes/tipoActividad.routes');
 const empresaActividadRoutes = require('./routes/empresaActividad.routes');
+const tipoServicioRoutes = require('./routes/tipoServicio.routes');
+const empresaServicioRoutes = require('./routes/empresaServicio.routes');
+const reservacion = require('./routes/reservacion.routes');
+const factura = require('./routes/factura.routes');
 
 const app = express();
 
@@ -51,5 +55,9 @@ app.use('/api/cliente-telefono', clienteTelefonoRoutes);
 app.use('/api/actividad', actividadRoutes);
 app.use('/api/tipo-actividad', tipoActividadRoutes);
 app.use('/api/empresa-actividad', empresaActividadRoutes)
+app.use('/api/tipo-servicio', tipoServicioRoutes);
+app.use('/api/empresa-servicio', empresaServicioRoutes);
+app.use('/api/reservacion', reservacion);
+app.use('/api/factura', factura);
 
 module.exports = app;
