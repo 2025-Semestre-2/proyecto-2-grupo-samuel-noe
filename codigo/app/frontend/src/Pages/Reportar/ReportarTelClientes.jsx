@@ -1,80 +1,63 @@
-
 import {useState, useEffect} from "react"; 
-import axios from "axios";
+import api from '../../services/axiosConfig';
 import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 export function ReportarTelClientes(){
+    
+  const [datos, setDatos] = useState([]);
+  const [cargando, setCargando] = useState(true);
 
-    const [datos, setDatos] = useState([]);
-    const [cargando, setCargando] = useState(true);
-
-    useEffect(() => {
-        cargarDatos();
-    }, []);
-
-    const cargarDatos = async () => {
-        try {
+  const cargar = async () => {
+    try {
         setCargando(true);
-        const response = await axios.get('http://localhost:3000/api/cliente-telefono');
-        
-        if (response.data.success) {
-            setDatos(response.data.data);
-            toast.success(` ${response.data.count} registros cargados`);
-        }
-        } catch (error) {
-        console.error('Error:', error);
-        toast.error(' Error al cargar datos');
-        } finally {
-        setCargando(false);
-        }
-    };
+        const res = await api.get('/cliente-telefono');
+        setDatos(res.data);
+    } catch (e) { toast.error("Error cargando reporte"); } 
+    finally { setCargando(false); }
+  }
 
-    return (
+  useEffect(() => { cargar(); }, []);
+
+  return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-      <h1>Reportar Teléfonos Clientes</h1>
-      
-      <div className="container mt-5">
-        {cargando ? (
-          <div className="text-center">
-            <div className="spinner-border" role="status">
-              <span className="visually-hidden">Cargando...</span>
+      <h1>Reportar Teléfonos de Clientes</h1>
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#f9f9f9', margin: '20px'}}>
+        {cargando ? <div className="text-center">Cargando...</div> : (
+            <div className="table-responsive">
+                <table className="table table-bordered table-striped" style={{backgroundColor:'white'}}>
+                    <thead className="thead-dark" style={{backgroundColor:'#343a40', color:'white'}}>
+                        <tr>
+                            <th>ID Registro</th> 
+                            <th>ID Cliente</th>
+                            <th>Nombre Cliente</th>   
+                            <th>Código</th>
+                            <th>Teléfono</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {datos.length > 0 ? (
+                            datos.map(d => (
+                                <tr key={d.IdTelefonoCliente}>
+                                    <td>{d.IdTelefonoCliente}</td>
+                                    <td>{d.IdCliente}</td>
+                                    <td style={{fontWeight:'bold'}}>{d.Cliente}</td>
+                                    <td>+{d.CodigoPais}</td>
+                                    <td>{d.NumeroTelefono}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr><td colSpan="5" className="text-center">No hay datos</td></tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
-          </div>
-        ) : (
-          <div className="table-responsive">
-            <table className="table table-bordered table-striped table-sm">
-              <thead className="table-dark">
-                  <tr>
-                      <th>ID</th> 
-                      <th>ID Cliente</th>   
-                      <th>Número Teléfono</th>
-                      <th>Código País</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  {datos.length > 0 ? (
-                    datos.map((telCliente) => (
-                      <tr key={telCliente.IdTelefonoCliente}>
-                        <td>{telCliente.IdTelefonoCliente}</td>
-                        <td>{telCliente.IdCliente}</td>
-                        <td>{telCliente.NumeroTelefono}</td>
-                        <td>{telCliente.CodigoPais}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="12" className="text-center">
-                        No hay datos disponibles
-                      </td>
-                    </tr>
-                  )}
-              </tbody>
-            </table>
-          </div>
         )}
+        <div style={{textAlign:'center', marginTop:'20px'}}>
+            <button onClick={cargar} className="btn btn-secondary">Refrescar</button>
+        </div>
       </div>
     </>
   )

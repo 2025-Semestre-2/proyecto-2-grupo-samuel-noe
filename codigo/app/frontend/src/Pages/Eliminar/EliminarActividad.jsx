@@ -1,139 +1,77 @@
-
 import { useState } from 'react'
-import { Textbox, TextboxBlock } from "../../Components/Textbox"
-import { validarNull, validarInt} from '../../Components/Validaciones'
-import axios from 'axios'
+import { Textbox } from "../../Components/Textbox"
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function EliminarActividad(){
 
-  const [idActividad, setIdActividad] = useState('')
-  const [nombreActividad, setNombreActividad] = useState('')
-  const [desc, setDesc] = useState('')
-  const [precio, setPrecio] = useState('')
-  const [validado, setValidado] = useState(false)
+  const [idBusqueda, setIdBusqueda] = useState('');
+  const [encontrado, setEncontrado] = useState(null);
 
-  const LimpiarActividad = () => {
-    setIdActividad('')
-    setNombreActividad('')
-    setDesc('')
-    setPrecio('')
-    setValidado(false)
+  const buscar = async () => {
+      if(!idBusqueda) return toast.warning("Ingrese ID");
+      try {
+          const res = await api.get('/actividad');
+          const item = res.data.find(x => x.IdTipoServicio == idBusqueda);
+          if(item) {
+              setEncontrado(item);
+              toast.success("Encontrado");
+          } else {
+              toast.error("No encontrado");
+              setEncontrado(null);
+          }
+      } catch (e) { toast.error("Error de conexión"); }
   }
 
-  const validacionesActividad = () => {
-
-    const nombreValido = validarNull(nombreActividad, 'Nombre de la Actividad');
-    if (!nombreValido.esValido) {
-      alert(nombreValido.mensaje);
-      return;
-    }
-    const descValido = validarNull(desc, 'Descripción');
-    if (!descValido.esValido) {
-      alert(descValido.mensaje);
-      return;
-    }
-    const costoValido = validarNull(precio, 'Costo');
-    if (!costoValido.esValido) {
-      alert(costoValido.mensaje);
-      return;
-    }
-
-    const costoValido2 = validarInt(precio, 'Costo');
-    if (!costoValido2.esValido) {
-      alert(costoValido2.mensaje);
-      return;
-    }
-
-    setValidado(true);
-  }
-
-  const mandarRequest = async () => {
-    LimpiarActividad()
-  }
-
-  const verificarExistenciaActividad = async () => {
-    if (!idActividad) {
-      alert('Ingresa un ID de actividad');
-      return;
-    }
-    try {
-    } 
-    catch (e) {
-      alert('Actividad no encontrada: ' + e.message);
-      console.error(e);
-    }
+  const eliminar = async () => {
+      if(!window.confirm(`¿Eliminar la actividad "${encontrado.NombreTipoServicio}"?`)) return;
+      try {
+          await api.delete(`/actividad/${encontrado.IdTipoServicio}`);
+          toast.success("Eliminado correctamente.");
+          setEncontrado(null);
+          setIdBusqueda('');
+      } catch (error) {
+          // Error de dependencia (51000)
+          toast.error("Error " + (error.response?.data?.error || "Error al eliminar"));
+      }
   }
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={4000}/>
       <h1>Eliminar Actividad</h1>
       
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>   
-
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
         <div className="form-group">
-        <label>ID de la Actividad: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idActividad}
-          onChange={setIdActividad}
-        />
+            <label style={{fontWeight:'bold'}}>ID Actividad: </label>
+            <div style={{display:'flex', gap:'10px'}}>
+                <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} placeholder="ID..." />
+                <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
+            </div>
         </div>
-        <button onClick={verificarExistenciaActividad}>Buscar</button>
-   
       </div>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>Nombre de Actividad: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""
-            value={nombreActividad}
-            onChange={setNombreActividad}
-        />
-        </div>
+      {encontrado && (
+        <div style={{border: '2px solid #d9534f', borderRadius: '4px', padding: '30px', backgroundColor: '#fff5f5'}}>
+            <h3 style={{color: '#d9534f', marginTop: 0, textAlign:'center'}}>¿Eliminar Registro?</h3>
 
-        <div className="form-group">
-        <label>Descripción: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""  
-            value={desc}
-            onChange={setDesc}
-        />
-        </div>
+            <div className="form-group">
+                <label>Nombre: </label>
+                <input disabled type="text" value={encontrado.NombreTipoServicio} className="form-control" style={{width:'100%', padding:'8px', fontWeight:'bold'}} />
+            </div>
 
-        <div className="form-group">
-        <label>Costo: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""  
-            value={precio}
-            onChange={setPrecio}
-        />
-        </div>
+            <div className="form-group">
+                <label>Costo Actual: </label>
+                <input disabled type="text" value={encontrado.Costo} className="form-control" style={{width:'100%', padding:'8px'}} />
+            </div>
 
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-              validacionesActividad()
-              if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarActividad}>Cancelar</button>
+            <div style={{display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px'}}>
+                <button onClick={eliminar} style={{backgroundColor:'#dc3545', color:'white'}}>Eliminar Definitivamente</button>
+                <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+            </div>
         </div>
-
-      </div>
+      )}
     </>
   )
 }

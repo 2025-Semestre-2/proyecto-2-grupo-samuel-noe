@@ -15,7 +15,7 @@ export function InsertarServicioHospedaje(){
     const cargar = async () => {
         try {
             const res = await api.get('/servicio-hospedaje/catalogo');
-            console.log("Datos del catálogo:", res.data); // <--- MIRA LA CONSOLA DEL NAVEGADOR (F12)
+            console.log("Datos del catálogo:", res.data);
             setCatalogo(res.data);
             
             if (res.data && res.data.length > 0) {

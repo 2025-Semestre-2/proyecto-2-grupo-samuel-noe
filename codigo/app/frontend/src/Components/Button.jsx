@@ -282,6 +282,30 @@ export function ButtonDrop11() {
   );
 }
 
+//Funcion para un boton desplegable de mantenimiento empresa recreación (catálogo de tipo de actividades)
+export function ButtonDrop12() {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="dropdown" style={{width: '100%'}}>
+      <button 
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        Tipo Actividad   
+      </button>
+        {isOpen && (
+        <ul className="dropdown-menu show" style={{position: 'static', width: '100%', minWidth: 'unset', padding: 0}}>
+          <EstiloBotonDrop href="/InsertarTipoActividad">Insertar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/ModificarTipoActividad">Modificar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/EliminarTipoActividad">Eliminar</EstiloBotonDrop>
+          <EstiloBotonDrop href="/ReportarTipoActividad">Reportar</EstiloBotonDrop>
+        </ul>
+        )}
+    </div>
+  );
+}
+
 /*
 //Funcion para un boton desplegable de mantenimiento reservaciones
 export function ButtonDrop7() {

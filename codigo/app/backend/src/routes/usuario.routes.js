@@ -4,7 +4,7 @@ const ctrl = require('../controllers/usuario.controller');
 
 router.get('/', ctrl.getUsuarios);
 router.post('/', ctrl.createUsuario);
-router.put('/:usuario', ctrl.updateUsuario);
-router.delete('/:usuario', ctrl.deleteUsuario);
+router.put('/:id', ctrl.updateUsuario);
+router.delete('/:id', ctrl.deleteUsuario);
 
 module.exports = router;

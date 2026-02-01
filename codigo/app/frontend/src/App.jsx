@@ -111,6 +111,11 @@ import {ModificarEmpRecTipoAct} from './Pages/Modificar/ModificarEmpRecTipoAct.j
 import {EliminarEmpRecTipoAct} from './Pages/Eliminar/EliminarEmpRecTipoAct.jsx'
 import {ReportarEmpRecTipoAct} from './Pages/Reportar/ReportarEmpRecTipoAct.jsx'
 
+import {InsertarTipoActividad} from './Pages/Insertar/InsertarTipoActividad.jsx'
+import {ModificarTipoActividad} from './Pages/Modificar/ModificarTipoActividad.jsx'
+import {EliminarTipoActividad} from './Pages/Eliminar/EliminarTipoActividad.jsx'
+import {ReportarTipoActividad} from './Pages/Reportar/ReportarTipoActividad.jsx'
+
 import {InsertarServicio} from './Pages/Insertar/InsertarServicio.jsx'
 import {ModificarServicio} from './Pages/Modificar/ModificarServicio.jsx'
 import {EliminarServicio} from './Pages/Eliminar/EliminarServicio.jsx'
@@ -226,7 +231,14 @@ function App() {
         <Route path='/ModificarEmpRecTipoAct' element = {<ModificarEmpRecTipoAct/>}/>
         <Route path='/EliminarEmpRecTipoAct' element = {<EliminarEmpRecTipoAct/>}/>
         <Route path='/ReportarEmpRecTipoAct' element = {<ReportarEmpRecTipoAct/>}/>
-        
+
+
+        <Route path='/InsertarTipoActividad' element = {<InsertarTipoActividad/>}/>
+        <Route path='/ModificarTipoActividad' element = {<ModificarTipoActividad/>}/>
+        <Route path='/EliminarTipoActividad' element = {<EliminarTipoActividad/>}/>
+        <Route path='/ReportarTipoActividad' element = {<ReportarTipoActividad/>}/>
+
+
         <Route path='/ManteServicios' element = {<ManteServicios/>}/>
         <Route path='/InsertarServicio' element = {<InsertarServicio/>}/>
         <Route path='/ModificarServicio' element = {<ModificarServicio/>}/>

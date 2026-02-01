@@ -1,220 +1,82 @@
-
 import { useState } from 'react'
-import { Textbox, TextboxBlock } from "../../Components/Textbox"
-import { validarNull} from '../../Components/Validaciones'
-import axios from 'axios'
+import { Textbox } from "../../Components/Textbox"
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function EliminarEmpRec(){
 
-    const [idEmpRec, setIdEmpRec] = useState('')
-    const [nombre, setNombre] = useState('')
-    const [cedulaJuridica, setCedulaJuridica] = useState('')
-    const [correo, setCorreo] = useState('')
-    const [telefono, setTelefono] = useState('')
-    const [nombreContacto, setNombreContacto] = useState('')
-    const [provincia, setProvincia] = useState('')
-    const [canton, setCanton] = useState('')
-    const [distrito, setDistrito] = useState('')
-    const [seniasExactas, setSeniasExactas] = useState('')
-    const [validado, setValidado] = useState(false)
+    const [idBusqueda, setIdBusqueda] = useState('');
+    const [encontrado, setEncontrado] = useState(null);
 
-    const LimpiarEmpRec = () => {
-        setIdEmpRec('')
-        setNombre('')
-        setCedulaJuridica('')
-        setCorreo('')
-        setTelefono('')
-        setNombreContacto('')
-        setProvincia('')
-        setCanton('')
-        setDistrito('')
-        setSeniasExactas('')
-        setValidado(false)
-    }
-
-    const validacionesEmpRec = () => {
-    
-        const nombreValido = validarNull(nombre, 'Nombre de la Empresa');
-        if (!nombreValido.esValido) {
-            alert(nombreValido.mensaje);
-            return;
-        }
-        const cedulaValido = validarNull(cedulaJuridica, 'Cédula Jurídica');
-        if (!cedulaValido.esValido) {
-            alert(cedulaValido.mensaje);
-            return;
-        }
-        const correoValido = validarNull(correo, 'Correo Electrónico');
-        if (!correoValido.esValido) {
-            alert(correoValido.mensaje);
-            return;
-        }
-        const telefonoValido = validarNull(telefono, 'Teléfono');
-        if (!telefonoValido.esValido) {
-            alert(telefonoValido.mensaje);
-            return;
-        }
-        const nombreContactoValido = validarNull(nombreContacto, 'Nombre Contacto');
-        if (!nombreContactoValido.esValido) {
-            alert(nombreContactoValido.mensaje);
-            return;
-        }
-        const provinciaValido = validarNull(provincia, 'Provincia');
-        if (!provinciaValido.esValido) {
-            alert(provinciaValido.mensaje);
-            return;
-        }
-        const cantonValido = validarNull(canton, 'Canton');
-        if (!cantonValido.esValido) {
-            alert(cantonValido.mensaje);
-            return;
-        }
-        const distritoValido = validarNull(distrito, 'Distrito');
-        if (!distritoValido.esValido) {
-            alert(distritoValido.mensaje);
-            return;
-        }
-        
-        setValidado(true);
-    }
-
-    const mandarRequest = async () => {
-        LimpiarEmpRec()
-    }
-
-    const verificarExistenciaEmpRec = async () => {
-        if (!idEmpRec) {
-            alert('Ingresa un ID de Empresa de Recreación');
-            return;
-        }
+    const buscar = async () => {
+        if(!idBusqueda) return toast.warning("Ingrese ID de Empresa");
         try {
-        } 
-        catch (e) {
-            alert('Empresa de Recreación no encontrada: ' + e.message);
-            console.error(e);
+            const res = await api.get('/recreacion');
+            const item = res.data.find(x => x.IdEmpresaRecreacion == idBusqueda);
+            if(item) {
+                setEncontrado(item);
+                toast.success("Empresa encontrada");
+            } else {
+                toast.error("No encontrada");
+                setEncontrado(null);
+            }
+        } catch (e) { toast.error("Error de conexión"); }
+    }
+
+    const eliminar = async () => {
+        if(!window.confirm(`¿Eliminar la empresa "${encontrado.NombreComercial}"?`)) return;
+        try {
+            await api.delete(`/recreacion/${encontrado.IdEmpresaRecreacion}`);
+            toast.success("Eliminada correctamente.");
+            setEncontrado(null);
+            setIdBusqueda('');
+        } catch (error) {
+            const msg = error.response?.data?.error || "Error al eliminar";
+            toast.error("Error " + msg);
         }
     }
 
     return (
-    <>
-      <h1>Eliminar Empresa de Recreación</h1>
+        <>
+            <ToastContainer position="top-right" autoClose={4000}/>
+            <h1>Eliminar Empresa de Recreación</h1>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>   
+            <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
+                <div className="form-group">
+                    <label style={{fontWeight:'bold'}}>ID Empresa (Sistema): </label>
+                    <div style={{display:'flex', gap:'10px'}}>
+                        <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} placeholder="Ej: 1, 5..." />
+                        <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
+                    </div>
+                </div>
+            </div>
 
-        <div className="form-group">
-        <label>ID de la Empresa de Recreación: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={idEmpRec}
-            onChange={setIdEmpRec}
-        />
-        </div>
-        <button onClick={verificarExistenciaEmpRec}>Buscar</button>
-   
-      </div>
-      
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>Nombre de la Empresa: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""
-            value={nombre}
-            onChange={setNombre}
-        />
-        </div>
+            {encontrado && (
+                <div style={{border: '2px solid #d9534f', borderRadius: '4px', padding: '30px', backgroundColor: '#fff5f5'}}>
+                    <h3 style={{color: '#d9534f', marginTop: 0, textAlign:'center'}}>¿Eliminar Empresa?</h3>
+                    
+                    <div className="form-group">
+                        <label>Nombre Comercial: </label>
+                        <input disabled type="text" value={encontrado.NombreComercial} className="form-control" style={{width:'100%', padding:'8px', fontWeight:'bold'}} />
+                    </div>
+                    <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px'}}>
+                        <div className="form-group">
+                            <label>Cédula Jurídica: </label>
+                            <input disabled type="text" value={encontrado.CedulaJuridica} className="form-control" style={{width:'100%', padding:'8px'}} />
+                        </div>
+                        <div className="form-group">
+                            <label>Contacto: </label>
+                            <input disabled type="text" value={encontrado.NombreContacto} className="form-control" style={{width:'100%', padding:'8px'}} />
+                        </div>
+                    </div>
 
-        <div className="form-group">
-        <label>Cédula Jurídica: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""
-            value={cedulaJuridica}
-            onChange={setCedulaJuridica}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Correo Electrónico: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""  
-            value={correo}
-            onChange={setCorreo}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Teléfono: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""
-            value={telefono}
-            onChange={setTelefono}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Nombre Contacto: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""
-            value={nombreContacto}
-            onChange={setNombreContacto}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Provincia: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""
-            value={provincia}
-            onChange={setProvincia}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Distrito: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""
-            value={distrito}
-            onChange={setDistrito}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Señas Exactas: </label>
-        <TextboxBlock
-            type="text"
-            placeholder=""
-            value={seniasExactas}
-            onChange={setSeniasExactas}
-        />
-        </div>
-        
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-              validacionesEmpRec()
-              if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarEmpRec}>Cancelar</button>
-        </div>
-
-      </div>
-    </>
-  )
+                    <div style={{display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px'}}>
+                        <button onClick={eliminar} style={{backgroundColor:'#dc3545', color:'white'}}>Eliminar Definitivamente</button>
+                        <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+                    </div>
+                </div>
+            )}
+        </>
+    )
 }

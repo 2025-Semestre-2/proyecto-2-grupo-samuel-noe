@@ -42,16 +42,15 @@ SELECT
     Provincia,
     Canton,
     Distrito,
-    Barrio, -- Faltaba
-    SenasExactas, -- Faltaba (lo mostramos como referencia)
+    Barrio,
+    SenasExactas,
     ReferenciaGPS,
-    CorreoElectronico, -- Faltaba
+    CorreoElectronico,
     SitioWebURL,
     (SELECT TOP 1 NumeroTelefono FROM HospedajeTelefono WHERE IdHospedaje = h.CedulaJuridica) AS TelefonoPrincipal
 FROM Hospedaje h;
 GO
 
--- 2. SP DE PAGINACIÓN (Nuevo)
 CREATE OR ALTER PROCEDURE SP_ListarHotelesPaginado
     @Pagina INT = 1,
     @CantidadPorPagina INT = 10

@@ -18,6 +18,10 @@ const servicioHospedajeRoutes = require('./routes/servicioHospedaje.routes');
 const tipoHabitacionRoutes = require('./routes/tipoHabitacion.routes');
 const comodidadHabitacionRoutes = require('./routes/comodidadHabitacion.routes');
 const fotoHabitacionRoutes = require('./routes/fotoHabitacion.routes');
+const clienteTelefonoRoutes = require('./routes/clienteTelefono.routes');
+const actividadRoutes = require('./routes/actividad.routes')
+const tipoActividadRoutes = require('./routes/tipoActividad.routes');
+const empresaActividadRoutes = require('./routes/empresaActividad.routes');
 
 const app = express();
 
@@ -43,5 +47,9 @@ app.use('/api/servicio-hospedaje', servicioHospedajeRoutes);
 app.use('/api/tipo-habitacion', tipoHabitacionRoutes);
 app.use('/api/comodidad-habitacion', comodidadHabitacionRoutes);
 app.use('/api/foto-habitacion', fotoHabitacionRoutes);
+app.use('/api/cliente-telefono', clienteTelefonoRoutes);
+app.use('/api/actividad', actividadRoutes);
+app.use('/api/tipo-actividad', tipoActividadRoutes);
+app.use('/api/empresa-actividad', empresaActividadRoutes)
 
 module.exports = app;

@@ -106,7 +106,6 @@ export function InsertarTipoHabitacion(){
 
         <div className="form-group">
             <label>Tipo de Cama: </label>
-            {/* CAMBIO 3: Select estático estilizado con opción por defecto */}
             <select 
                 style={{
                     width: '100%', padding: '8px', height:'42px', 

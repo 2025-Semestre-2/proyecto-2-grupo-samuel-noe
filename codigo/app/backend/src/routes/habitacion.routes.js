@@ -1,8 +1,12 @@
 const { Router } = require('express');
 const router = Router();
-const { getHabitaciones, createHabitacion } = require('../controllers/habitacion.controller');
+const ctrl = require('../controllers/habitacion.controller');
 
-router.get('/', getHabitaciones);
-router.post('/', createHabitacion);
+router.get('/tipos', ctrl.getTiposHabitacion);
+
+router.get('/', ctrl.getHabitaciones);
+router.post('/', ctrl.createHabitacion);
+router.put('/:id', ctrl.updateHabitacion);
+router.delete('/:id', ctrl.deleteHabitacion);
 
 module.exports = router;

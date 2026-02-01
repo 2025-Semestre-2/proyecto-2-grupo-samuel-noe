@@ -193,7 +193,7 @@ USE GestionHoteleraDB;
 GO
 
 -- ==========================================================================================
--- MÓDULO DE TELÉFONOS DE HOTEL (Con validación de cantidad 1..2)
+-- MÓDULO DE TELÉFONOS DE HOTEL
 -- ==========================================================================================
 
 CREATE OR ALTER PROCEDURE SP_ReportarTelefonosHotel
@@ -453,7 +453,7 @@ END
 GO
 
 -- ==========================================================================================
--- MÓDULO CATÁLOGO REDES SOCIALES (MAESTRO)
+-- MÓDULO CATÁLOGO REDES SOCIALES
 -- ==========================================================================================
 
 CREATE OR ALTER PROCEDURE SP_ReportarCatalogoRedSocial
@@ -513,7 +513,7 @@ END
 GO
 
 -- ==========================================================================================
--- MÓDULO CATÁLOGO DE SERVICIOS (MAESTRO)
+-- MÓDULO CATÁLOGO DE SERVICIOS
 -- ==========================================================================================
 
 CREATE OR ALTER PROCEDURE SP_ReportarCatalogoServicio
@@ -852,5 +852,690 @@ AS
 BEGIN
     SET NOCOUNT ON;
     DELETE FROM HabitacionFoto WHERE IdFoto = @IdFoto;
+END
+GO
+
+-- ==========================================================================================
+-- MÓDULO HABITACIONES
+-- ==========================================================================================
+
+/* 1. Reportar (Join triple: Habitacion -> Tipo -> Hotel) */
+CREATE OR ALTER PROCEDURE SP_ReportarHabitaciones
+AS
+BEGIN
+    SELECT 
+        h.IdHabitacion,
+        hos.NombreComercial AS Hotel,
+        th.Nombre AS Tipo,
+        h.IdTipoHabitacion,
+        h.NumeroHabitacion,
+        h.Estado
+    FROM Habitacion h
+    INNER JOIN TipoHabitacion th ON h.IdTipoHabitacion = th.IdTipoHabitacion
+    INNER JOIN Hospedaje hos ON th.IdHospedaje = hos.CedulaJuridica
+    ORDER BY hos.NombreComercial, h.NumeroHabitacion;
+END
+GO
+
+/* 2. Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarHabitacion
+    @IdTipoHabitacion INT,
+    @NumeroHabitacion INT,
+    @Estado NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM TipoHabitacion WHERE IdTipoHabitacion = @IdTipoHabitacion)
+        THROW 51000, 'El Tipo de Habitación no existe.', 1;
+
+    DECLARE @IdHotel INT;
+    SELECT @IdHotel = IdHospedaje FROM TipoHabitacion WHERE IdTipoHabitacion = @IdTipoHabitacion;
+
+    IF EXISTS (
+        SELECT 1 FROM Habitacion h
+        INNER JOIN TipoHabitacion th ON h.IdTipoHabitacion = th.IdTipoHabitacion
+        WHERE th.IdHospedaje = @IdHotel AND h.NumeroHabitacion = @NumeroHabitacion
+    )
+    BEGIN
+        THROW 51000, 'Ya existe una habitación con ese número en este hotel.', 1;
+    END
+
+    INSERT INTO Habitacion (IdTipoHabitacion, NumeroHabitacion, Estado)
+    VALUES (@IdTipoHabitacion, @NumeroHabitacion, @Estado);
+END
+GO
+
+/* 3. Modificar */
+CREATE OR ALTER PROCEDURE SP_ModificarHabitacion
+    @IdHabitacion INT,
+    @IdTipoHabitacion INT,
+    @NumeroHabitacion INT,
+    @Estado NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM TipoHabitacion WHERE IdTipoHabitacion = @IdTipoHabitacion)
+        THROW 51000, 'El Tipo de Habitación no existe.', 1;
+
+    UPDATE Habitacion
+    SET IdTipoHabitacion = @IdTipoHabitacion,
+        NumeroHabitacion = @NumeroHabitacion,
+        Estado = @Estado
+    WHERE IdHabitacion = @IdHabitacion;
+END
+GO
+
+/* 4. Eliminar */
+CREATE OR ALTER PROCEDURE SP_EliminarHabitacion
+    @IdHabitacion INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM Reservacion WHERE IdHabitacion = @IdHabitacion)
+    BEGIN
+        DECLARE @Cant INT;
+        SELECT @Cant = COUNT(*) FROM Reservacion WHERE IdHabitacion = @IdHabitacion;
+        DECLARE @Msg NVARCHAR(200) = CONCAT('No se puede eliminar. Esta habitación tiene ', @Cant, ' reservaciones históricas o activas.');
+        THROW 51000, @Msg, 1;
+    END
+
+    DELETE FROM Habitacion WHERE IdHabitacion = @IdHabitacion;
+END
+GO
+
+-- ==========================================================================================
+-- MÓDULO CLIENTES
+-- ==========================================================================================
+
+/* 1. Reportar */
+CREATE OR ALTER PROCEDURE SP_ReportarClientes
+AS
+BEGIN
+    SELECT 
+        IdCliente,
+        Nombre,
+        PrimerApellido,
+        SegundoApellido,
+        CONCAT(Nombre, ' ', PrimerApellido, ' ', SegundoApellido) AS NombreCompleto,
+        TipoIdentificacion,
+        NumeroIdentificacion,
+        FechaNacimiento,
+        PaisResidencia,
+        Provincia,
+        Canton,
+        Distrito,
+        CorreoElectronico
+    FROM Cliente
+    ORDER BY PrimerApellido, Nombre;
+END
+GO
+
+/* 2. Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarCliente
+    @Nombre NVARCHAR(50),
+    @PrimerApellido NVARCHAR(50),
+    @SegundoApellido NVARCHAR(50),
+    @FechaNacimiento DATE,
+    @TipoIdentificacion NVARCHAR(50),
+    @NumeroIdentificacion NVARCHAR(50),
+    @PaisResidencia NVARCHAR(50),
+    @Provincia NVARCHAR(50),
+    @Canton NVARCHAR(50),
+    @Distrito NVARCHAR(50),
+    @Correo NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validar Duplicidad de Cédula
+    IF EXISTS (SELECT 1 FROM Cliente WHERE NumeroIdentificacion = @NumeroIdentificacion)
+        THROW 51000, 'Ya existe un cliente registrado con ese número de identificación.', 1;
+
+    INSERT INTO Cliente (
+        Nombre, PrimerApellido, SegundoApellido, FechaNacimiento, 
+        TipoIdentificacion, NumeroIdentificacion, PaisResidencia, 
+        Provincia, Canton, Distrito, CorreoElectronico
+    )
+    VALUES (
+        @Nombre, @PrimerApellido, @SegundoApellido, @FechaNacimiento, 
+        @TipoIdentificacion, @NumeroIdentificacion, @PaisResidencia, 
+        @Provincia, @Canton, @Distrito, @Correo
+    );
+END
+GO
+
+/* 3. Modificar */
+CREATE OR ALTER PROCEDURE SP_ModificarCliente
+    @IdCliente INT,
+    @Nombre NVARCHAR(50),
+    @PrimerApellido NVARCHAR(50),
+    @SegundoApellido NVARCHAR(50),
+    @FechaNacimiento DATE,
+    @TipoIdentificacion NVARCHAR(50),
+    @NumeroIdentificacion NVARCHAR(50),
+    @PaisResidencia NVARCHAR(50),
+    @Provincia NVARCHAR(50),
+    @Canton NVARCHAR(50),
+    @Distrito NVARCHAR(50),
+    @Correo NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM Cliente WHERE NumeroIdentificacion = @NumeroIdentificacion AND IdCliente <> @IdCliente)
+        THROW 51000, 'Ese número de identificación ya pertenece a otro cliente.', 1;
+
+    UPDATE Cliente
+    SET Nombre = @Nombre,
+        PrimerApellido = @PrimerApellido,
+        SegundoApellido = @SegundoApellido,
+        FechaNacimiento = @FechaNacimiento,
+        TipoIdentificacion = @TipoIdentificacion,
+        NumeroIdentificacion = @NumeroIdentificacion,
+        PaisResidencia = @PaisResidencia,
+        Provincia = @Provincia,
+        Canton = @Canton,
+        Distrito = @Distrito,
+        CorreoElectronico = @Correo
+    WHERE IdCliente = @IdCliente;
+END
+GO
+
+/* 4. Eliminar (CON BLOQUEO DE SEGURIDAD) */
+CREATE OR ALTER PROCEDURE SP_EliminarCliente
+    @IdCliente INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM Reservacion WHERE IdCliente = @IdCliente)
+    BEGIN
+        DECLARE @Cant INT;
+        SELECT @Cant = COUNT(*) FROM Reservacion WHERE IdCliente = @IdCliente;
+        DECLARE @Msg NVARCHAR(200) = CONCAT('No se puede eliminar. El cliente tiene ', @Cant, ' reservaciones asociadas.');
+        THROW 51000, @Msg, 1;
+    END
+
+    DELETE FROM Cliente WHERE IdCliente = @IdCliente;
+END
+GO
+
+-- ==========================================================================================
+-- MÓDULO TELÉFONOS DE CLIENTE
+-- ==========================================================================================
+
+CREATE OR ALTER PROCEDURE SP_ReportarTelefonoCliente
+AS
+BEGIN
+    SELECT 
+        tc.IdTelefonoCliente,
+        c.Nombre + ' ' + c.PrimerApellido AS Cliente,
+        tc.IdCliente,
+        tc.NumeroTelefono,
+        tc.CodigoPais
+    FROM ClienteTelefono tc
+    INNER JOIN Cliente c ON tc.IdCliente = c.IdCliente
+    ORDER BY c.PrimerApellido;
+END
+GO
+
+/* 2. Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarTelefonoCliente
+    @IdCliente INT,
+    @NumeroTelefono INT,
+    @CodigoPais INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM Cliente WHERE IdCliente = @IdCliente)
+        THROW 51000, 'El cliente indicado no existe.', 1;
+
+    IF EXISTS (SELECT 1 FROM ClienteTelefono WHERE IdCliente = @IdCliente AND NumeroTelefono = @NumeroTelefono)
+        THROW 51000, 'Este cliente ya tiene registrado ese número telefónico.', 1;
+
+    INSERT INTO ClienteTelefono (IdCliente, NumeroTelefono, CodigoPais)
+    VALUES (@IdCliente, @NumeroTelefono, @CodigoPais);
+END
+GO
+
+/* 3. Modificar */
+CREATE OR ALTER PROCEDURE SP_ModificarTelefonoCliente
+    @IdTelefonoCliente INT,
+    @NumeroTelefono INT,
+    @CodigoPais INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    UPDATE TelefonoCliente
+    SET NumeroTelefono = @NumeroTelefono,
+        CodigoPais = @CodigoPais
+    WHERE IdTelefonoCliente = @IdTelefonoCliente;
+END
+GO
+
+/* 4. Eliminar */
+CREATE OR ALTER PROCEDURE SP_EliminarTelefonoCliente
+    @IdTelefonoCliente INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @IdCliente INT;
+    SELECT @IdCliente = IdCliente FROM ClienteTelefono WHERE IdTelefonoCliente = @IdTelefonoCliente;
+
+    DECLARE @Cantidad INT;
+    SELECT @Cantidad = COUNT(*) FROM ClienteTelefono WHERE IdCliente = @IdCliente;
+
+    IF @Cantidad <= 1
+    BEGIN
+        THROW 51000, 'No se puede eliminar. El cliente debe tener al menos un teléfono de contacto.', 1;
+    END
+
+    DELETE FROM ClienteTelefono WHERE IdTelefonoCliente = @IdTelefonoCliente;
+END
+GO
+
+CREATE OR ALTER PROCEDURE SP_ListarCodigosTelefono
+AS
+BEGIN
+    SELECT IdCodigoTelefono, Pais 
+    FROM CodigoTelefono
+    ORDER BY IdCodigoTelefono;
+END
+GO
+
+-- ==========================================================================================
+-- MÓDULO USUARIOS
+-- ==========================================================================================
+
+/* 1. Reportar */
+CREATE OR ALTER PROCEDURE SP_ReportarUsuarios
+AS
+BEGIN
+    SELECT Usuario, Contraseña, TipoUsuario 
+    FROM Usuario
+    ORDER BY TipoUsuario, Usuario;
+END
+GO
+
+/* 2. Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarUsuario
+    @Usuario NVARCHAR(50),
+    @Contrasena NVARCHAR(50),
+    @TipoUsuario VARCHAR(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM Usuario WHERE Usuario = @Usuario)
+        THROW 51000, 'El nombre de usuario ya existe.', 1;
+
+    IF @TipoUsuario NOT IN ('ADMIN', 'USUARIO')
+        THROW 51000, 'Tipo de usuario inválido. Solo se permite: ADMIN o USUARIO.', 1;
+
+    INSERT INTO Usuario (Usuario, Contraseña, TipoUsuario)
+    VALUES (@Usuario, @Contrasena, @TipoUsuario);
+END
+GO
+
+/* 3. Modificar */
+CREATE OR ALTER PROCEDURE SP_ModificarUsuario
+    @Usuario NVARCHAR(50),
+    @Contrasena NVARCHAR(50),
+    @TipoUsuario VARCHAR(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM Usuario WHERE Usuario = @Usuario)
+        THROW 51000, 'El usuario no existe.', 1;
+
+    IF @TipoUsuario NOT IN ('ADMIN', 'USUARIO')
+        THROW 51000, 'Tipo de usuario inválido. Solo se permite: ADMIN o USUARIO.', 1;
+
+    UPDATE Usuario
+    SET Contraseña = @Contrasena,
+        TipoUsuario = @TipoUsuario
+    WHERE Usuario = @Usuario;
+END
+GO
+
+/* 4. Eliminar */
+CREATE OR ALTER PROCEDURE SP_EliminarUsuario
+    @Usuario NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DELETE FROM Usuario WHERE Usuario = @Usuario;
+END
+GO
+
+-- ==========================================================================================
+-- MÓDULO ACTIVIDADES
+-- ==========================================================================================
+
+/* 1. Reportar */
+CREATE OR ALTER PROCEDURE SP_ReportarTipoServicio
+AS
+BEGIN
+    SELECT IdTipoServicio, NombreTipoServicio, Descripcion, Costo
+    FROM TipoServicio
+    ORDER BY NombreTipoServicio;
+END
+GO
+
+/* 2. Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarTipoServicio
+    @Nombre NVARCHAR(100),
+    @Descripcion NVARCHAR(MAX),
+    @Costo INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM TipoServicio WHERE NombreTipoServicio = @Nombre)
+        THROW 51000, 'Ya existe una actividad con ese nombre.', 1;
+
+    INSERT INTO TipoServicio (NombreTipoServicio, Descripcion, Costo)
+    VALUES (@Nombre, @Descripcion, @Costo);
+END
+GO
+
+/* 3. Modificar */
+CREATE OR ALTER PROCEDURE SP_ModificarTipoServicio
+    @Id INT,
+    @Nombre NVARCHAR(100),
+    @Descripcion NVARCHAR(MAX),
+    @Costo INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM TipoServicio WHERE IdTipoServicio = @Id)
+        THROW 51000, 'La actividad no existe.', 1;
+
+    UPDATE TipoServicio
+    SET NombreTipoServicio = @Nombre,
+        Descripcion = @Descripcion,
+        Costo = @Costo
+    WHERE IdTipoServicio = @Id;
+END
+GO
+
+/* 4. Eliminar */
+CREATE OR ALTER PROCEDURE SP_EliminarTipoServicio
+    @Id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM EmpresaRecreacionTipoServicio WHERE IdTipoServicio = @Id)
+    BEGIN
+        DECLARE @Cant INT;
+        SELECT @Cant = COUNT(*) FROM EmpresaRecreacionTipoServicio WHERE IdTipoServicio = @Id;
+        DECLARE @Msg NVARCHAR(200) = CONCAT('No se puede eliminar. Esta actividad es ofrecida por ', @Cant, ' empresas. Desvincúlelas primero.');
+        THROW 51000, @Msg, 1;
+    END
+
+    DELETE FROM TipoServicio WHERE IdTipoServicio = @Id;
+END
+GO
+
+-- ==========================================================================================
+-- CORRECCIÓN MÓDULO EMPRESA DE RECREACIÓN
+-- ==========================================================================================
+
+/* 1. Reportar */
+CREATE OR ALTER PROCEDURE SP_ReportarEmpresaRecreacion
+AS
+BEGIN
+    SELECT 
+        IdEmpresaRecreacion,
+        NombreEmpresa,
+        CedulaJuridica,
+        CorreoElectronico,
+        NombreContacto,
+        Provincia,
+        Canton,
+        Distrito,
+        SenasExactas
+    FROM EmpresaRecreacion
+    ORDER BY NombreEmpresa;
+END
+GO
+
+/* 2. Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarEmpresaRecreacion
+    @NombreEmpresa NVARCHAR(150),
+    @CedulaJuridica INT,
+    @CorreoElectronico NVARCHAR(100),
+    @NombreContacto NVARCHAR(100),
+    @Provincia NVARCHAR(50),
+    @Canton NVARCHAR(50),
+    @Distrito NVARCHAR(50),
+    @SenasExactas NVARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM EmpresaRecreacion WHERE CedulaJuridica = @CedulaJuridica)
+        THROW 51000, 'Ya existe una empresa registrada con esa Cédula Jurídica.', 1;
+
+    INSERT INTO EmpresaRecreacion (
+        NombreEmpresa, CedulaJuridica, CorreoElectronico, 
+        NombreContacto, Provincia, Canton, Distrito, SenasExactas
+    )
+    VALUES (
+        @NombreEmpresa, @CedulaJuridica, @CorreoElectronico, 
+        @NombreContacto, @Provincia, @Canton, @Distrito, @SenasExactas
+    );
+END
+GO
+
+/* 3. Modificar */
+CREATE OR ALTER PROCEDURE SP_ModificarEmpresaRecreacion
+    @IdEmpresaRecreacion INT,
+    @NombreEmpresa NVARCHAR(150),
+    @CedulaJuridica INT,
+    @CorreoElectronico NVARCHAR(100),
+    @NombreContacto NVARCHAR(100),
+    @Provincia NVARCHAR(50),
+    @Canton NVARCHAR(50),
+    @Distrito NVARCHAR(50),
+    @SenasExactas NVARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM EmpresaRecreacion WHERE IdEmpresaRecreacion = @IdEmpresaRecreacion)
+        THROW 51000, 'La empresa no existe.', 1;
+
+    IF EXISTS (SELECT 1 FROM EmpresaRecreacion WHERE CedulaJuridica = @CedulaJuridica AND IdEmpresaRecreacion <> @IdEmpresaRecreacion)
+        THROW 51000, 'Esa Cédula Jurídica ya pertenece a otra empresa.', 1;
+
+    UPDATE EmpresaRecreacion
+    SET NombreEmpresa = @NombreEmpresa,
+        CedulaJuridica = @CedulaJuridica,
+        CorreoElectronico = @CorreoElectronico,
+        NombreContacto = @NombreContacto,
+        Provincia = @Provincia,
+        Canton = @Canton,
+        Distrito = @Distrito,
+        SenasExactas = @SenasExactas
+    WHERE IdEmpresaRecreacion = @IdEmpresaRecreacion;
+END
+GO
+
+/* 4. Eliminar */
+CREATE OR ALTER PROCEDURE SP_EliminarEmpresaRecreacion
+    @IdEmpresaRecreacion INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM EmpresaRecreacionTipoServicio WHERE IdEmpresaRecreacion = @IdEmpresaRecreacion)
+    BEGIN
+        DECLARE @Cant INT;
+        SELECT @Cant = COUNT(*) FROM EmpresaRecreacionTipoServicio WHERE IdEmpresaRecreacion = @IdEmpresaRecreacion;
+        DECLARE @Msg NVARCHAR(200) = CONCAT('No se puede eliminar. Esta empresa ofrece ', @Cant, ' actividades/servicios. Desvincúlelos primero.');
+        THROW 51000, @Msg, 1;
+    END
+
+    DELETE FROM EmpresaRecreacion WHERE IdEmpresaRecreacion = @IdEmpresaRecreacion;
+END
+GO
+
+-- ==========================================================================================
+-- MÓDULO CATÁLOGO TIPO ACTIVIDAD
+-- ==========================================================================================
+
+/* 1. Reportar */
+CREATE OR ALTER PROCEDURE SP_ReportarTipoActividad
+AS
+BEGIN
+    SELECT IdTipoActividad, NombreTipoActividad, Descripcion, Costo
+    FROM TipoActividad
+    ORDER BY NombreTipoActividad;
+END
+GO
+
+/* 2. Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarTipoActividad
+    @Nombre NVARCHAR(100),
+    @Descripcion NVARCHAR(MAX),
+    @Costo INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validar duplicados por nombre
+    IF EXISTS (SELECT 1 FROM TipoActividad WHERE NombreTipoActividad = @Nombre)
+        THROW 51000, 'Ya existe una actividad registrada con ese nombre.', 1;
+
+    INSERT INTO TipoActividad (NombreTipoActividad, Descripcion, Costo)
+    VALUES (@Nombre, @Descripcion, @Costo);
+END
+GO
+
+/* 3. Modificar */
+CREATE OR ALTER PROCEDURE SP_ModificarTipoActividad
+    @Id INT,
+    @Nombre NVARCHAR(100),
+    @Descripcion NVARCHAR(MAX),
+    @Costo INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM TipoActividad WHERE IdTipoActividad = @Id)
+        THROW 51000, 'El tipo de actividad no existe.', 1;
+
+    UPDATE TipoActividad
+    SET NombreTipoActividad = @Nombre,
+        Descripcion = @Descripcion,
+        Costo = @Costo
+    WHERE IdTipoActividad = @Id;
+END
+GO
+
+/* 4. Eliminar (Con protección de dependencias) */
+CREATE OR ALTER PROCEDURE SP_EliminarTipoActividad
+    @Id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF OBJECT_ID('dbo.EmpresaRecreacionTipoActividad', 'U') IS NOT NULL 
+    BEGIN
+        IF EXISTS (SELECT 1 FROM EmpresaRecreacionTipoActividad WHERE IdTipoActividad = @Id)
+        BEGIN
+            THROW 51000, 'No se puede eliminar. Esta actividad está asignada a una o más empresas de recreación.', 1;
+        END
+    END
+
+    DELETE FROM TipoActividad WHERE IdTipoActividad = @Id;
+END
+GO
+
+-- ==========================================================================================
+-- MÓDULO INTERMEDIO: EMPRESA - TIPO ACTIVIDAD
+-- ==========================================================================================
+
+/* 1. Reportar (Con Joins para ver nombres) */
+CREATE OR ALTER PROCEDURE SP_ReportarEmpresaActividad
+AS
+BEGIN
+    SELECT 
+        eta.IdEmpresaRecreacionTipoActividad AS ID,
+        er.NombreEmpresa AS Empresa,
+        ta.NombreTipoActividad AS Actividad,
+        eta.IdEmpresaRecreacion,
+        eta.IdTipoActividad
+    FROM EmpresaRecreacionTipoActividad eta
+    INNER JOIN EmpresaRecreacion er ON eta.IdEmpresaRecreacion = er.IdEmpresaRecreacion
+    INNER JOIN TipoActividad ta ON eta.IdTipoActividad = ta.IdTipoActividad
+    ORDER BY er.NombreEmpresa, ta.NombreTipoActividad;
+END
+GO
+
+/* 2. Insertar */
+CREATE OR ALTER PROCEDURE SP_RegistrarEmpresaActividad
+    @IdEmpresa INT,
+    @IdActividad INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM EmpresaRecreacion WHERE IdEmpresaRecreacion = @IdEmpresa)
+        THROW 51000, 'La empresa seleccionada no existe.', 1;
+    IF NOT EXISTS (SELECT 1 FROM TipoActividad WHERE IdTipoActividad = @IdActividad)
+        THROW 51000, 'El tipo de actividad no existe.', 1;
+
+    IF EXISTS (SELECT 1 FROM EmpresaRecreacionTipoActividad WHERE IdEmpresaRecreacion = @IdEmpresa AND IdTipoActividad = @IdActividad)
+        THROW 51000, 'Esta empresa ya tiene asignada esa actividad.', 1;
+
+    INSERT INTO EmpresaRecreacionTipoActividad (IdEmpresaRecreacion, IdTipoActividad)
+    VALUES (@IdEmpresa, @IdActividad);
+END
+GO
+
+/* 3. Modificar */
+CREATE OR ALTER PROCEDURE SP_ModificarEmpresaActividad
+    @IdRelacion INT, -- PK de la tabla intermedia
+    @IdEmpresa INT,
+    @IdActividad INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM EmpresaRecreacionTipoActividad WHERE IdEmpresaRecreacionTipoActividad = @IdRelacion)
+        THROW 51000, 'El registro no existe.', 1;
+
+    -- Validar Duplicado (Excluyendo el propio registro)
+    IF EXISTS (SELECT 1 FROM EmpresaRecreacionTipoActividad 
+               WHERE IdEmpresaRecreacion = @IdEmpresa 
+               AND IdTipoActividad = @IdActividad 
+               AND IdEmpresaRecreacionTipoActividad <> @IdRelacion)
+        THROW 51000, 'Esa combinación de Empresa y Actividad ya existe.', 1;
+
+    UPDATE EmpresaRecreacionTipoActividad
+    SET IdEmpresaRecreacion = @IdEmpresa,
+        IdTipoActividad = @IdActividad
+    WHERE IdEmpresaRecreacionTipoActividad = @IdRelacion;
+END
+GO
+
+/* 4. Eliminar */
+CREATE OR ALTER PROCEDURE SP_EliminarEmpresaActividad
+    @IdRelacion INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DELETE FROM EmpresaRecreacionTipoActividad WHERE IdEmpresaRecreacionTipoActividad = @IdRelacion;
 END
 GO

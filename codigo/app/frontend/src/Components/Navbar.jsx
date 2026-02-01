@@ -2,7 +2,7 @@
 import '../App.css'
 import { Link } from "react-router-dom"
 import {ButtonDrop1, ButtonDrop2, ButtonDrop3, ButtonDrop4, ButtonDrop5,
-     ButtonDrop6, ButtonDrop7, ButtonDrop8, ButtonDrop9, ButtonDrop10, ButtonDrop11} from './Button'
+     ButtonDrop6, ButtonDrop7, ButtonDrop8, ButtonDrop9, ButtonDrop10, ButtonDrop11, ButtonDrop12} from './Button'
 
 /*
 <Link to="/ManteServicios">
@@ -298,7 +298,8 @@ export function Navbar9(){
             <Link to="/ReportarEmpRec">
                 <button>Reportar Empresa Recreación</button>
             </Link>
-                
+
+            <ButtonDrop12/>    
             <ButtonDrop10/>
             <ButtonDrop3/>
             <ButtonDrop11/>

@@ -43,7 +43,6 @@ export function EliminarRedSocial(){
       <ToastContainer position="top-right" autoClose={4000}/>
       <h1>Eliminar Red Social (Catálogo)</h1>
 
-      {/* BUSQUEDA */}
       <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
         <div className="form-group">
             <label style={{fontWeight:'bold'}}>ID Catálogo: </label>

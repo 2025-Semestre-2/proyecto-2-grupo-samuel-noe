@@ -1,127 +1,113 @@
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { validarNull, validarInt} from '../../Components/Validaciones'
-import axios from 'axios'
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function ModificarEmpRecTipoAct(){
 
-  const [idEmpRecTipoAct, setIdEmpRecTipoAct] = useState('')
-  const [idEmpRec, setIdEmpRec] = useState('')
+  const [idBusqueda, setIdBusqueda] = useState('');
+  const [encontrado, setEncontrado] = useState(null);
+  
+  // Selects editables
+  const [idEmpresa, setIdEmpresa] = useState('')
   const [idActividad, setIdActividad] = useState('')
-  const [validado, setValidado] = useState(false)
+  
+  const [listaEmpresas, setListaEmpresas] = useState([])
+  const [listaActividades, setListaActividades] = useState([])
 
-    const LimpiarActividad = () => {
-        setIdEmpRecTipoAct('')
-        setIdEmpRec('')
-        setIdActividad('')
-        setValidado(false)
-    }
+  // Cargar Catalogos
+  useEffect(() => {
+      const cargar = async () => {
+          try {
+            const resE = await api.get('/empresa-actividad/empresas');
+            setListaEmpresas(resE.data);
+            const resA = await api.get('/empresa-actividad/actividades');
+            setListaActividades(resA.data);
+          } catch(e) { console.error(e); }
+      };
+      cargar();
+  }, []);
 
-    const validacionesActividad = () => {
-    
-        const idEmpRecValido = validarNull(idEmpRec, 'ID Empresa Recreacion');
-        if (!idEmpRecValido.esValido) {
-            alert(idEmpRecValido.mensaje);
-            return;
-        }
-        const idActividadValido = validarNull(idActividad, 'ID Actividad');
-        if (!idActividadValido.esValido) {
-            alert(idActividadValido.mensaje);
-            return;
-        }
-
-        const idEmpRecValido2 = validarInt(idEmpRec, 'ID Empresa Recreacion');
-        if (!idEmpRecValido2.esValido) {
-            alert(idEmpRecValido2.mensaje);
-            return;
-        }
-        const idActividadValido2 = validarInt(idActividad, 'ID Actividad');
-        if (!idActividadValido2.esValido) {
-            alert(idActividadValido2.mensaje);
-            return;
-        }
-
-        setValidado(true);
-    }
-
-    const mandarRequest = async () => {
-        LimpiarActividad()
-    }
-
-  const verificarExistenciaActividad = async () => {
-    if (!idEmpRecTipoAct) {
-      alert('Ingresa un ID de Empresa-Actividad');
-      return;
-    }
-    try {
-    } 
-    catch (e) {
-      alert('Empresa-Actividad no encontrada: ' + e.message);
-      console.error(e);
-    }
+  const buscar = async () => {
+      if(!idBusqueda) return toast.warning("Ingrese ID");
+      try {
+          const res = await api.get('/empresa-actividad');
+          const item = res.data.find(x => x.ID == idBusqueda);
+          if(item) {
+              setEncontrado(item);
+              setIdEmpresa(item.IdEmpresaRecreacion.toString());
+              setIdActividad(item.IdTipoActividad.toString());
+              toast.success("Registro cargado");
+          } else {
+              toast.error("No encontrado");
+              setEncontrado(null);
+          }
+      } catch (e) { toast.error("Error al buscar"); }
   }
 
-    return (
+  const guardar = async () => {
+      try {
+          await api.put(`/empresa-actividad/${encontrado.ID}`, {
+              idEmpresa: parseInt(idEmpresa),
+              idActividad: parseInt(idActividad)
+          });
+          toast.success("Actualizado correctamente.");
+          setEncontrado(null);
+          setIdBusqueda('');
+      } catch (e) { 
+          toast.error("Error: " + (e.response?.data?.error || "Error al guardar")); 
+      }
+  }
+
+  return (
     <>
-      <h1>Modificar Empresa Recreacion Tipo Actividad</h1>
-      
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>   
+      <ToastContainer position="top-right" autoClose={3000}/>
+      <h1>Modificar Asignación</h1>
 
-      <div className="form-group">
-      <label>ID de la Empresa Recreacion Tipo Actividad: </label>
-      <Textbox
-        type="text"
-        placeholder=""
-        value={idEmpRecTipoAct}
-        onChange={setIdEmpRecTipoAct}
-      />
-      </div>
-      <button onClick={verificarExistenciaActividad}>Buscar</button>
-   
-      </div>
-
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
         <div className="form-group">
-        <label>ID Empresa Recreacion: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={idEmpRec}
-            onChange={setIdEmpRec}
-        />
+            <label style={{fontWeight:'bold'}}>ID de Asignación: </label>
+            <div style={{display:'flex', gap:'10px'}}>
+                <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} />
+                <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
+            </div>
         </div>
-
-        <div className="form-group">
-        <label>ID Actividad: </label>
-        <Textbox
-            type="text"
-            placeholder=""  
-            value={idActividad}
-            onChange={setIdActividad}
-        />
-        </div>
-
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-              validacionesActividad()
-              if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarActividad}>Cancelar</button>
-        </div>
-
       </div>
+
+      {encontrado && (
+        <div style={{border: '2px solid #333', borderRadius: '4px', padding: '30px', backgroundColor: '#f9f9f9'}}>
+            
+            <div className="form-group">
+                <label>Empresa: </label>
+                <select 
+                    style={{width: '100%', padding: '8px', height:'42px', borderRadius:'4px', backgroundColor:'white'}}
+                    value={idEmpresa} onChange={(e) => setIdEmpresa(e.target.value)}
+                >
+                    {listaEmpresas.map(e => (
+                        <option key={e.IdEmpresaRecreacion} value={e.IdEmpresaRecreacion}>{e.NombreComercial}</option>
+                    ))}
+                </select>
+            </div>
+
+            <div className="form-group">
+                <label>Actividad: </label>
+                <select 
+                    style={{width: '100%', padding: '8px', height:'42px', borderRadius:'4px', backgroundColor:'white'}}
+                    value={idActividad} onChange={(e) => setIdActividad(e.target.value)}
+                >
+                    {listaActividades.map(a => (
+                        <option key={a.IdTipoActividad} value={a.IdTipoActividad}>{a.NombreTipoActividad}</option>
+                    ))}
+                </select>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
+                <button onClick={guardar}>Guardar Cambios</button>
+                <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+            </div>
+        </div>
+      )}
     </>
   )
 }

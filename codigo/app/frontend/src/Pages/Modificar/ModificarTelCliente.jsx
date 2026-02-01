@@ -1,161 +1,117 @@
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { validarNull, validarInt } from '../../Components/Validaciones'
-import axios from 'axios'
+import { validarInt } from '../../Components/Validaciones'
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function ModificarTelCliente(){
 
-  const [idTelCliente, setIdTelCliente] = useState('')
-  const [idCliente, setIdCliente] = useState('')
-  const [telefono, setTelefono] = useState('')
-  const [codPais, setCodPais] = useState('')
-  const [validado, setValidado] = useState(false)
-
-  const LimpiarTelCliente = () => {
-    setIdTelCliente('')
-    setIdCliente('')
-    setTelefono('')
-    setCodPais('')
-    setValidado(false)
-  }
-
-  const validacionesTelCliente = () => {
+  const [idBusqueda, setIdBusqueda] = useState('');
+  const [encontrado, setEncontrado] = useState(null);
   
-    const idClienteValido = validarNull(idCliente, 'Identificación Cliente');
-    if (!idClienteValido.esValido) {
-      alert(idClienteValido.mensaje);
-      return;
-    }
-    const telefonoValido = validarNull(telefono, 'Teléfono del Cliente');
-    if (!telefonoValido.esValido) {
-      alert(telefonoValido.mensaje);
-      return;
-    }
-    const codPaisValido = validarNull(codPais, 'Código País');
-    if (!codPaisValido.esValido) {
-      alert(codPaisValido.mensaje);
-      return;
-    }
+  const [telefono, setTelefono] = useState('');
+  const [codPais, setCodPais] = useState('');
+  const [listaCodigos, setListaCodigos] = useState([]);
 
-    const idClienteValido2 = validarInt(idCliente, 'Identificación Cliente');
-    if (!idClienteValido2.esValido) {
-      alert(idClienteValido2.mensaje);
-      return;
-    }
-    const telefonoValido2 = validarInt(telefono, 'Teléfono del Cliente');
-    if (!telefonoValido2.esValido) {
-      alert(telefonoValido2.mensaje);
-      return;
-    }
-    const codPaisValido2 = validarInt(codPais, 'Código País');
-    if (!codPaisValido2.esValido) {
-      alert(codPaisValido2.mensaje);
-      return;
-    }
+  // Cargar catálogo de códigos
+  useEffect(() => {
+      const cargar = async () => {
+          try {
+            const res = await api.get('/cliente-telefono/codigos');
+            setListaCodigos(res.data);
+          } catch(e) { console.error(e); }
+      };
+      cargar();
+  }, []);
 
-    setValidado(true);
+  const buscar = async () => {
+      if(!idBusqueda) return toast.warning("Ingrese ID de Registro");
+      try {
+          const res = await api.get('/cliente-telefono');
+          const item = res.data.find(x => x.IdTelefonoCliente == idBusqueda);
+          if(item) {
+              setEncontrado(item);
+              setTelefono(item.NumeroTelefono.toString());
+              setCodPais(item.CodigoPais.toString());
+              toast.success("Cargado");
+          } else {
+              toast.error("No encontrado");
+              setEncontrado(null);
+          }
+      } catch (e) { toast.error("Error al buscar"); }
   }
 
-  const mandarRequest = async () => {
-    LimpiarTelCliente();
-  }
+  const guardar = async () => {
+      if (!validarInt(telefono, 'Teléfono').esValido) return toast.warning("Número inválido");
+      if (!codPais) return toast.warning("Seleccione Código País");
 
-  const verificarExistenciaTelCliente = async () => {
-    if (!idTelCliente) {
-      alert('Ingresa un ID de teléfono cliente');
-      return;
-    }
-    try {
-      const response = await axios.get('http://localhost:3000/api/cliente-telefono');
-      const lista = response.data?.data ?? []
-      const telcliente = lista.find(c => String(c.IdTelefonoCliente) === String(idTelCliente));
-
-      if (!telcliente) {
-        alert('Telefono Cliente no encontrado')
-        return
+      try {
+          await api.put(`/cliente-telefono/${encontrado.IdTelefonoCliente}`, {
+              numeroTelefono: parseInt(telefono),
+              codigoPais: parseInt(codPais)
+          });
+          toast.success("Actualizado correctamente.");
+          setEncontrado(null);
+          setIdBusqueda('');
+      } catch (e) { 
+          toast.error("Error: " + (e.response?.data?.error || "Error al guardar")); 
       }
-
-      setIdCliente(telcliente.IdCliente || '')
-      setTelefono(telcliente.NumeroTelefono || telcliente.Telefono || '')
-      setCodPais(telcliente.CodigoPais || '')
-      alert('Telefono Cliente encontrado')
-    } 
-    catch (e) {
-      alert('Telefono Cliente no encontrado: ' + e.message)
-      console.error(e);
-    }
   }
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000}/>
       <h1>Modificar Teléfono de Cliente</h1>
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-      }}>   
 
+      <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
         <div className="form-group">
-        <label>ID del Teléfono Cliente: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idTelCliente}
-          onChange={setIdTelCliente}
-        />
+            <label style={{fontWeight:'bold'}}>ID de Registro: </label>
+            <div style={{display:'flex', gap:'10px'}}>
+                <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} placeholder="Ej: 1, 5..." />
+                <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
+            </div>
         </div>
-        <button onClick={verificarExistenciaTelCliente}>Buscar</button>
-
       </div>
-      
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '20px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>Identificación Cliente: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={idCliente}
-          onChange={setIdCliente}
-        />
-        </div>
 
-        <div className="form-group">
-        <label>Teléfono del Cliente: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={telefono}
-          onChange={setTelefono}
-        />
-        </div>
+      {encontrado && (
+        <div style={{border: '2px solid #333', borderRadius: '4px', padding: '30px', backgroundColor: '#f9f9f9'}}>
+            <div className="form-group">
+                <label>Cliente (Solo Lectura): </label>
+                <input disabled type="text" value={encontrado.Cliente} style={{width:'100%', padding:'8px', backgroundColor:'#ccc', borderRadius:'4px', border:'1px solid #999'}} />
+            </div>
 
-        <div className="form-group">
-        <label>Código País: </label>
-        <Textbox
-          type="text"
-          placeholder=""
-          value={codPais}
-          onChange={setCodPais}
-        />
-        </div> 
-        
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-          <button onClick={() => {
-            validacionesTelCliente()
-            if(validado){mandarRequest()}
-          }}>Aceptar</button>
-          <button onClick={LimpiarTelCliente}>Cancelar</button>
+            <div className="form-group" style={{display:'flex', gap:'10px'}}>
+                <div style={{width:'35%'}}>
+                    <label>Código País: </label>
+                    <select 
+                        style={{
+                            width: '100%', padding: '8px', height:'42px', 
+                            borderRadius:'4px', border:'1px solid #ccc', 
+                            backgroundColor:'white', color: '#333'
+                        }}
+                        value={codPais}
+                        onChange={(e) => setCodPais(e.target.value)}
+                    >
+                        {listaCodigos.map(c => (
+                            <option key={c.IdCodigoTelefono} value={c.IdCodigoTelefono}>
+                                +{c.IdCodigoTelefono} ({c.Pais})
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div style={{flexGrow:1}}>
+                    <label>Número: </label>
+                    <Textbox type="text" value={telefono} onChange={setTelefono} />
+                </div>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
+                <button onClick={guardar}>Guardar Cambios</button>
+                <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+            </div>
         </div>
-
-      </div>
+      )}
     </>
   )
 }

@@ -1,220 +1,108 @@
-
 import { useState } from 'react'
 import { Textbox } from "../../Components/Textbox"
-import { validarNull} from '../../Components/Validaciones'
-import axios from 'axios'
+import { validarNull, validarInt, validarCorreo } from '../../Components/Validaciones'
+import api from '../../services/axiosConfig'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export function ModificarEmpRec(){
 
-    const [idEmpRec, setIdEmpRec] = useState('')
+    const [idBusqueda, setIdBusqueda] = useState('');
+    const [encontrado, setEncontrado] = useState(null);
+    
+    // Campos editables
     const [nombre, setNombre] = useState('')
     const [cedulaJuridica, setCedulaJuridica] = useState('')
     const [correo, setCorreo] = useState('')
-    const [telefono, setTelefono] = useState('')
     const [nombreContacto, setNombreContacto] = useState('')
     const [provincia, setProvincia] = useState('')
     const [canton, setCanton] = useState('')
     const [distrito, setDistrito] = useState('')
     const [seniasExactas, setSeniasExactas] = useState('')
-    const [validado, setValidado] = useState(false)
 
-    const LimpiarEmpRec = () => {
-        setIdEmpRec('')
-        setNombre('')
-        setCedulaJuridica('')
-        setCorreo('')
-        setTelefono('')
-        setNombreContacto('')
-        setProvincia('')
-        setCanton('')
-        setDistrito('')
-        setSeniasExactas('')
-        setValidado(false)
-    }
-
-    const validacionesEmpRec = () => {
-    
-        const nombreValido = validarNull(nombre, 'Nombre de la Empresa');
-        if (!nombreValido.esValido) {
-            alert(nombreValido.mensaje);
-            return;
-        }
-        const cedulaValido = validarNull(cedulaJuridica, 'Cédula Jurídica');
-        if (!cedulaValido.esValido) {
-            alert(cedulaValido.mensaje);
-            return;
-        }
-        const correoValido = validarNull(correo, 'Correo Electrónico');
-        if (!correoValido.esValido) {
-            alert(correoValido.mensaje);
-            return;
-        }
-        const telefonoValido = validarNull(telefono, 'Teléfono');
-        if (!telefonoValido.esValido) {
-            alert(telefonoValido.mensaje);
-            return;
-        }
-        const nombreContactoValido = validarNull(nombreContacto, 'Nombre Contacto');
-        if (!nombreContactoValido.esValido) {
-            alert(nombreContactoValido.mensaje);
-            return;
-        }
-        const provinciaValido = validarNull(provincia, 'Provincia');
-        if (!provinciaValido.esValido) {
-            alert(provinciaValido.mensaje);
-            return;
-        }
-        const cantonValido = validarNull(canton, 'Canton');
-        if (!cantonValido.esValido) {
-            alert(cantonValido.mensaje);
-            return;
-        }
-        const distritoValido = validarNull(distrito, 'Distrito');
-        if (!distritoValido.esValido) {
-            alert(distritoValido.mensaje);
-            return;
-        }
-        
-        setValidado(true);
-    }
-
-    const mandarRequest = async () => {
-        LimpiarEmpRec()
-    }
-
-    const verificarExistenciaEmpRec = async () => {
-        if (!idEmpRec) {
-            alert('Ingresa un ID de Empresa de Recreación');
-            return;
-        }
+    const buscar = async () => {
+        if(!idBusqueda) return toast.warning("Ingrese ID");
         try {
-        } 
-        catch (e) {
-            alert('Empresa de Recreación no encontrada: ' + e.message);
-            console.error(e);
+            const res = await api.get('/recreacion');
+            const item = res.data.find(x => x.IdEmpresaRecreacion == idBusqueda);
+            if(item) {
+                setEncontrado(item);
+                setNombre(item.NombreEmpresa);
+                setCedulaJuridica(item.CedulaJuridica.toString());
+                setCorreo(item.CorreoElectronico);
+                setNombreContacto(item.NombreContacto);
+                setProvincia(item.Provincia);
+                setCanton(item.Canton);
+                setDistrito(item.Distrito);
+                setSeniasExactas(item.SenasExactas);
+                toast.success("Empresa cargada");
+            } else {
+                toast.error("No encontrada");
+                setEncontrado(null);
+            }
+        } catch (e) { toast.error("Error al buscar"); }
+    }
+
+    const guardar = async () => {
+        if (!validarNull(nombre, 'Nombre').esValido) return toast.warning("Nombre requerido");
+        if (!validarInt(cedulaJuridica, 'Cédula').esValido) return toast.warning("Cédula inválida");
+
+        try {
+            await api.put(`/recreacion/${encontrado.IdEmpresaRecreacion}`, {
+                nombreEmpresa: nombre,
+                cedulaJuridica: parseInt(cedulaJuridica),
+                correoElectronico: correo,
+                nombreContacto: nombreContacto,
+                provincia, canton, distrito, senasExactas
+            });
+            toast.success("Actualizada correctamente.");
+            setEncontrado(null);
+            setIdBusqueda('');
+        } catch (e) { 
+            toast.error("Error: " + (e.response?.data?.error || "Error al guardar")); 
         }
     }
 
     return (
-    <>
-      <h1>Modificar Empresa de Recreación</h1>
+        <>
+            <ToastContainer position="top-right" autoClose={3000}/>
+            <h1>Modificar Empresa de Recreación</h1>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>   
+            <div style={{border: '2px solid #333', borderRadius: '4px', padding: '20px', backgroundColor: '#e9ecef', marginBottom: '20px'}}>   
+                <div className="form-group">
+                    <label style={{fontWeight:'bold'}}>ID Empresa (Sistema): </label>
+                    <div style={{display:'flex', gap:'10px'}}>
+                        <Textbox type="text" value={idBusqueda} onChange={setIdBusqueda} />
+                        <button onClick={buscar} style={{height:'42px', marginTop:0}}>Buscar</button>
+                    </div>
+                </div>
+            </div>
 
-        <div className="form-group">
-        <label>ID de la Empresa de Recreación: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={idEmpRec}
-            onChange={setIdEmpRec}
-        />
-        </div>
-        <button onClick={verificarExistenciaEmpRec}>Buscar</button>
-   
-      </div>
+            {encontrado && (
+                <div style={{border: '2px solid #333', borderRadius: '4px', padding: '30px', backgroundColor: '#f9f9f9'}}>
+                    <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px'}}>
+                        <div className="form-group"><label>Nombre Comercial:</label><Textbox type="text" value={nombre} onChange={setNombre} /></div>
+                        <div className="form-group"><label>Cédula Jurídica:</label><Textbox type="text" value={cedulaJuridica} onChange={setCedulaJuridica} /></div>
+                    </div>
 
-      <div style={{
-        border: '2px solid #333',
-        borderRadius: '4px',
-        padding: '30px',
-        backgroundColor: '#f9f9f9',
-      }}>
-      
-        <div className="form-group">
-        <label>Nombre de la Empresa: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={nombre}
-            onChange={setNombre}
-        />
-        </div>
+                    <div className="form-group"><label>Correo:</label><Textbox type="text" value={correo} onChange={setCorreo} /></div>
 
-        <div className="form-group">
-        <label>Cédula Jurídica: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={cedulaJuridica}
-            onChange={setCedulaJuridica}
-        />
-        </div>
+                    <div className="form-group"><label>Nombre Contacto:</label><Textbox type="text" value={nombreContacto} onChange={setNombreContacto} /></div>
 
-        <div className="form-group">
-        <label>Correo Electrónico: </label>
-        <Textbox
-            type="text"
-            placeholder=""  
-            value={correo}
-            onChange={setCorreo}
-        />
-        </div>
+                    <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px'}}>
+                        <div className="form-group"><label>Provincia:</label><Textbox type="text" value={provincia} onChange={setProvincia} /></div>
+                        <div className="form-group"><label>Cantón:</label><Textbox type="text" value={canton} onChange={setCanton} /></div>
+                        <div className="form-group"><label>Distrito:</label><Textbox type="text" value={distrito} onChange={setDistrito} /></div>
+                    </div>
 
-        <div className="form-group">
-        <label>Teléfono: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={telefono}
-            onChange={setTelefono}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Nombre Contacto: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={nombreContacto}
-            onChange={setNombreContacto}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Provincia: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={provincia}
-            onChange={setProvincia}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Distrito: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={distrito}
-            onChange={setDistrito}
-        />
-        </div>
-
-        <div className="form-group">
-        <label>Señas Exactas: </label>
-        <Textbox
-            type="text"
-            placeholder=""
-            value={seniasExactas}
-            onChange={setSeniasExactas}
-        />
-        
-        </div>
-        <div style={{ display: 'flex', gap: '100px', justifyContent: 'center' }}>
-            <button onClick={() => {
-                validacionesEmpRec()
-                if(validado){mandarRequest()}
-            }}>Aceptar</button>
-          <button onClick={LimpiarEmpRec}>Cancelar</button>
-        </div>
-
-      </div>
-    </>
-  )
+                    <div className="form-group"><label>Señas Exactas:</label><Textbox type="text" value={seniasExactas} onChange={setSeniasExactas} /></div>
+                    
+                    <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
+                        <button onClick={guardar}>Guardar Cambios</button>
+                        <button onClick={() => setEncontrado(null)} style={{backgroundColor:'#6c757d'}}>Cancelar</button>
+                    </div>
+                </div>
+            )}
+        </>
+    )
 }
