@@ -7,13 +7,54 @@ USE GestionHoteleraDB;
 GO
 
 -- ==========================================================================================
--- 0. INICIALIZACIÓN DE CATÁLOGOS
+-- 0. INICIALIZACIÓN DE CATÁLOGOS Y ADMIN DEFAULT
 -- ==========================================================================================
 
 -- Garantizar que existan códigos de país para evitar errores de FK en HospedajeTelefono
 IF NOT EXISTS (SELECT 1 FROM CodigoTelefono)
 BEGIN
     INSERT INTO CodigoTelefono (IdCodigoTelefono, Pais) VALUES (506, 'Costa Rica');
+END
+GO
+
+-- SP PARA CREAR ADMIN POR DEFECTO (EJECUTAR AL INICIO)
+CREATE OR ALTER PROCEDURE SP_InicializarAdminDefault
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF NOT EXISTS (SELECT 1 FROM Usuario WHERE Usuario = 'admin')
+    BEGIN
+        INSERT INTO Usuario (Usuario, Contraseña, TipoUsuario)
+        VALUES ('admin', 'admin', 'ADMIN');
+    END
+END
+GO
+
+EXEC SP_InicializarAdminDefault;
+GO
+
+-- SP PARA VALIDAR ACCESO (LOGIN)
+CREATE OR ALTER PROCEDURE SP_ValidarAccesoAdmin
+    @Usuario NVARCHAR(50),
+    @Contrasena NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM Usuario WHERE Usuario = @Usuario AND Contraseña = @Contrasena)
+    BEGIN
+        THROW 51000, 'Usuario o contraseña incorrectos.', 1;
+    END
+
+    DECLARE @Rol VARCHAR(20);
+    SELECT @Rol = TipoUsuario FROM Usuario WHERE Usuario = @Usuario;
+
+    IF @Rol <> 'ADMIN'
+    BEGIN
+        THROW 51000, 'Acceso denegado. Se requieren permisos de Administrador.', 1;
+    END
+
+    SELECT Usuario, TipoUsuario FROM Usuario WHERE Usuario = @Usuario;
 END
 GO
 

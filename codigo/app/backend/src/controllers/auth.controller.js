@@ -2,24 +2,34 @@ const { getConnection, sql } = require('../config/db');
 
 const login = async (req, res) => {
     const { user, password } = req.body;
+
     try {
         const pool = await getConnection();
+        
+        // Ejecutar el SP de validación estricta
         const result = await pool.request()
             .input('Usuario', sql.NVarChar, user)
-            .input('Password', sql.NVarChar, password)
-            .output('EsAutenticado', sql.Bit)
-            .output('Rol', sql.NVarChar)
-            .execute('SP_AutenticarUsuario');
+            .input('Contrasena', sql.NVarChar, password)
+            .execute('SP_ValidarAccesoAdmin');
 
-        const { EsAutenticado, Rol } = result.output;
-
-        if (EsAutenticado) {
-            res.json({ success: true, rol: Rol, user, message: 'Login exitoso' });
+        // Si el SP no lanza error, el login es exitoso
+        if (result.recordset.length > 0) {
+            const usuarioData = result.recordset[0];
+            res.json({ 
+                success: true, 
+                message: 'Bienvenido al Sistema', 
+                user: usuarioData 
+            });
         } else {
             res.status(401).json({ success: false, message: 'Credenciales inválidas' });
         }
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(401).json({ 
+            success: false, 
+            error: error.message || 'Error de autenticación' 
+        });
     }
 };
+
 module.exports = { login };
